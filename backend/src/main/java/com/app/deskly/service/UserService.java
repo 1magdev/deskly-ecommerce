@@ -5,6 +5,9 @@ import com.app.deskly.model.User;
 import com.app.deskly.repository.UserRepository;
 import com.app.deskly.util.CpfValidator;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -12,17 +15,21 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+
     public User register(UserRequestDTO dto) {
-        if (!dto.getPassword().equals(dto.getConfirmPassword())){
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new IllegalArgumentException("senhas não coincidem");
         }
-        if (!CpfValidator.isValid(dto.getCpf())){
+
+        if (!CpfValidator.isValid(dto.getCpf())) {
             throw new IllegalArgumentException("CPF inválido");
         }
-        if (userRepository.findByCpf(dto.getCpf()) != null){
+
+        if (userRepository.findByCpf(dto.getCpf()).isPresent()) {
             throw new IllegalArgumentException("CPF já cadastrado");
         }
-        if (userRepository.findByEmail(dto.getEmail()) != null){
+
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new IllegalArgumentException("email já cadastrado");
         }
 
