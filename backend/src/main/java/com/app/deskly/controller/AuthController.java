@@ -3,6 +3,7 @@ package com.app.deskly.controller;
 import com.app.deskly.dto.AuthResponseDTO;
 import com.app.deskly.dto.LoginRequestDTO;
 import com.app.deskly.dto.UserRequestDTO;
+import com.app.deskly.model.Role;
 import com.app.deskly.model.User;
 import com.app.deskly.service.AuthService;
 import com.app.deskly.service.UserService;
@@ -34,6 +35,10 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody UserRequestDTO userRequest) {
+        if (userRequest.getRole() == Role.ADMIN || userRequest.getRole() == Role.ESTOQUISTA) {
+            throw new IllegalArgumentException("Não é possível se registrar como ADMIN ou ESTOQUISTA");
+        }
+
         User user = userService.register(userRequest);
         String token = authService.generateToken(user);
 
