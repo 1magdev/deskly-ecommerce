@@ -1,7 +1,5 @@
 package com.app.deskly.dto;
 
-import org.hibernate.validator.constraints.br.CPF;
-
 import com.app.deskly.model.Role;
 
 import jakarta.validation.constraints.Email;

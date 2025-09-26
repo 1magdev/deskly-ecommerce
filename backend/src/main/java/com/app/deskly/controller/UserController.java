@@ -1,5 +1,6 @@
 package com.app.deskly.controller;
 
+import com.app.deskly.dto.UpdateUserDTO;
 import com.app.deskly.dto.UserRequestDTO;
 import com.app.deskly.model.User;
 import com.app.deskly.service.UserService;
@@ -21,4 +22,11 @@ public class UserController {
         User user = userService.register(dto);
         return ResponseEntity.ok(user);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateUserDTO dto) {
+        userService.updateUser(id, dto);
+        return ResponseEntity.ok("Usuário atualizado com sucesso.");
+    }
+
 }
