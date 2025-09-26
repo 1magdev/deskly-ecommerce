@@ -5,8 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class ProductQuantityUpdateDTO {
+public class ProductUpdateDTO {
     @NotNull
-    @Min(value = 0, message = "Quantidade deve ser 0 ou maior")
-    private Integer stock;
+    @Min(0)
+    private Integer quantity;
 }

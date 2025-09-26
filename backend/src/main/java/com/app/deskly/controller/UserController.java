@@ -12,12 +12,11 @@ public class UserController {
 
     private final UserService userService;
 
-
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
+    @PostMapping()
     public ResponseEntity<User> register(@RequestBody UserRequestDTO dto) {
         User user = userService.register(dto);
         return ResponseEntity.ok(user);
