@@ -49,20 +49,20 @@ public class UserService {
     }
 
     public void updateUser(Long id, UpdateUserDTO dto) {
-   
+
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedEmail = authentication.getName();
         User loggedUser = userRepository.findByEmail(loggedEmail)
-            .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Usuário logado não encontrado"));
 
         boolean isSameUser = user.getId().equals(loggedUser.getId());
 
-        
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-            throw new RuntimeException("As senhas não coincidem.");}
+            throw new RuntimeException("As senhas não coincidem.");
+        }
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
 
         user.setFullname(dto.getFullname());
@@ -73,6 +73,6 @@ public class UserService {
         }
 
         userRepository.save(user);
-}
+    }
 
 }
