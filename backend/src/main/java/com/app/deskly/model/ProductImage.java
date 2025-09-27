@@ -12,16 +12,13 @@ public class ProductImage {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-   
     private String fileName;
 
-  
     private String filePath;
 
     private Boolean isMain;
 
     @ManyToOne
- 
+    @JoinColumn(name = "id_catalog", referencedColumnName = "id_catalog")
     private Product product;
 }
-

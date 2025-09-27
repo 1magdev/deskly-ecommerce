@@ -15,7 +15,7 @@ public class Stock {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "id_catalog", nullable = false)
+    @JoinColumn(name = "id_catalog", referencedColumnName = "id_catalog", nullable = false)
     private Product product;
 
     @Column(nullable = false)

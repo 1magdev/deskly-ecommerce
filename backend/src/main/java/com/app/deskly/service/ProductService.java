@@ -26,7 +26,7 @@ public class ProductService {
         if (search == null || search.isEmpty()) {
             return productRepository.findAll(pageable);
         } else {
-            return productRepository.findByName(search, pageable);
+            return productRepository.findByNameContainingIgnoreCase(search, pageable);
         }
     }
 
