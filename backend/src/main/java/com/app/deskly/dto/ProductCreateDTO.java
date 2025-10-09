@@ -29,7 +29,6 @@ public class ProductCreateDTO {
     private BigDecimal price;
 
     @Min(0)
-    @NotBlank(message = "Quantidade do produto não pode ser vazio")
     private Integer quantity;
 
 

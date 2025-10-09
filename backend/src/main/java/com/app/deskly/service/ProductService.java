@@ -18,14 +18,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.app.deskly.dto.ProductCreateDTO;
 import com.app.deskly.model.Product;
+import com.app.deskly.model.Stock;
 import com.app.deskly.repository.ProductRepository;
+import com.app.deskly.repository.StockRepository;
 
 @Service
 public class ProductService {
 
     @Autowired
-
     private ProductRepository productRepository;
+
+    @Autowired
+    private StockRepository stockRepository;
 
     public Page<Product> listProducts(String search, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -49,6 +53,35 @@ public class ProductService {
         Product existing = getById(id);
         existing.setName(updatedProduct.getName());
         existing.setPrice(updatedProduct.getPrice());
+
+        // Atualiza a imagem se fornecida
+        if (updatedProduct.getProductImage() != null) {
+            existing.setProductImage(updatedProduct.getProductImage());
+        }
+
+        return productRepository.save(existing);
+    }
+
+    public Product updateWithImage(Long id, Product updatedProduct, MultipartFile image) {
+        Product existing = getById(id);
+        existing.setName(updatedProduct.getName());
+        existing.setPrice(updatedProduct.getPrice());
+
+        // Processa nova imagem se fornecida
+        if (image != null && !image.isEmpty()) {
+            String extension = FilenameUtils.getExtension(image.getOriginalFilename());
+            String newFileName = UUID.randomUUID().toString() + "." + extension;
+
+            String uploadDir = "/deskly-ecommerce-2/assets/images/";
+            Path filePath = Paths.get(uploadDir, newFileName);
+            try {
+                Files.write(filePath, image.getBytes());
+                existing.setProductImage(newFileName);
+            } catch (IOException e) {
+                throw new RuntimeException("Erro ao salvar imagem", e);
+            }
+        }
+
         return productRepository.save(existing);
     }
 
@@ -68,6 +101,9 @@ public class ProductService {
         product.setPrice(dto.getPrice());
         product.setActive(true);
 
+        String mainImagePath = null;
+        int mainImageIndex = dto.getMainImageIndex() != null ? dto.getMainImageIndex() : 0;
+
         for (int i = 0; i < images.size(); i++) {
 
             MultipartFile file = images.get(i);
@@ -78,13 +114,30 @@ public class ProductService {
             Path filePath = Paths.get(uploadDir, newFileName);
             try {
                 Files.write(filePath, file.getBytes());
+
+                // Define a imagem principal baseada no índice
+                if (i == mainImageIndex) {
+                    mainImagePath = newFileName;
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Erro ao salvar imagem", e);
             }
 
         }
 
-        productRepository.save(product);
+        // Define a imagem principal no produto
+        product.setProductImage(mainImagePath);
+
+        // Salva o produto
+        Product savedProduct = productRepository.save(product);
+
+        // Cria registro no estoque se quantidade foi informada
+        if (dto.getQuantity() != null && dto.getQuantity() > 0) {
+            Stock stock = new Stock();
+            stock.setProduct(savedProduct);
+            stock.setQuantity(dto.getQuantity());
+            stockRepository.save(stock);
+        }
     }
 
 }

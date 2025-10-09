@@ -49,6 +49,14 @@ public class ProductController {
         return toDTO(productService.update(id, product));
     }
 
+    @PutMapping(value = "/{id}/with-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ProductDTO updateProductWithImage(
+            @PathVariable Long id,
+            @RequestPart("data") Product product,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+        return toDTO(productService.updateWithImage(id, product, image));
+    }
+
     @PatchMapping("/{id}/status")
     public void toggleStatus(@PathVariable Long id, @RequestParam boolean active) {
         productService.enableDisable(id, active);
