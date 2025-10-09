@@ -11,14 +11,14 @@ public class Stock {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_stock")
+    @Column(name = "id")
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "id_catalog", referencedColumnName = "id_catalog", nullable = false)
+    @JoinColumn(name = "id_catalog", referencedColumnName = "id", nullable = false)
     private Product product;
 
-    @Column(nullable = false)
+    @Column(name = "quantity", nullable = false)
     private Integer quantity = 0;
 
     @Column(name = "updated_at")

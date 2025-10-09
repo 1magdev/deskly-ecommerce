@@ -15,29 +15,26 @@ import com.app.deskly.model.Product;
 import com.app.deskly.service.ProductService;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/products")
 @PreAuthorize("hasRole('ADMIN')")
 public class ProductController {
 
     @Autowired
     private ProductService productService;
 
-
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createProduct(
-        @RequestPart("data") ProductCreateDTO dto,
-        @RequestPart("images") List<MultipartFile> images
-    ) {
+            @RequestPart("data") ProductCreateDTO dto,
+            @RequestPart("images") List<MultipartFile> images) {
         productService.createProduct(dto, images);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping
     public Page<ProductDTO> listProducts(
-        @RequestParam(required = false) String search,
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
-    ) {
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         return productService.listProducts(search, page, size)
                 .map(this::toDTO);
     }
@@ -61,10 +58,8 @@ public class ProductController {
         ProductDTO dto = new ProductDTO();
         dto.setId(product.getId());
         dto.setName(product.getName());
-        dto.setQuantity(product.getQuantity());
         dto.setPrice(product.getPrice());
         dto.setActive(product.getActive());
         return dto;
     }
 }
-

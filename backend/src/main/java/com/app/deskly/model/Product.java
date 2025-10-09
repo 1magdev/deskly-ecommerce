@@ -1,26 +1,32 @@
 package com.app.deskly.model;
 
-import jakarta.persistence.*;
-import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "tbl_catalog")
+@Table(name = "tbl_products")
 public class Product {
 
     @Id
-    @Column(name = "id_catalog")
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name", length = 200, nullable = false)
     private String name;
 
-    private Integer quantity;
+    @Column(name = "product_image")
+    private String productImage;
 
     @Column(name = "price")
     private BigDecimal price;
@@ -41,8 +47,5 @@ public class Product {
         this.createdAt = LocalDateTime.now();
         this.active = true;
     }
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductImage> images = new ArrayList<>();
 
 }

@@ -1,18 +1,24 @@
 package com.app.deskly.service;
 
 import java.io.IOException;
-import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.UUID;
+
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.app.deskly.dto.ProductCreateDTO;
-import com.app.deskly.model.*;
-import com.app.deskly.repository.ProductRepository;
-import org.apache.commons.io.FilenameUtils;
 
+import com.app.deskly.dto.ProductCreateDTO;
+import com.app.deskly.model.Product;
+import com.app.deskly.repository.ProductRepository;
 
 @Service
 public class ProductService {
@@ -32,7 +38,7 @@ public class ProductService {
 
     public Product getById(Long id) {
         return productRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
     }
 
     public Product create(Product product) {
@@ -42,7 +48,6 @@ public class ProductService {
     public Product update(Long id, Product updatedProduct) {
         Product existing = getById(id);
         existing.setName(updatedProduct.getName());
-        existing.setQuantity(updatedProduct.getQuantity());
         existing.setPrice(updatedProduct.getPrice());
         return productRepository.save(existing);
     }
@@ -53,8 +58,6 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    
-
     public void createProduct(ProductCreateDTO dto, List<MultipartFile> images) {
 
         Product product = new Product();
@@ -63,18 +66,14 @@ public class ProductService {
         product.setDescription(dto.getDescription());
         product.setRating(dto.getRating());
         product.setPrice(dto.getPrice());
-        product.setQuantity(dto.getQuantity());
         product.setActive(true);
 
-        List<ProductImage> imageList = new ArrayList<>();
-        
         for (int i = 0; i < images.size(); i++) {
 
             MultipartFile file = images.get(i);
             String extension = FilenameUtils.getExtension(file.getOriginalFilename());
             String newFileName = UUID.randomUUID().toString() + "." + extension;
 
-            
             String uploadDir = "/deskly-ecommerce-2/assets/images/";
             Path filePath = Paths.get(uploadDir, newFileName);
             try {
@@ -83,17 +82,9 @@ public class ProductService {
                 throw new RuntimeException("Erro ao salvar imagem", e);
             }
 
-            ProductImage image = new ProductImage();
-            image.setFileName(newFileName);
-            image.setFilePath(filePath.toString());
-            image.setIsMain(dto.getMainImageIndex() != null && dto.getMainImageIndex() == i);
-            image.setProduct(product);
+        }
 
-            imageList.add(image);
+        productRepository.save(product);
     }
-
-    product.setImages(imageList);
-    productRepository.save(product); 
-}
 
 }
