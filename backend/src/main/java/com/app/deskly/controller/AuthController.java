@@ -1,15 +1,20 @@
 package com.app.deskly.controller;
 
-import com.app.deskly.dto.AuthResponseDTO;
-import com.app.deskly.dto.LoginRequestDTO;
-import com.app.deskly.dto.UserRequestDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.app.deskly.dto.auth.AuthResponseDTO;
+import com.app.deskly.dto.auth.LoginRequestDTO;
+import com.app.deskly.dto.user.UserRequestDTO;
 import com.app.deskly.model.Role;
 import com.app.deskly.model.User;
 import com.app.deskly.service.AuthService;
 import com.app.deskly.service.UserService;
+
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -35,6 +40,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody UserRequestDTO userRequest) {
+
         if (userRequest.getRole() == Role.ADMIN || userRequest.getRole() == Role.ESTOQUISTA) {
             throw new IllegalArgumentException("Não é possível se registrar como ADMIN ou ESTOQUISTA");
         }

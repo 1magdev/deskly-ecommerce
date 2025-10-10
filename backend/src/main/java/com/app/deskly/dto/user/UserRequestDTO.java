@@ -1,9 +1,10 @@
-package com.app.deskly.dto;
+package com.app.deskly.dto.user;
 
 import com.app.deskly.model.Role;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -26,6 +27,6 @@ public class UserRequestDTO {
     @NotBlank(message = "Confirme a senha!")
     private String confirmPassword;
 
-    @NotBlank(message = "Cargo não pode ser vázio")
+    @NotNull(message = "Cargo não pode ser vázio")
     private Role role;
 }

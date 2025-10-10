@@ -1,4 +1,4 @@
-package com.app.deskly.dto;
+package com.app.deskly.dto.product;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

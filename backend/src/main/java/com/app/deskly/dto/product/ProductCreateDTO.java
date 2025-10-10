@@ -1,4 +1,4 @@
-package com.app.deskly.dto;
+package com.app.deskly.dto.product;
 
 import java.math.BigDecimal;
 import jakarta.validation.constraints.*;
@@ -32,6 +32,9 @@ public class ProductCreateDTO {
     private Integer quantity;
 
 
-    private Integer mainImageIndex; 
+    private Integer mainImageIndex;
+
+    // Imagem em formato base64 (opcional, alternativa ao MultipartFile)
+    private String imageBase64;
 
 }

@@ -1,4 +1,4 @@
-package com.app.deskly.dto;
+package com.app.deskly.dto.product;
 
 import java.math.BigDecimal;
 import jakarta.validation.constraints.*;

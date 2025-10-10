@@ -1,4 +1,4 @@
-package com.app.deskly.dto;
+package com.app.deskly.dto.user;
 
 import com.app.deskly.model.Role;
 import lombok.Data;

@@ -1,6 +1,6 @@
 package com.app.deskly.service;
 
-import com.app.deskly.dto.UserRequestDTO;
+import com.app.deskly.dto.user.UserRequestDTO;
 import com.app.deskly.model.Role;
 import com.app.deskly.model.User;
 import com.app.deskly.repository.UserRepository;

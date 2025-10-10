@@ -1,4 +1,4 @@
-package com.app.deskly.dto;
+package com.app.deskly.dto.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

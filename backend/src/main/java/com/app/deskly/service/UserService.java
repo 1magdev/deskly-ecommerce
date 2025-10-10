@@ -1,7 +1,7 @@
 package com.app.deskly.service;
 
-import com.app.deskly.dto.UpdateUserDTO;
-import com.app.deskly.dto.UserRequestDTO;
+import com.app.deskly.dto.user.UpdateUserDTO;
+import com.app.deskly.dto.user.UserRequestDTO;
 import com.app.deskly.model.User;
 import com.app.deskly.repository.UserRepository;
 import com.app.deskly.util.CpfValidator;
@@ -10,6 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class UserService {
@@ -73,6 +75,10 @@ public class UserService {
         }
 
         userRepository.save(user);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
 }

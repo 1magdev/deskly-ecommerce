@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,7 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.app.deskly.dto.ProductCreateDTO;
+import com.app.deskly.dto.product.ProductCreateDTO;
 import com.app.deskly.model.Product;
 import com.app.deskly.model.Stock;
 import com.app.deskly.repository.ProductRepository;
@@ -91,6 +92,11 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    public void delete(Long id) {
+        Product product = getById(id);
+        productRepository.delete(product);
+    }
+
     public void createProduct(ProductCreateDTO dto, List<MultipartFile> images) {
 
         Product product = new Product();
@@ -102,27 +108,31 @@ public class ProductService {
         product.setActive(true);
 
         String mainImagePath = null;
-        int mainImageIndex = dto.getMainImageIndex() != null ? dto.getMainImageIndex() : 0;
 
-        for (int i = 0; i < images.size(); i++) {
+        // Processa imagens apenas se foram fornecidas
+        if (images != null && !images.isEmpty()) {
+            int mainImageIndex = dto.getMainImageIndex() != null ? dto.getMainImageIndex() : 0;
 
-            MultipartFile file = images.get(i);
-            String extension = FilenameUtils.getExtension(file.getOriginalFilename());
-            String newFileName = UUID.randomUUID().toString() + "." + extension;
+            for (int i = 0; i < images.size(); i++) {
 
-            String uploadDir = "/deskly-ecommerce-2/assets/images/";
-            Path filePath = Paths.get(uploadDir, newFileName);
-            try {
-                Files.write(filePath, file.getBytes());
+                MultipartFile file = images.get(i);
+                String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+                String newFileName = UUID.randomUUID().toString() + "." + extension;
 
-                // Define a imagem principal baseada no índice
-                if (i == mainImageIndex) {
-                    mainImagePath = newFileName;
+                String uploadDir = "/deskly-ecommerce-2/assets/images/";
+                Path filePath = Paths.get(uploadDir, newFileName);
+                try {
+                    Files.write(filePath, file.getBytes());
+
+                    // Define a imagem principal baseada no índice
+                    if (i == mainImageIndex) {
+                        mainImagePath = newFileName;
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException("Erro ao salvar imagem", e);
                 }
-            } catch (IOException e) {
-                throw new RuntimeException("Erro ao salvar imagem", e);
-            }
 
+            }
         }
 
         // Define a imagem principal no produto
@@ -135,8 +145,88 @@ public class ProductService {
         if (dto.getQuantity() != null && dto.getQuantity() > 0) {
             Stock stock = new Stock();
             stock.setProduct(savedProduct);
+            stock.setIdCatalog(savedProduct.getId());
             stock.setQuantity(dto.getQuantity());
             stockRepository.save(stock);
+        }
+    }
+
+    public void createProductFromBase64(ProductCreateDTO dto) {
+        Product product = new Product();
+
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setRating(dto.getRating());
+        product.setPrice(dto.getPrice());
+        product.setActive(true);
+
+        // Processa imagem base64 se foi fornecida
+        if (dto.getImageBase64() != null && !dto.getImageBase64().isEmpty()) {
+            String imagePath = saveBase64Image(dto.getImageBase64());
+            product.setProductImage(imagePath);
+        }
+
+        // Salva o produto
+        Product savedProduct = productRepository.save(product);
+
+        // Cria registro no estoque se quantidade foi informada
+        if (dto.getQuantity() != null && dto.getQuantity() > 0) {
+            Stock stock = new Stock();
+            stock.setProduct(savedProduct);
+            stock.setIdCatalog(savedProduct.getId());
+            stock.setQuantity(dto.getQuantity());
+            stockRepository.save(stock);
+        }
+    }
+
+    public Product updateFromBase64(Long id, ProductCreateDTO dto) {
+        Product existing = getById(id);
+        existing.setName(dto.getName());
+        existing.setDescription(dto.getDescription());
+        existing.setRating(dto.getRating());
+        existing.setPrice(dto.getPrice());
+
+        // Processa imagem base64 se foi fornecida
+        if (dto.getImageBase64() != null && !dto.getImageBase64().isEmpty()) {
+            String imagePath = saveBase64Image(dto.getImageBase64());
+            existing.setProductImage(imagePath);
+        }
+
+        return productRepository.save(existing);
+    }
+
+    private String saveBase64Image(String base64String) {
+        try {
+            // Remove o prefixo "data:image/...;base64," se existir
+            String base64Data = base64String;
+            if (base64String.contains(",")) {
+                base64Data = base64String.split(",")[1];
+            }
+
+            // Decodifica o base64
+            byte[] imageBytes = Base64.getDecoder().decode(base64Data);
+
+            // Detecta a extensão da imagem pelo prefixo base64
+            String extension = "png"; // padrão
+            if (base64String.contains("data:image/")) {
+                String mimeType = base64String.substring(
+                    base64String.indexOf("data:image/") + 11,
+                    base64String.indexOf(";")
+                );
+                extension = mimeType;
+            }
+
+            // Gera nome único para o arquivo
+            String fileName = UUID.randomUUID().toString() + "." + extension;
+
+            // Salva o arquivo
+            String uploadDir = "/deskly-ecommerce-2/assets/images/";
+            Path filePath = Paths.get(uploadDir, fileName);
+            Files.write(filePath, imageBytes);
+
+            return fileName;
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao salvar imagem base64", e);
         }
     }
 
