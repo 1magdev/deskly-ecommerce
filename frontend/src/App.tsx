@@ -1,35 +1,66 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from '@/components/ui/sonner';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { BackofficeLayout } from '@/components/layout/BackofficeLayout';
+import { LoginPage } from '@/pages/Auth/LoginPage';
+import { ProductListPage } from '@/pages/Products/ProductListPage';
+import { ProductFormPage } from '@/pages/Products/ProductFormPage';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <BrowserRouter>
+      <AuthProvider>
+        <div className="min-h-screen bg-background">
+          <Routes>
+            {/* Rota pública */}
+            <Route path="/login" element={<LoginPage />} />
+
+            {/* Rotas protegidas - requer autenticação */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Navigate to="/products" replace />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/products"
+              element={
+                <ProtectedRoute requiredRole={['ADMIN', 'ESTOQUISTA']}>
+                  <BackofficeLayout>
+                    <ProductListPage />
+                  </BackofficeLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/products/new"
+              element={
+                <ProtectedRoute requiredRole={['ADMIN', 'ESTOQUISTA']}>
+                  <BackofficeLayout>
+                    <ProductFormPage />
+                  </BackofficeLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/products/:id/edit"
+              element={
+                <ProtectedRoute requiredRole={['ADMIN', 'ESTOQUISTA']}>
+                  <BackofficeLayout>
+                    <ProductFormPage />
+                  </BackofficeLayout>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+          <Toaster position="top-right" richColors />
+        </div>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
