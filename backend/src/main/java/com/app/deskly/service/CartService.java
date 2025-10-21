@@ -1,13 +1,14 @@
 package com.app.deskly.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.app.deskly.dto.cart.Cart;
-import com.app.deskly.dto.cart.CartItem;
+import com.app.deskly.dto.cart.CartDTO;
+import com.app.deskly.dto.cart.CartItemDTO;
 import com.app.deskly.model.Product;
 import com.app.deskly.model.User;
 import com.app.deskly.repository.CartItemRepository;
@@ -22,26 +23,26 @@ public class CartService {
     @Autowired private ProductRepository productRepository;
 
     public void addProductToCart(String sessionId, User user, Long productId) {
-        Cart cart;
+        CartDTO cart;
 
         if (user != null) {
-            cart = cartRepository.findByUser(user).orElse(new Cart());
+            cart = cartRepository.findByUser(user).orElse(new CartDTO());
             cart.setUser(user);
         } else {
-            cart = cartRepository.findBySessionId(sessionId).orElse(new Cart());
+            cart = cartRepository.findBySessionId(sessionId).orElse(new CartDTO());
             cart.setSessionId(sessionId);
         }
 
         Product product = productRepository.findById(productId).orElseThrow();
-        Optional<CartItem> existingItem = cart.getItems().stream()
+        Optional<CartItemDTO> existingItem = cart.getItems().stream()
             .filter(item -> item.getProduct().getId().equals(productId))
             .findFirst();
 
         if (existingItem.isPresent()) {
-            CartItem item = existingItem.get();
+            CartItemDTO item = existingItem.get();
             item.setQuantity(item.getQuantity() + 1);
         } else {
-            CartItem item = new CartItem();
+            CartItemDTO item = new CartItemDTO();
             item.setProduct(product);
             item.setQuantity(1);
             item.setCart(cart);
@@ -53,8 +54,8 @@ public class CartService {
 
 
     public void increaseItem(Long productId, String sessionId, User user) {
-        Cart cart = findCart(sessionId, user);
-        CartItem item = findItem(cart, productId);
+        CartDTO cart = findCart(sessionId, user);
+        CartItemDTO item = findItem(cart, productId);
 
         item.setQuantity(item.getQuantity() + 1);
         cartItemRepository.save(item);
@@ -64,8 +65,8 @@ public class CartService {
     }
 
     public void decreaseItem(Long productId, String sessionId, User user) {
-        Cart cart = findCart(sessionId, user);
-        CartItem item = findItem(cart, productId);
+        CartDTO cart = findCart(sessionId, user);
+        CartItemDTO item = findItem(cart, productId);
 
         if (item.getQuantity() > 1) {
             item.setQuantity(item.getQuantity() - 1);
@@ -80,8 +81,8 @@ public class CartService {
     }
 
     public void removeItem(Long productId, String sessionId, User user) {
-        Cart cart = findCart(sessionId, user);
-        CartItem item = findItem(cart, productId);
+        CartDTO cart = findCart(sessionId, user);
+        CartItemDTO item = findItem(cart, productId);
 
         cart.getItems().remove(item);
         cartItemRepository.delete(item);
@@ -90,7 +91,7 @@ public class CartService {
         cartRepository.save(cart);
     }
 
-    private void recalculateSubtotal(Cart cart) {
+    private void recalculateSubtotal(CartDTO cart) {
         BigDecimal subtotal = cart.getItems().stream()
             .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -100,13 +101,46 @@ public class CartService {
         cart.setSubtotal(subtotal.add(frete)); 
     }
 
-    private Cart findCart(String sessionId, User user) {
+//GET DO CARRINHO AINDA NÃO FINALIZADO
+
+//     public CartDTO getCart(String sessionId, User user) {
+//         Cart cart = findCart(sessionId, user);
+
+//         List<CartItemDTO> items = cart.getItems().stream().map(item -> {
+//             CartItemDTO dto = new CartItemDTO();
+//             dto.setProductId(item.getProduct().getId());
+//             dto.setProductName(item.getProduct().getName());
+//             dto.setUnitPrice(item.getProduct().getPrice());
+//             dto.setQuantity(item.getQuantity());
+//             dto.setTotal(item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+//             return dto;
+//         }).toList();
+
+//         BigDecimal subtotal = items.stream()
+//             .map(CartDTO::getSubtotal)
+//             .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+//         BigDecimal shipping = cart.getShippingCost() != null ? cart.getShippingCost() : BigDecimal.ZERO;
+
+//         CartDTO response = new CartDTO();
+//         response.setItems(items);
+//         response.setSubtotal(subtotal);
+//         response.setShippingCost(shipping);
+//         response.setSubtotal(subtotal.add(shipping));
+
+//     return response;
+// }
+
+
+
+
+    private CartDTO findCart(String sessionId, User user) {
         return user != null ?
             cartRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Carrinho não encontrado para usuário")) :
             cartRepository.findBySessionId(sessionId).orElseThrow(() -> new RuntimeException("Carrinho não encontrado para sessão"));
     }
 
-    private CartItem findItem(Cart cart, Long productId) {
+    private CartItemDTO findItem(CartDTO cart, Long productId) {
         return cart.getItems().stream()
             .filter(item -> item.getProduct().getId().equals(productId))
             .findFirst()

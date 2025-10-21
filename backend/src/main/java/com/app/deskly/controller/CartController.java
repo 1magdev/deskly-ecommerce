@@ -4,6 +4,7 @@ package com.app.deskly.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,14 +21,15 @@ import com.app.deskly.service.CartService;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/cart")
+@RequestMapping("/cart")
+@PreAuthorize("isAuthenticated()")
 public class CartController {
 
     @Autowired private CartService cartService;
 
     @PostMapping("/add")
     public ResponseEntity<?> addProductToCart(
-        @RequestBody com.app.deskly.dto.cart.AddToCartRequest request,
+        @RequestBody com.app.deskly.dto.cart.AddToCartRequestDTO request,
         @AuthenticationPrincipal User user, 
         HttpServletRequest httpRequest
     ) {
