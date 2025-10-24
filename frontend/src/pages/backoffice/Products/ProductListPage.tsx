@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Pencil, Power, Trash2 } from 'lucide-react';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { DataTable, type Column } from '@/components/shared/DataTable';
-import { StatusBadge } from '@/components/shared/StatusBadge';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { DataTable, type Column } from '@/components/shared/DataTable';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { StatusBadge } from '@/components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { apiService, type Product } from '@/services/api.service';
+import { Pencil, Power, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 export function ProductListPage() {
@@ -133,7 +133,7 @@ export function ProductListPage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(`/products/${product.id}/edit`)}
+            onClick={() => navigate(`/backoffice/products/${product.id}/edit`)}
             title="Editar"
             className="hover:text-primary hover:bg-primary/10"
           >
@@ -190,7 +190,7 @@ export function ProductListPage() {
       <PageHeader
         title="Lista de Produtos"
         action={
-          <Button onClick={() => navigate('/products/new')} className="bg-primary">
+          <Button onClick={() => navigate('/backoffice/products/new')} className="bg-primary">
             Novo Produto
           </Button>
         }

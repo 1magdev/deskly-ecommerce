@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.app.deskly.dto.product.ProductCreateDTO;
+import com.app.deskly.dto.product.ProductResponseDTO;
 import com.app.deskly.model.Product;
 import com.app.deskly.model.Stock;
 import com.app.deskly.repository.ProductRepository;
@@ -31,6 +32,50 @@ public class ProductService {
 
     @Autowired
     private StockRepository stockRepository;
+
+    // *** Catalog ***
+
+    public List<ProductResponseDTO> listCatalogProducts(String search, String category, int page, int size) {
+        List<Product> products = productRepository.findByActive(true);
+
+        return products.stream().map(product -> {
+            Stock stock = stockRepository.findByProductId(product.getId()).orElse(null);
+            Integer quantity = stock != null ? stock.getQuantity() : 0;
+
+            return new ProductResponseDTO(
+                product.getId(),
+                product.getName(),
+                quantity,
+                product.getPrice(),
+                product.getActive(),
+                product.getDescription(),
+                product.getRating(),
+                product.getProductImage()
+            );
+        }).toList();
+    }
+
+    public ProductResponseDTO getForCatalogById(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        Stock productOnStock = stockRepository.findByProductId(product.getId()).orElse(null);
+        Integer quantity = productOnStock != null ? productOnStock.getQuantity() : 0;
+
+        return new ProductResponseDTO(
+          product.getId(),
+          product.getName(),
+          quantity,
+          product.getPrice(),
+          product.getActive(),
+          product.getDescription(),
+          product.getRating(),
+          product.getProductImage()
+        );
+    }
+
+
+    // *** Back-office *** 
 
     public Page<Product> listProducts(String search, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());

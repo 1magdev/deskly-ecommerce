@@ -1,31 +1,8 @@
-export interface Product extends Record<string, unknown> {
-  id?: number;
-  name: string;
-  description: string;
-  price: number;
-  rating: number;
-  quantity: number;
-  productImage?: string;
-  active?: boolean;
-}
-
-export interface PageResponse<T> {
-  content: T[];
-  totalPages: number;
-  totalElements: number;
-  size: number;
-  number: number;
-}
+import type { Product, PageResponse, ErrorResponse } from '../types/api.types';
 
 export interface FieldError {
   field: string;
   message: string;
-}
-
-export interface ErrorResponse {
-  message?: string;
-  errors?: FieldError[];
-  status?: number;
 }
 
 class ApiService {

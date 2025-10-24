@@ -40,11 +40,11 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody UserRequestDTO userRequest) {
-
+/* 
         if (userRequest.getRole() == Role.ADMIN || userRequest.getRole() == Role.ESTOQUISTA) {
             throw new IllegalArgumentException("Não é possível se registrar como ADMIN ou ESTOQUISTA");
         }
-
+ */
         User user = userService.register(userRequest);
         String token = authService.generateToken(user);
 

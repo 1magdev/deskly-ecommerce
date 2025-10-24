@@ -70,7 +70,7 @@ export function ProductFormPage() {
       toast.error(
         error instanceof Error ? error.message : "Erro ao carregar produto"
       );
-      navigate("/products");
+      navigate("/backoffice/products");
     } finally {
       setLoading(false);
     }
@@ -141,7 +141,7 @@ export function ProductFormPage() {
         await productService.createProductWithBase64(createData);
         toast.success("Produto cadastrado com sucesso!");
       }
-      navigate("/products");
+      navigate("/backoffice/products");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Erro ao salvar produto"
@@ -430,7 +430,7 @@ export function ProductFormPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate("/products")}
+                onClick={() => navigate("/backoffice/products")}
                 disabled={loading}
                 className="border-success text-success hover:bg-success/10"
               >

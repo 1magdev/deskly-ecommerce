@@ -1,11 +1,16 @@
 // Error Response Types
-export interface ErrorResponse {
-  timestamp: string;
-  status: number;
-  error: string;
+export interface FieldError {
+  field: string;
   message: string;
-  path: string;
-  errors?: Record<string, string>; // Para erros de validação
+}
+
+export interface ErrorResponse {
+  timestamp?: string;
+  status?: number;
+  error?: string;
+  message?: string;
+  path?: string;
+  errors?: FieldError[]; // Para erros de validação
 }
 
 // Auth Types
@@ -29,11 +34,7 @@ export interface RegisterRequest {
 }
 
 // User Types
-export enum UserRole {
-  CUSTOMER = 'CUSTOMER',
-  ADMIN = 'ADMIN',
-  ESTOQUISTA = 'ESTOQUISTA'
-}
+export type UserRole = 'CUSTOMER' | 'ADMIN' | 'ESTOQUISTA';
 
 export interface User {
   id: number;
@@ -60,6 +61,7 @@ export interface Product {
   quantity?: number;
   price: number;
   active: boolean;
+  productImage?: string;
   mainImageIndex?: number;
 }
 

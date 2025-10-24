@@ -1,5 +1,7 @@
 package com.app.deskly.dto.product;
 
+import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -7,9 +9,11 @@ import lombok.Data;
 @AllArgsConstructor
 public class ProductResponseDTO {
     private Long id;
-    private String code;
     private String name;
     private Integer quantity;
-    private Double price;
-    private String status;
+    private BigDecimal price;
+    private Boolean status;
+    private String description;
+    private Double rating;
+    private String productImage;
 }

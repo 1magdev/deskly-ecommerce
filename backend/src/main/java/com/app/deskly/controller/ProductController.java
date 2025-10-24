@@ -1,7 +1,5 @@
 package com.app.deskly.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -9,30 +7,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.app.deskly.dto.product.ProductCreateDTO;
 import com.app.deskly.dto.product.ProductDTO;
 import com.app.deskly.model.Product;
 import com.app.deskly.service.ProductService;
 
 @RestController
-@RequestMapping("/products")
+@RequestMapping("/admin/products")
 @PreAuthorize("hasRole('ADMIN')")
 public class ProductController {
 
     @Autowired
     private ProductService productService;
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> createProductJson(@RequestBody ProductCreateDTO dto) {
+    @PostMapping
+    public ResponseEntity<Void> createProduct(@RequestBody ProductCreateDTO dto) {
         productService.createProductFromBase64(dto);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createProduct(
-            @RequestPart("data") ProductCreateDTO dto,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
-        productService.createProduct(dto, images);
         return ResponseEntity.ok().build();
     }
 
@@ -64,12 +55,13 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}/status")
-    public void toggleStatus(@PathVariable Long id, @RequestParam boolean active) {
+    public ResponseEntity<Void> toggleStatus(@PathVariable Long id, @RequestParam boolean active) {
         productService.enableDisable(id, active);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.delete(id);
         return ResponseEntity.noContent().build();
     }
@@ -78,8 +70,11 @@ public class ProductController {
         ProductDTO dto = new ProductDTO();
         dto.setId(product.getId());
         dto.setName(product.getName());
+        dto.setDescription(product.getDescription());
+        dto.setRating(product.getRating());
         dto.setPrice(product.getPrice());
         dto.setActive(product.getActive());
+        dto.setProductImage(product.getProductImage());
         return dto;
     }
 }

@@ -6,12 +6,15 @@ import lombok.Data;
 
 @Data
 public class ProductDTO {
-    
 
     private Long id;
 
     @NotBlank(message = "Nome do produto não pode ser vazio")
     private String name;
+
+    private String description;
+
+    private Double rating;
 
     @NotBlank(message = "Quantidade não pode ser vazio")
     private Integer quantity;
@@ -20,5 +23,9 @@ public class ProductDTO {
     private BigDecimal price;
 
     private Boolean active;
+
+    private String productImage;
+
+    private Integer mainImageIndex;
 
 }

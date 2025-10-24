@@ -1,5 +1,9 @@
 import { apiClient } from "@/lib/api-client";
-import type{ AuthResponse, LoginRequest, RegisterRequest } from "@/types/api.types";
+import type {
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
+} from "@/types/api.types";
 
 class AuthService {
   /**

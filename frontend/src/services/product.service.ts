@@ -8,8 +8,19 @@ import type {
 } from "@/types/api.types";
 
 class ProductService {
+  async getCatalog(/* params: {
+    category?: string;
+    query?: string;
+  } */): Promise<PageResponse<Product>> {
+    return apiClient.get<PageResponse<Product>>("/catalog/products");
+  }
+
+  async getCatalogProduct(params: { id: string }): Promise<Product> {
+    return apiClient.get(`/catalog/products/${params.id}`);
+  }
+
   /**
-   * Lista produtos com paginação e busca
+   * Lista produtos com paginação e busca (backoffice)
    */
   async getProducts(params?: PageRequest): Promise<PageResponse<Product>> {
     const queryParams: Record<string, string> = {
@@ -20,35 +31,39 @@ class ProductService {
     if (params?.search) {
       queryParams.search = params.search;
     }
-
-    return apiClient.get<PageResponse<Product>>("/products", queryParams);
+    const products = apiClient.get<PageResponse<Product>>(
+      "/admin/products",
+      queryParams
+    );
+    console.log(products);
+    return products;
   }
 
   /**
-   * Busca produto por ID
+   * Busca produto por ID (backoffice)
    */
   async getProductById(id: number): Promise<Product> {
-    return apiClient.get<Product>(`/products/${id}`);
+    return apiClient.get<Product>(`/admin/products/${id}`);
   }
 
   /**
-   * Cria um novo produto
+   * Cria um novo produto (backoffice)
    */
   async createProduct(data: ProductCreateRequest): Promise<void> {
-    return apiClient.post<void>("/products", data);
+    return apiClient.post<void>("/admin/products", data);
   }
 
   /**
-   * Cria um novo produto com imagem em base64
+   * Cria um novo produto com imagem em base64 (backoffice)
    */
   async createProductWithBase64(
     data: ProductCreateRequest & { imageBase64?: string }
   ): Promise<void> {
-    return apiClient.post<void>("/products", data);
+    return apiClient.post<void>("/admin/products", data);
   }
 
   /**
-   * Cria produto com imagens
+   * Cria produto com imagens (backoffice)
    */
   async createProductWithImages(
     data: ProductCreateRequest,
@@ -67,31 +82,31 @@ class ProductService {
       formData.append("images", image);
     });
 
-    return apiClient.postFormData<void>("/products", formData);
+    return apiClient.postFormData<void>("/admin/products", formData);
   }
 
   /**
-   * Atualiza um produto
+   * Atualiza um produto (backoffice)
    */
   async updateProduct(
     id: number,
     data: ProductUpdateRequest
   ): Promise<Product> {
-    return apiClient.put<Product>(`/products/${id}`, data);
+    return apiClient.put<Product>(`/admin/products/${id}`, data);
   }
 
   /**
-   * Atualiza um produto com imagem em base64
+   * Atualiza um produto com imagem em base64 (backoffice)
    */
   async updateProductWithBase64(
     id: number,
     data: ProductUpdateRequest & { imageBase64?: string }
   ): Promise<Product> {
-    return apiClient.put<Product>(`/products/${id}`, data);
+    return apiClient.put<Product>(`/admin/products/${id}`, data);
   }
 
   /**
-   * Atualiza produto com imagem
+   * Atualiza produto com imagem (backoffice)
    */
   async updateProductWithImage(
     id: number,
@@ -112,16 +127,16 @@ class ProductService {
     }
 
     return apiClient.putFormData<Product>(
-      `/products/${id}/with-image`,
+      `/admin/products/${id}/with-image`,
       formData
     );
   }
 
   /**
-   * Ativa ou desativa um produto
+   * Ativa ou desativa um produto (backoffice)
    */
   async toggleProductStatus(id: number, active: boolean): Promise<void> {
-    return apiClient.patch<void>(`/products/${id}/status?active=${active}`);
+    return apiClient.patch<void>(`/admin/products/${id}/status?active=${active}`);
   }
 
   /**
