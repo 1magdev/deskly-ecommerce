@@ -9,7 +9,9 @@ import { productService } from "@/services/product.service";
 import type {
   ProductCreateRequest,
   ProductUpdateRequest,
+  ProductCategory,
 } from "@/types/api.types";
+import { PRODUCT_CATEGORIES } from "@/types/api.types";
 import { toast } from "sonner";
 import { Upload, Trash2, CheckCircle, ImageIcon, Info } from "lucide-react";
 
@@ -19,6 +21,7 @@ interface FormErrors {
   quantity?: string;
   description?: string;
   rating?: string;
+  category?: string;
 }
 
 interface FormData {
@@ -27,6 +30,7 @@ interface FormData {
   price: number;
   rating?: number;
   quantity?: number;
+  category?: ProductCategory;
   imageBase64?: string;
   imagePreview?: string;
 }
@@ -37,6 +41,7 @@ const INITIAL_FORM_DATA: FormData = {
   price: 0,
   rating: 0,
   quantity: 0,
+  category: undefined,
   imageBase64: undefined,
   imagePreview: undefined,
 };
@@ -68,6 +73,7 @@ export function ProductFormPage() {
         price: product.price,
         rating: product.rating,
         quantity: product.quantity,
+        category: product.category,
         imageBase64: product.productImage,
         imagePreview: product.productImage
           ? `${
@@ -113,6 +119,10 @@ export function ProductFormPage() {
       newErrors.rating = "Avaliação deve estar entre 0 e 5";
     }
 
+    if (!formData.category) {
+      newErrors.category = "Categoria é obrigatória";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -135,6 +145,7 @@ export function ProductFormPage() {
           price: formData.price,
           rating: formData.rating,
           quantity: formData.quantity,
+          category: formData.category,
           image: formData.imageBase64,
         };
         await productService.updateProduct(parseInt(id), updateData);
@@ -146,6 +157,7 @@ export function ProductFormPage() {
           price: formData.price,
           rating: formData.rating,
           quantity: formData.quantity,
+          category: formData.category!,
           image: formData.imageBase64,
         };
         await productService.createProduct(createData);
@@ -253,6 +265,33 @@ export function ProductFormPage() {
                   error={errors.quantity}
                   required
                 />
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Categoria <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.category || ""}
+                    onChange={(e) =>
+                      handleChange("category", e.target.value as ProductCategory)
+                    }
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                      errors.category
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    <option value="">Selecione uma categoria</option>
+                    {Object.entries(PRODUCT_CATEGORIES).map(([key, label]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.category && (
+                    <p className="text-sm text-red-500">{errors.category}</p>
+                  )}
+                </div>
 
                 <FormTextarea
                   label="Descrição Detalhada"

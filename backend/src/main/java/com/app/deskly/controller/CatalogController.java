@@ -13,13 +13,13 @@ import com.app.deskly.dto.product.ProductResponseDTO;
 import com.app.deskly.service.ProductService;
 
 @RestController
-@RequestMapping("/catalog/products")
+@RequestMapping("/catalog")
 public class CatalogController {
 
     @Autowired
     private ProductService productService;
 
-    @GetMapping
+    @GetMapping("/products")
     public List<ProductResponseDTO> listProducts(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String category,
@@ -28,7 +28,7 @@ public class CatalogController {
         return productService.listCatalogProducts(search, category, page, size);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/products/{id}")
     public ProductResponseDTO getProduct(@PathVariable Long id) {
         return productService.getForCatalogById(id);
     }

@@ -10,71 +10,78 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.app.deskly.dto.product.ProductCreateDTO;
 import com.app.deskly.dto.product.ProductDTO;
+import com.app.deskly.dto.product.ProductUpdateDTO;
 import com.app.deskly.model.Product;
 import com.app.deskly.service.ProductService;
+import com.app.deskly.repository.StockRepository;
 
 @RestController
 @RequestMapping("/products")
-@PreAuthorize("hasRole('ADMIN','BACKOFFICE')")
+@PreAuthorize("hasAnyRole('ADMIN','BACKOFFICE')")
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+  @Autowired
+  private ProductService productService;
 
-    @PostMapping
-    public ResponseEntity<Void> createProduct(@RequestBody ProductCreateDTO dto) {
-        productService.createProductFromBase64(dto);
-        return ResponseEntity.ok().build();
-    }
+  @Autowired
+  private StockRepository stockRepository;
 
-    @GetMapping
-    public Page<ProductDTO> listProducts(
-            @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return productService.listProducts(search, page, size)
-                .map(this::toDTO);
-    }
+  @PostMapping
+  public ResponseEntity<Void> createProduct(@RequestBody ProductCreateDTO dto) {
+    Product product = productService.getCreatedProduct(dto);
+    productService.create(product);
+    return ResponseEntity.ok().build();
+  }
 
-    @GetMapping("/{id}")
-    public ProductDTO getProduct(@PathVariable Long id) {
-        return toDTO(productService.getById(id));
-    }
+  @GetMapping
+  public Page<ProductDTO> listProducts(
+      @RequestParam(required = false) String search,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    return productService.listProducts(search, page, size)
+        .map(this::toDTO);
+  }
 
-    @PutMapping("/{id}")
-    public ProductDTO updateProduct(@PathVariable Long id, @RequestBody ProductCreateDTO dto) {
-        return toDTO(productService.updateFromBase64(id, dto));
-    }
+  @GetMapping("/{id}")
+  public ProductDTO getProduct(@PathVariable Long id) {
+    return toDTO(productService.getById(id));
+  }
 
-    @PutMapping(value = "/{id}/with-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ProductDTO updateProductWithImage(
-            @PathVariable Long id,
-            @RequestPart("data") Product product,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
-        return toDTO(productService.updateWithImage(id, product, image));
-    }
+  @PutMapping("/{id}")
+  public ProductDTO updateProduct(@PathVariable Long id, @RequestBody ProductCreateDTO dto) {
+    Product product = productService.getUpdatedProduct(id, dto);
+    return toDTO(productService.update(id, product, dto.getQuantity()));
+  }
 
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<Void> toggleStatus(@PathVariable Long id, @RequestParam boolean active) {
-        productService.enableDisable(id, active);
-        return ResponseEntity.ok().build();
-    }
+  @PatchMapping("/{id}/status")
+  public ResponseEntity<Void> toggleStatus(@PathVariable Long id, @RequestParam boolean active) {
+    productService.enableDisable(id, active);
+    return ResponseEntity.ok().build();
+  }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-        productService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    productService.delete(id);
+    return ResponseEntity.noContent().build();
+  }
 
-    private ProductDTO toDTO(Product product) {
-        ProductDTO dto = new ProductDTO();
-        dto.setId(product.getId());
-        dto.setName(product.getName());
-        dto.setDescription(product.getDescription());
-        dto.setRating(product.getRating());
-        dto.setPrice(product.getPrice());
-        dto.setActive(product.getActive());
-        dto.setProductImage(product.getProductImage());
-        return dto;
-    }
+  private ProductDTO toDTO(Product product) {
+    ProductDTO dto = new ProductDTO();
+    dto.setId(product.getId());
+    dto.setName(product.getName());
+    dto.setDescription(product.getDescription());
+    dto.setCategory(product.getCategory());
+    dto.setRating(product.getRating());
+    dto.setPrice(product.getPrice());
+    dto.setActive(product.getActive());
+    dto.setProductImage(product.getProductImage());
+
+    // Buscar quantidade do estoque
+    Integer quantity = stockRepository.findByProductId(product.getId())
+        .map(stock -> stock.getQuantity())
+        .orElse(0);
+    dto.setQuantity(quantity);
+
+    return dto;
+  }
 }

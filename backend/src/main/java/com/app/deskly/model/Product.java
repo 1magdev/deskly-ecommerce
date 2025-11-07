@@ -1,16 +1,10 @@
 package com.app.deskly.model;
 
+import jakarta.persistence.*;
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
-import lombok.Data;
 
 @Data
 @Entity
@@ -33,6 +27,11 @@ public class Product {
 
     @Column(name = "rating", precision = 2)
     private Double rating;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProductCategories category;
+
 
     @Column(name = "description", length = 2000)
     private String description;

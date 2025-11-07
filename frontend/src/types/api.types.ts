@@ -53,6 +53,35 @@ export interface UpdateUserRequest {
 }
 
 // Product Types
+export type ProductCategory =
+  | "Monitor"
+  | "Teclado_Mouse"
+  | "Headset"
+  | "Webcam"
+  | "Cadeira"
+  | "Mesa"
+  | "Luminaria_Mesa"
+  | "Organizador_Mesa"
+  | "Organizador_Cabos"
+  | "Suporte_Monitor"
+  | "Impressora"
+  | "Itens_Ergonomicos";
+
+export const PRODUCT_CATEGORIES: Record<ProductCategory, string> = {
+  Monitor: "Monitor",
+  Teclado_Mouse: "Teclado e Mouse",
+  Headset: "Headset",
+  Webcam: "Webcam",
+  Cadeira: "Cadeira",
+  Mesa: "Mesa",
+  Luminaria_Mesa: "Luminária de Mesa",
+  Organizador_Mesa: "Organizador de Mesa",
+  Organizador_Cabos: "Organizador de Cabos",
+  Suporte_Monitor: "Suporte para Monitor",
+  Impressora: "Impressora",
+  Itens_Ergonomicos: "Itens Ergonômicos",
+};
+
 export interface Product {
   id: number;
   name: string;
@@ -62,6 +91,7 @@ export interface Product {
   price: number;
   active: boolean;
   productImage?: string;
+  category: ProductCategory;
 }
 
 export interface ProductCreateRequest {
@@ -71,6 +101,7 @@ export interface ProductCreateRequest {
   quantity?: number;
   price: number;
   image?: string;
+  category: ProductCategory;
 }
 
 export interface ProductUpdateRequest {
@@ -81,6 +112,7 @@ export interface ProductUpdateRequest {
   price?: number;
   active?: boolean;
   image?: string;
+  category?: ProductCategory;
 }
 
 // Pagination Types

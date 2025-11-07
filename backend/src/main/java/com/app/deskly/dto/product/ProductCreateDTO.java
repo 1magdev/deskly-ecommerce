@@ -1,12 +1,16 @@
 package com.app.deskly.dto.product;
 
 import java.math.BigDecimal;
+
+import com.app.deskly.model.ProductCategories;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
 public class ProductCreateDTO {
-    
     
     private Long id;
 
@@ -31,10 +35,10 @@ public class ProductCreateDTO {
     @Min(0)
     private Integer quantity;
 
+    @NotBlank(message = "Insira uma imagem válida")
+    private String image;
 
-    private Integer mainImageIndex;
-
-    // Imagem em formato base64 (opcional, alternativa ao MultipartFile)
-    private String imageBase64;
+    @NotNull(message = "A categoria do produto é obrigatória.")
+    private ProductCategories category;
 
 }

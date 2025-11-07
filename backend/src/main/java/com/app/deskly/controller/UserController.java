@@ -33,21 +33,21 @@ public class UserController {
     }
 
 
-    @PreAuthorize("hasRole('ADMIN','BACKOFFICE')")
+    @PreAuthorize("hasAnyRole('ADMIN','BACKOFFICE')")
     @PostMapping()
     public ResponseEntity<User> create(@RequestBody UserRequestDTO dto) {
         User user = userService.create(dto);
         return ResponseEntity.ok(user);
     }
 
-    @PreAuthorize("hasRole('ADMIN','BACKOFFICE')")
+    @PreAuthorize("hasAnyRole('ADMIN','BACKOFFICE')")
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable Long id, @RequestBody UpdateUserDTO dto) {
         userService.updateUser(id, dto);
         return ResponseEntity.ok("Usuário atualizado com sucesso.");
     }
 
-    @PreAuthorize("hasRole('ADMIN','BACKOFFICE')")
+    @PreAuthorize("hasAnyRole('ADMIN','BACKOFFICE')")
     @GetMapping("/{role}")
     public ResponseEntity<List<UserDTO>> getAll(@PathVariable UserRoles role) {
         List<User> users = userService.getAll(role);

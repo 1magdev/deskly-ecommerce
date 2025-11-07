@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { productService } from "@/services/product.service";
 import type { Product } from "@/types/api.types";
+import { PRODUCT_CATEGORIES } from "@/types/api.types";
 import { Pencil, Power } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -160,6 +161,15 @@ export function ProductListPage() {
     {
       key: "name",
       label: "Nome",
+    },
+    {
+      key: "category",
+      label: "Categoria",
+      render: (product) => (
+        <span className="text-sm">
+          {PRODUCT_CATEGORIES[product.category] || product.category}
+        </span>
+      ),
     },
     {
       key: "quantity",

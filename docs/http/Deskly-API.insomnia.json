@@ -1,0 +1,381 @@
+{
+	"_type": "export",
+	"__export_format": 4,
+	"__export_date": "2025-11-07T00:00:00.000Z",
+	"__export_source": "insomnia.desktop.app:v2023.5.8",
+	"resources": [
+		{
+			"_id": "wrk_deskly",
+			"_type": "workspace",
+			"name": "Deskly E-commerce API",
+			"description": "Complete API documentation for Deskly E-commerce",
+			"parentId": null
+		},
+		{
+			"_id": "env_base",
+			"_type": "environment",
+			"name": "Base Environment",
+			"data": {
+				"baseUrl": "http://localhost:8080",
+				"token": ""
+			},
+			"dataPropertyOrder": {
+				"&": ["baseUrl", "token"]
+			},
+			"parentId": "wrk_deskly"
+		},
+		{
+			"_id": "fld_auth",
+			"_type": "request_group",
+			"name": "Auth",
+			"description": "Authentication endpoints",
+			"parentId": "wrk_deskly"
+		},
+		{
+			"_id": "req_login",
+			"_type": "request",
+			"name": "Login",
+			"url": "{{ _.baseUrl }}/auth/login",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"email\": \"admin@deskly.com\",\n\t\"password\": \"admin123\"\n}"
+			},
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"parentId": "fld_auth"
+		},
+		{
+			"_id": "req_register",
+			"_type": "request",
+			"name": "Register",
+			"url": "{{ _.baseUrl }}/auth/register",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"fullname\": \"João Silva\",\n\t\"email\": \"joao.silva@email.com\",\n\t\"cpf\": \"12345678901\",\n\t\"password\": \"senha123\",\n\t\"confirmPassword\": \"senha123\",\n\t\"role\": \"CLIENTE\"\n}"
+			},
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"parentId": "fld_auth"
+		},
+		{
+			"_id": "fld_catalog",
+			"_type": "request_group",
+			"name": "Catalog",
+			"description": "Public catalog endpoints - no authentication required",
+			"parentId": "wrk_deskly"
+		},
+		{
+			"_id": "req_catalog_list",
+			"_type": "request",
+			"name": "List Products",
+			"url": "{{ _.baseUrl }}/catalog/products?page=0&size=10",
+			"method": "GET",
+			"parameters": [
+				{
+					"name": "page",
+					"value": "0",
+					"description": "Page number"
+				},
+				{
+					"name": "size",
+					"value": "10",
+					"description": "Items per page"
+				},
+				{
+					"name": "search",
+					"value": "",
+					"description": "Search by product name",
+					"disabled": true
+				},
+				{
+					"name": "category",
+					"value": "",
+					"description": "Filter by category",
+					"disabled": true
+				}
+			],
+			"parentId": "fld_catalog"
+		},
+		{
+			"_id": "req_catalog_get",
+			"_type": "request",
+			"name": "Get Product by ID",
+			"url": "{{ _.baseUrl }}/catalog/products/1",
+			"method": "GET",
+			"parentId": "fld_catalog"
+		},
+		{
+			"_id": "fld_cart",
+			"_type": "request_group",
+			"name": "Cart",
+			"description": "Cart management - requires authentication",
+			"parentId": "wrk_deskly"
+		},
+		{
+			"_id": "req_cart_add",
+			"_type": "request",
+			"name": "Add Product to Cart",
+			"url": "{{ _.baseUrl }}/cart/add",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"productId\": 1\n}"
+			},
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_cart"
+		},
+		{
+			"_id": "req_cart_increase",
+			"_type": "request",
+			"name": "Increase Item Quantity",
+			"url": "{{ _.baseUrl }}/cart/increase/1",
+			"method": "PUT",
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_cart"
+		},
+		{
+			"_id": "req_cart_decrease",
+			"_type": "request",
+			"name": "Decrease Item Quantity",
+			"url": "{{ _.baseUrl }}/cart/decrease/1",
+			"method": "PUT",
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_cart"
+		},
+		{
+			"_id": "req_cart_remove",
+			"_type": "request",
+			"name": "Remove Item from Cart",
+			"url": "{{ _.baseUrl }}/cart/remove/1",
+			"method": "DELETE",
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_cart"
+		},
+		{
+			"_id": "fld_users",
+			"_type": "request_group",
+			"name": "Users",
+			"description": "User management endpoints",
+			"parentId": "wrk_deskly"
+		},
+		{
+			"_id": "req_user_profile",
+			"_type": "request",
+			"name": "Get Profile",
+			"url": "{{ _.baseUrl }}/users/profile",
+			"method": "GET",
+			"headers": [
+				{
+					"name": "Authorization",
+					"value": "Bearer {{ _.token }}"
+				}
+			],
+			"parentId": "fld_users"
+		},
+		{
+			"_id": "req_user_create",
+			"_type": "request",
+			"name": "Create User (Admin/Backoffice)",
+			"url": "{{ _.baseUrl }}/users",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"fullname\": \"Maria Santos\",\n\t\"email\": \"maria.santos@email.com\",\n\t\"cpf\": \"98765432100\",\n\t\"password\": \"senha123\",\n\t\"confirmPassword\": \"senha123\",\n\t\"role\": \"CLIENTE\"\n}"
+			},
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_users"
+		},
+		{
+			"_id": "req_user_update",
+			"_type": "request",
+			"name": "Update User (Admin/Backoffice)",
+			"url": "{{ _.baseUrl }}/users/1",
+			"method": "PUT",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"fullname\": \"Maria Santos Silva\",\n\t\"cpf\": \"98765432100\",\n\t\"password\": \"novaSenha123\",\n\t\"confirmPassword\": \"novaSenha123\",\n\t\"role\": \"CLIENTE\",\n\t\"active\": true\n}"
+			},
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_users"
+		},
+		{
+			"_id": "req_user_list",
+			"_type": "request",
+			"name": "List Users by Role (Admin/Backoffice)",
+			"url": "{{ _.baseUrl }}/users/CLIENTE",
+			"method": "GET",
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_users"
+		},
+		{
+			"_id": "fld_products",
+			"_type": "request_group",
+			"name": "Products (Admin/Backoffice)",
+			"description": "Product management - requires ADMIN or BACKOFFICE role",
+			"parentId": "wrk_deskly"
+		},
+		{
+			"_id": "req_product_create",
+			"_type": "request",
+			"name": "Create Product",
+			"url": "{{ _.baseUrl }}/products",
+			"method": "POST",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"name\": \"Mouse Gamer RGB\",\n\t\"description\": \"Mouse gamer com iluminação RGB\",\n\t\"price\": 149.90,\n\t\"rating\": 4.5,\n\t\"quantity\": 50,\n\t\"image\": \"\"\n}"
+			},
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_products"
+		},
+		{
+			"_id": "req_product_list",
+			"_type": "request",
+			"name": "List Products",
+			"url": "{{ _.baseUrl }}/products?page=0&size=10",
+			"method": "GET",
+			"parameters": [
+				{
+					"name": "page",
+					"value": "0"
+				},
+				{
+					"name": "size",
+					"value": "10"
+				},
+				{
+					"name": "search",
+					"value": "",
+					"disabled": true
+				}
+			],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_products"
+		},
+		{
+			"_id": "req_product_get",
+			"_type": "request",
+			"name": "Get Product by ID",
+			"url": "{{ _.baseUrl }}/products/1",
+			"method": "GET",
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_products"
+		},
+		{
+			"_id": "req_product_update",
+			"_type": "request",
+			"name": "Update Product",
+			"url": "{{ _.baseUrl }}/products/1",
+			"method": "PUT",
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"name\": \"Mouse Gamer RGB Pro\",\n\t\"description\": \"Mouse gamer profissional com RGB\",\n\t\"price\": 179.90,\n\t\"rating\": 4.8,\n\t\"quantity\": 75,\n\t\"image\": \"\"\n}"
+			},
+			"headers": [
+				{
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_products"
+		},
+		{
+			"_id": "req_product_toggle",
+			"_type": "request",
+			"name": "Toggle Product Status",
+			"url": "{{ _.baseUrl }}/products/1/status?active=true",
+			"method": "PATCH",
+			"parameters": [
+				{
+					"name": "active",
+					"value": "true",
+					"description": "Set to true to activate, false to deactivate"
+				}
+			],
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_products"
+		},
+		{
+			"_id": "req_product_delete",
+			"_type": "request",
+			"name": "Delete Product",
+			"url": "{{ _.baseUrl }}/products/1",
+			"method": "DELETE",
+			"authentication": {
+				"type": "bearer",
+				"token": "{{ _.token }}"
+			},
+			"parentId": "fld_products"
+		}
+	]
+}
