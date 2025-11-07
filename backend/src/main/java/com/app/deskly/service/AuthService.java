@@ -1,15 +1,17 @@
 package com.app.deskly.service;
 
-import com.app.deskly.exception.BadRequestException;
 import com.app.deskly.model.User;
 import com.app.deskly.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -21,30 +23,32 @@ import java.util.Optional;
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final SecretKey secretKey;
+    @Autowired
+    private UserRepository userRepository;
 
-    @Value("${jwt.expiration:86400}")
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();;
+
+    @Value("${env.jwt.expiration}")
     private long jwtExpiration;
+    @Value("${env.jwt.secret}")
+    private String jwtSecret;
+    private SecretKey jwtSecretKey;
 
-    public AuthService(UserRepository userRepository,
-            @Value("${jwt.secret:deskly-secret-key-change-in-production}") String jwtSecret) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder();
-        this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+    @PostConstruct
+    public void init() {
+        this.jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String login(String email, String password) {
         Optional<User> userOpt = userRepository.findByEmail(email);
 
         if (userOpt.isEmpty() || !userOpt.get().isActive()) {
-            throw new BadRequestException("Credenciais inválidas");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credênciais inválidas!");
         }
 
         User user = userOpt.get();
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
-            throw new BadRequestException("Credenciais inválidas");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credênciais inválidas!");
         }
 
         return generateToken(user);
@@ -52,7 +56,7 @@ public class AuthService {
 
     public String generateToken(User user) {
         Instant now = Instant.now();
-        Instant expiration = now.plus(jwtExpiration, ChronoUnit.SECONDS);
+        Instant expiration = now.plus(this.jwtExpiration, ChronoUnit.SECONDS);
 
         return Jwts.builder()
                 .subject(user.getId().toString())
@@ -60,13 +64,14 @@ public class AuthService {
                 .claim("role", user.getRole().name())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))
-                .signWith(secretKey)
+                .signWith(jwtSecretKey)
                 .compact();
     }
 
     public Claims validateToken(String token) {
+
         return Jwts.parser()
-                .verifyWith(secretKey)
+                .verifyWith(jwtSecretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -80,5 +85,10 @@ public class AuthService {
         } catch (Exception e) {
             return Optional.empty();
         }
+    }
+
+    public Long getUserIdFromToken(String token) {
+            Claims claims = validateToken(token);
+            return Long.valueOf(claims.getSubject());
     }
 }

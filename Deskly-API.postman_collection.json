@@ -94,8 +94,99 @@
 			]
 		},
 		{
+			"name": "Catalog",
+			"item": [
+				{
+					"name": "List Catalog Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/catalog/products?page=0&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"catalog",
+								"products"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "mouse",
+									"disabled": true
+								},
+								{
+									"key": "category",
+									"value": "perifericos",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Catalog Product by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/catalog/products/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"catalog",
+								"products",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "User",
 			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "Create User",
 					"request": {
@@ -162,11 +253,41 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "List Users by Role",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/users/:role",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								":role"
+							],
+							"variable": [
+								{
+									"key": "role",
+									"value": "CLIENTE",
+									"description": "Valores possíveis: CLIENTE, ADMIN, ESTOQUISTA"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
 		{
-			"name": "Product",
+			"name": "Admin - Product",
 			"item": [
 				{
 					"name": "Create Product",
@@ -184,14 +305,15 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Mouse Gamer RGB\",\n    \"description\": \"Mouse gamer com iluminação RGB personalizável\",\n    \"price\": 149.90,\n    \"rating\": 4.5,\n    \"quantity\": 50,\n    \"productImage\": \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\"\n}"
+							"raw": "{\n    \"name\": \"Mouse Gamer RGB\",\n    \"description\": \"Mouse gamer com iluminação RGB personalizável\",\n    \"price\": 149.90,\n    \"rating\": 4.5,\n    \"quantity\": 50,\n    \"imageBase64\": \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/products",
+							"raw": "{{baseUrl}}/admin/products",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"admin",
 								"products"
 							]
 						}
@@ -209,11 +331,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/products?page=0&size=10",
+							"raw": "{{baseUrl}}/admin/products?page=0&size=10",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"admin",
 								"products"
 							],
 							"query": [
@@ -246,11 +369,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/products/:id",
+							"raw": "{{baseUrl}}/admin/products/:id",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"admin",
 								"products",
 								":id"
 							],
@@ -280,16 +404,64 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Mouse Gamer RGB Pro\",\n    \"price\": 179.90,\n    \"productImage\": \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\"\n}"
+							"raw": "{\n    \"name\": \"Mouse Gamer RGB Pro\",\n    \"description\": \"Mouse gamer com iluminação RGB personalizável e ajustes de DPI\",\n    \"price\": 179.90,\n    \"rating\": 4.8,\n    \"imageBase64\": \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\"\n}"
 						},
 						"url": {
-							"raw": "{{baseUrl}}/products/:id",
+							"raw": "{{baseUrl}}/admin/products/:id",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"admin",
 								"products",
 								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product with Image (Multipart)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "data",
+									"value": "{\"name\": \"Mouse Gamer RGB Pro\", \"price\": 179.90}",
+									"type": "text",
+									"contentType": "application/json"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/path/to/image.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/admin/products/:id/with-image",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"products",
+								":id",
+								"with-image"
 							],
 							"variable": [
 								{
@@ -312,11 +484,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/products/:id/status?active=true",
+							"raw": "{{baseUrl}}/admin/products/:id/status?active=true",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
+								"admin",
 								"products",
 								":id",
 								"status"
@@ -326,6 +499,36 @@
 									"key": "active",
 									"value": "true"
 								}
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/admin/products/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"admin",
+								"products",
+								":id"
 							],
 							"variable": [
 								{

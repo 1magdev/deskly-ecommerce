@@ -1,6 +1,6 @@
 package com.app.deskly.dto.user;
 
-import com.app.deskly.model.Role;
+import com.app.deskly.model.UserRoles;
 import lombok.Data;
 
 @Data
@@ -10,7 +10,7 @@ public class UserDTO {
     private String fullname;
     private String email;
     private String cpf;
-    private Role role;
+    private UserRoles role;
     private Boolean active;
 
 }

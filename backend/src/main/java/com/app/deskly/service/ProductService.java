@@ -14,8 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.app.deskly.dto.product.ProductCreateDTO;
 import com.app.deskly.dto.product.ProductResponseDTO;
@@ -57,7 +59,7 @@ public class ProductService {
 
     public ProductResponseDTO getForCatalogById(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
 
         Stock productOnStock = stockRepository.findByProductId(product.getId()).orElse(null);
         Integer quantity = productOnStock != null ? productOnStock.getQuantity() : 0;
@@ -88,7 +90,7 @@ public class ProductService {
 
     public Product getById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
     }
 
     public Product create(Product product) {
@@ -124,7 +126,7 @@ public class ProductService {
                 Files.write(filePath, image.getBytes());
                 existing.setProductImage(newFileName);
             } catch (IOException e) {
-                throw new RuntimeException("Erro ao salvar imagem", e);
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem", e);
             }
         }
 
@@ -174,7 +176,7 @@ public class ProductService {
                         mainImagePath = newFileName;
                     }
                 } catch (IOException e) {
-                    throw new RuntimeException("Erro ao salvar imagem", e);
+                    throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem", e);
                 }
 
             }
@@ -271,7 +273,7 @@ public class ProductService {
 
             return fileName;
         } catch (IOException e) {
-            throw new RuntimeException("Erro ao salvar imagem base64", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao salvar imagem base64", e);
         }
     }
 

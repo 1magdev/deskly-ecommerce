@@ -2,11 +2,12 @@ package com.app.deskly.model;
 
 import lombok.Data;
 import jakarta.persistence.*;
+import org.springframework.http.ResponseEntity;
 
-@Data
 @Entity
 @Table(name = "tbl_users")
-public class User {
+@Data
+public class User{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +27,7 @@ public class User {
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private UserRoles role;
 
     @Column(name = "active")
     private boolean active = true;

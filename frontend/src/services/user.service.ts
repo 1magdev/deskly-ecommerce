@@ -33,6 +33,13 @@ class UserService {
   async getUserById(id: number): Promise<User> {
     return apiClient.get<User>(`/users/${id}`);
   }
+
+  /**
+   * Busca perfil do usuário autenticado
+   */
+  async getUserProfile(): Promise<User> {
+    return apiClient.get<User>('/users/profile');
+  }
 }
 
 export const userService = new UserService();
