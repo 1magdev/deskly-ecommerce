@@ -1,6 +1,9 @@
 package com.app.deskly.service;
 
+import com.app.deskly.dto.auth.AuthResponseDTO;
+import com.app.deskly.dto.user.UserRequestDTO;
 import com.app.deskly.model.User;
+import com.app.deskly.model.UserRoles;
 import com.app.deskly.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -9,6 +12,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,6 +29,8 @@ public class AuthService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserService userService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();;
 
@@ -52,6 +58,19 @@ public class AuthService {
         }
 
         return generateToken(user);
+    }
+
+    public AuthResponseDTO register(UserRequestDTO userData){
+       if (userData.getRole() != UserRoles.CUSTOMER) {
+            throw new IllegalArgumentException("Não é possível se registrar como ADMIN ou ESTOQUISTA");
+        }
+
+        User user = userService.create(userData);
+        String token = this.generateToken(user);
+
+        AuthResponseDTO response = new AuthResponseDTO(token, user.getEmail(), user.getRole().name());
+
+        return response;
     }
 
     public String generateToken(User user) {

@@ -2,7 +2,6 @@ package com.app.deskly.dto.user;
 
 import com.app.deskly.model.UserRoles;
 import lombok.Data;
-
 @Data
 public class UpdateUserDTO {
     

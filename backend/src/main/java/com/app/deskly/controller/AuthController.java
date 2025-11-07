@@ -23,8 +23,6 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
-    @Autowired
-    private UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
@@ -37,19 +35,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody UserRequestDTO userRequest) {
-/* 
-        if (userRequest.getRole() == Role.ADMIN || userRequest.getRole() == Role.ESTOQUISTA) {
-            throw new IllegalArgumentException("Não é possível se registrar como ADMIN ou ESTOQUISTA");
-        }
- */
-/*
-        User user = userService.register(userRequest);
-        String token = authService.generateToken(user);
+    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody UserRequestDTO userRequest) {      
+      AuthResponseDTO userData = authService.register(userRequest);
+      return ResponseEntity.ok(userData);
 
-        AuthResponseDTO response = new AuthResponseDTO(token, user.getEmail(), user.getRole().name());
-*/
-
-        return ResponseEntity.ok(null);
     }
 }
