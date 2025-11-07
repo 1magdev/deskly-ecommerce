@@ -30,11 +30,11 @@ export interface RegisterRequest {
   email: string;
   password: string;
   cpf: string;
-  role?: 'CUSTOMER' | 'ADMIN' | 'ESTOQUISTA';
+  role?: "CUSTOMER" | "ADMIN" | "ESTOQUISTA";
 }
 
 // User Types
-export type UserRole = 'CUSTOMER' | 'ADMIN' | 'ESTOQUISTA';
+export type UserRole = "CUSTOMER" | "ADMIN" | "ESTOQUISTA";
 
 export interface User {
   id: number;
@@ -62,7 +62,6 @@ export interface Product {
   price: number;
   active: boolean;
   productImage?: string;
-  mainImageIndex?: number;
 }
 
 export interface ProductCreateRequest {
@@ -71,7 +70,7 @@ export interface ProductCreateRequest {
   rating?: number;
   quantity?: number;
   price: number;
-  mainImageIndex?: number;
+  image?: string;
 }
 
 export interface ProductUpdateRequest {
@@ -81,7 +80,7 @@ export interface ProductUpdateRequest {
   quantity?: number;
   price?: number;
   active?: boolean;
-  mainImageIndex?: number;
+  image?: string;
 }
 
 // Pagination Types

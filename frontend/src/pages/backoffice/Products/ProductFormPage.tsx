@@ -3,12 +3,15 @@ import { useNavigate, useParams } from "react-router-dom";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { FormInput } from "@/components/shared/FormInput";
 import { FormTextarea } from "@/components/shared/FormTextarea";
-import { ImageUploader } from "@/components/shared/ImageUploader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { productService } from "@/services/product.service";
-import type { Product, ProductCreateRequest } from "@/types/api.types";
+import type {
+  ProductCreateRequest,
+  ProductUpdateRequest,
+} from "@/types/api.types";
 import { toast } from "sonner";
+import { Upload, Trash2, CheckCircle, ImageIcon, Info } from "lucide-react";
 
 interface FormErrors {
   name?: string;
@@ -16,7 +19,6 @@ interface FormErrors {
   quantity?: string;
   description?: string;
   rating?: string;
-  images?: string;
 }
 
 interface FormData {
@@ -25,10 +27,21 @@ interface FormData {
   price: number;
   rating?: number;
   quantity?: number;
-  images: File[];
   imageBase64?: string;
   imagePreview?: string;
 }
+
+const INITIAL_FORM_DATA: FormData = {
+  name: "",
+  description: "",
+  price: 0,
+  rating: 0,
+  quantity: 0,
+  imageBase64: undefined,
+  imagePreview: undefined,
+};
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 export function ProductFormPage() {
   const navigate = useNavigate();
@@ -36,16 +49,7 @@ export function ProductFormPage() {
   const isEditing = !!id;
 
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    description: "",
-    price: 0,
-    rating: 0,
-    quantity: 0,
-    images: [],
-    imageBase64: undefined,
-    imagePreview: undefined,
-  });
+  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
   const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
@@ -64,7 +68,14 @@ export function ProductFormPage() {
         price: product.price,
         rating: product.rating,
         quantity: product.quantity,
-        images: [], // Não carregamos imagens existentes por enquanto
+        imageBase64: product.productImage,
+        imagePreview: product.productImage
+          ? `${
+              !product.productImage.includes("data:image/")
+                ? "data:image/png;base64"
+                : ""
+            }${product.productImage}`
+          : undefined,
       });
     } catch (error) {
       toast.error(
@@ -91,7 +102,7 @@ export function ProductFormPage() {
       newErrors.price = "Preço deve ser maior que zero";
     }
 
-    if (formData.quantity < 0) {
+    if (formData.quantity !== undefined && formData.quantity < 0) {
       newErrors.quantity = "Quantidade não pode ser negativa";
     }
 
@@ -116,29 +127,28 @@ export function ProductFormPage() {
 
     try {
       setLoading(true);
+
       if (isEditing && id) {
-        const updateData: ProductCreateRequest & { imageBase64?: string } = {
+        const updateData: ProductUpdateRequest = {
           name: formData.name,
           description: formData.description,
           price: formData.price,
           rating: formData.rating,
           quantity: formData.quantity,
-          imageBase64: formData.imageBase64,
+          image: formData.imageBase64,
         };
-
-        await productService.updateProductWithBase64(parseInt(id), updateData);
+        await productService.updateProduct(parseInt(id), updateData);
         toast.success("Produto atualizado com sucesso!");
       } else {
-        const createData: ProductCreateRequest & { imageBase64?: string } = {
+        const createData: ProductCreateRequest = {
           name: formData.name,
           description: formData.description,
           price: formData.price,
           rating: formData.rating,
           quantity: formData.quantity,
-          imageBase64: formData.imageBase64,
+          image: formData.imageBase64,
         };
-
-        await productService.createProductWithBase64(createData);
+        await productService.createProduct(createData);
         toast.success("Produto cadastrado com sucesso!");
       }
       navigate("/backoffice/products");
@@ -151,12 +161,8 @@ export function ProductFormPage() {
     }
   };
 
-  const handleChange = (
-    field: keyof FormData,
-    value: string | number | File[] | undefined
-  ) => {
+  const handleChange = (field: keyof FormData, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Limpar erro do campo ao editar
     if (errors[field as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
@@ -166,13 +172,11 @@ export function ProductFormPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validar tamanho do arquivo (máx 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > MAX_FILE_SIZE) {
       toast.error("A imagem deve ter no máximo 5MB");
       return;
     }
 
-    // Validar tipo de arquivo
     if (!file.type.startsWith("image/")) {
       toast.error("Por favor, selecione apenas arquivos de imagem");
       return;
@@ -188,6 +192,14 @@ export function ProductFormPage() {
       }));
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setFormData((prev) => ({
+      ...prev,
+      imageBase64: undefined,
+      imagePreview: undefined,
+    }));
   };
 
   if (loading && isEditing) {
@@ -208,7 +220,6 @@ export function ProductFormPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Coluna Esquerda */}
               <div className="space-y-4">
                 <FormInput
                   label="Nome do Produto"
@@ -266,42 +277,16 @@ export function ProductFormPage() {
                 />
               </div>
 
-              {/* Coluna Direita */}
               <div className="space-y-6">
-                {/* Upload de Imagem */}
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/60 transition-all duration-300">
                   <label className="flex items-center gap-2 text-sm font-semibold text-dark mb-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-primary"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <ImageIcon className="h-5 w-5 text-primary" />
                     Imagem do Produto
                   </label>
 
                   {!formData.imagePreview ? (
                     <div className="text-center py-8">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="mx-auto h-16 w-16 text-primary/40 mb-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                        />
-                      </svg>
+                      <Upload className="mx-auto h-16 w-16 text-primary/40 mb-4" />
                       <div className="relative">
                         <input
                           type="file"
@@ -312,37 +297,14 @@ export function ProductFormPage() {
                         />
                         <label
                           htmlFor="image-upload"
-                          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-lg
-                            hover:bg-blue-600 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer"
+                          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-blue-600 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                          <Upload className="h-5 w-5" />
                           Escolher Imagem
                         </label>
                       </div>
                       <p className="mt-4 text-xs text-gray-600 flex items-center justify-center gap-1.5">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 text-gray-400"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+                        <Info className="h-4 w-4 text-gray-400" />
                         Máx: 5MB • JPG, PNG, GIF
                       </p>
                     </div>
@@ -360,79 +322,32 @@ export function ProductFormPage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              imageBase64: undefined,
-                              imagePreview: undefined,
-                            }))
-                          }
-                          className="absolute -top-2 -right-2 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-full p-2.5
-                            hover:from-red-600 hover:to-red-700 hover:scale-110 transition-all duration-200 shadow-lg
-                            focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 z-10"
+                          onClick={handleRemoveImage}
+                          className="absolute -top-2 -right-2 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-full p-2.5 hover:from-red-600 hover:to-red-700 hover:scale-110 transition-all duration-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 z-10"
                           title="Remover imagem"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                          <Trash2 className="h-5 w-5" />
                         </button>
                       </div>
                       <div className="flex items-center justify-center gap-2 bg-success/10 text-success px-4 py-2.5 rounded-lg">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <span className="text-sm font-semibold">Imagem carregada com sucesso!</span>
+                        <CheckCircle className="h-5 w-5" />
+                        <span className="text-sm font-semibold">
+                          Imagem carregada com sucesso!
+                        </span>
                       </div>
-                    </div>
-                  )}
-
-                  {errors.images && (
-                    <div className="mt-3 flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <p className="text-sm font-medium">{errors.images}</p>
                     </div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Botões de Ação */}
             <div className="flex items-center justify-end gap-3 mt-8">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => navigate("/backoffice/products")}
                 disabled={loading}
-                className="border-success text-success hover:bg-success/10"
+                className="border-success text-success hover:bg-success/10 hover:border-success hover:text-success"
               >
                 Cancelar
               </Button>

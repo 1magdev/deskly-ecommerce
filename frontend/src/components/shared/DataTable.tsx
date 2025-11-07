@@ -8,12 +8,13 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 export interface Column<T> {
   key: string;
   label: string;
   render?: (row: T) => React.ReactNode;
+  sortable?: boolean;
 }
 
 interface Pagination {
@@ -30,16 +31,41 @@ interface DataTableProps<T> {
   onSearch?: (search: string) => void;
   onPageChange: (page: number) => void;
   searchPlaceholder?: string;
+  onSort?: (key: string, direction: 'asc' | 'desc') => void;
+  sortKey?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
-export function DataTable<T extends Record<string, unknown>>({
+export function DataTable<T>({
   columns,
   data,
   pagination,
   onSearch,
   onPageChange,
   searchPlaceholder = 'Buscar...',
+  onSort,
+  sortKey,
+  sortDirection,
 }: DataTableProps<T>) {
+  const handleSort = (key: string) => {
+    if (!onSort) return;
+
+    if (sortKey === key) {
+      onSort(key, sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      onSort(key, 'asc');
+    }
+  };
+
+  const getSortIcon = (columnKey: string) => {
+    if (sortKey !== columnKey) {
+      return <ArrowUpDown className="h-4 w-4 ml-2 opacity-50" />;
+    }
+    return sortDirection === 'asc'
+      ? <ArrowUp className="h-4 w-4 ml-2" />
+      : <ArrowDown className="h-4 w-4 ml-2" />;
+  };
+
   return (
     <div className="space-y-4">
       {onSearch && (
@@ -58,7 +84,17 @@ export function DataTable<T extends Record<string, unknown>>({
             <TableRow className="bg-dark hover:bg-dark">
               {columns.map((column) => (
                 <TableHead key={column.key} className="text-white font-semibold">
-                  {column.label}
+                  {column.sortable !== false ? (
+                    <button
+                      onClick={() => handleSort(column.key)}
+                      className="flex items-center hover:text-gray-200 transition-colors"
+                    >
+                      {column.label}
+                      {getSortIcon(column.key)}
+                    </button>
+                  ) : (
+                    column.label
+                  )}
                 </TableHead>
               ))}
             </TableRow>

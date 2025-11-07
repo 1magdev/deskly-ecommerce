@@ -6,39 +6,28 @@ import type {
 } from '@/types/api.types';
 
 class UserService {
-  /**
-   * Lista todos os usuários
-   */
+  async getUserProfile(): Promise<User> {
+    return apiClient.get<User>('/users/profile');
+  }
+
   async getAllUsers(): Promise<User[]> {
     return apiClient.get<User[]>('/users');
   }
 
-  /**
-   * Cria um novo usuário (admin apenas)
-   */
-  async createUser(data: RegisterRequest): Promise<User> {
-    return apiClient.post<User>('/users', data);
+  async getUsersByRole(role: string): Promise<User[]> {
+    return apiClient.get<User[]>(`/users/${role}`);
   }
 
-  /**
-   * Atualiza um usuário
-   */
-  async updateUser(id: number, data: UpdateUserRequest): Promise<void> {
-    return apiClient.put<void>(`/users/${id}`, data);
-  }
-
-  /**
-   * Busca usuário por ID
-   */
   async getUserById(id: number): Promise<User> {
     return apiClient.get<User>(`/users/${id}`);
   }
 
-  /**
-   * Busca perfil do usuário autenticado
-   */
-  async getUserProfile(): Promise<User> {
-    return apiClient.get<User>('/users/profile');
+  async createUser(data: RegisterRequest): Promise<User> {
+    return apiClient.post<User>('/users', data);
+  }
+
+  async updateUser(id: number, data: UpdateUserRequest): Promise<void> {
+    return apiClient.put<void>(`/users/${id}`, data);
   }
 }
 

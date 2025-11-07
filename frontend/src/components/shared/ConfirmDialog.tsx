@@ -5,8 +5,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -24,8 +24,11 @@ export function ConfirmDialog({
   description,
 }: ConfirmDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={(isOpen: boolean) => !isOpen && onCancel()}>
-      <DialogContent>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen: boolean) => !isOpen && onCancel()}
+    >
+      <DialogContent className="bg-amber-50">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -34,9 +37,7 @@ export function ConfirmDialog({
           <Button variant="outline" onClick={onCancel}>
             Cancelar
           </Button>
-          <Button onClick={onConfirm}>
-            Confirmar
-          </Button>
+          <Button onClick={onConfirm}>Confirmar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

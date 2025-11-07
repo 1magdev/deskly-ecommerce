@@ -1,19 +1,23 @@
-import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
-import { DataTable, type Column } from '@/components/shared/DataTable';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { StatusBadge } from '@/components/shared/StatusBadge';
-import { Button } from '@/components/ui/button';
-import { apiService, type Product } from '@/services/api.service';
-import { Pencil, Power, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
+import { DataTable, type Column } from "@/components/shared/DataTable";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { productService } from "@/services/product.service";
+import type { Product } from "@/types/api.types";
+import { Pencil, Power } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export function ProductListPage() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortKey, setSortKey] = useState<string>("id");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [pagination, setPagination] = useState({
     currentPage: 0,
     totalPages: 1,
@@ -25,16 +29,42 @@ export function ProductListPage() {
     open: boolean;
     productId?: number;
     currentStatus?: boolean;
-    action?: 'toggle' | 'delete';
+    action?: "toggle" | "delete";
   }>({
     open: false,
   });
 
+  const sortProducts = (data: Product[], key: string, direction: "asc" | "desc") => {
+    return [...data].sort((a, b) => {
+      const aValue = a[key as keyof Product];
+      const bValue = b[key as keyof Product];
+
+      // Tratamento especial para valores numéricos
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return direction === "asc" ? aValue - bValue : bValue - aValue;
+      }
+
+      // Tratamento para strings
+      const aStr = String(aValue || "").toLowerCase();
+      const bStr = String(bValue || "").toLowerCase();
+
+      if (direction === "asc") {
+        return aStr.localeCompare(bStr);
+      }
+      return bStr.localeCompare(aStr);
+    });
+  };
+
   const fetchProducts = async (page: number, search?: string) => {
     try {
       setLoading(true);
-      const response = await apiService.getProducts(page, pagination.pageSize, search);
-      setProducts(response.content);
+      const response = await productService.getProducts({
+        page,
+        size: pagination.pageSize,
+        search,
+      });
+      const sortedProducts = sortProducts(response.content, sortKey, sortDirection);
+      setProducts(sortedProducts);
       setPagination({
         currentPage: response.number,
         totalPages: response.totalPages,
@@ -42,7 +72,9 @@ export function ProductListPage() {
         totalItems: response.totalElements,
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao carregar produtos');
+      toast.error(
+        error instanceof Error ? error.message : "Erro ao carregar produtos"
+      );
     } finally {
       setLoading(false);
     }
@@ -64,28 +96,35 @@ export function ProductListPage() {
     fetchProducts(page, searchTerm);
   };
 
+  const handleSort = (key: string, direction: "asc" | "desc") => {
+    setSortKey(key);
+    setSortDirection(direction);
+    const sortedProducts = sortProducts(products, key, direction);
+    setProducts(sortedProducts);
+  };
+
   const handleConfirmAction = async () => {
     if (!confirmDialog.productId) return;
 
     try {
-      if (confirmDialog.action === 'delete') {
-        await apiService.deleteProduct(confirmDialog.productId);
-        toast.success('Produto excluído com sucesso!');
+      if (confirmDialog.action === "delete") {
+        await productService.deleteProduct(confirmDialog.productId);
+        toast.success("Produto excluído com sucesso!");
       } else if (confirmDialog.currentStatus !== undefined) {
-        await apiService.toggleProductStatus(
+        await productService.toggleProductStatus(
           confirmDialog.productId,
           !confirmDialog.currentStatus
         );
-        toast.success('Status alterado com sucesso!');
+        toast.success("Status alterado com sucesso!");
       }
       fetchProducts(pagination.currentPage, searchTerm);
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : confirmDialog.action === 'delete'
-          ? 'Erro ao excluir produto'
-          : 'Erro ao alterar status'
+          : confirmDialog.action === "delete"
+          ? "Erro ao excluir produto"
+          : "Erro ao alterar status"
       );
     } finally {
       setConfirmDialog({ open: false });
@@ -94,40 +133,62 @@ export function ProductListPage() {
 
   const columns: Column<Product>[] = [
     {
-      key: 'id',
-      label: 'Código',
+      key: "id",
+      label: "Código",
     },
     {
-      key: 'name',
-      label: 'Nome',
+      key: "productImage",
+      label: "Imagem",
+      render: (product) => (
+        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+          {product.productImage ? (
+            <img
+              src={`${
+                !product.productImage.includes("data:image/")
+                  ? "data:image/png;base64"
+                  : ""
+              }${product.productImage}`}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <Skeleton></Skeleton>
+          )}
+        </div>
+      ),
     },
     {
-      key: 'quantity',
-      label: 'Quantidade',
+      key: "name",
+      label: "Nome",
+    },
+    {
+      key: "quantity",
+      label: "Quantidade",
       render: (product) => (
         <span className="underline">{product.quantity}</span>
       ),
     },
     {
-      key: 'price',
-      label: 'Valor',
+      key: "price",
+      label: "Valor",
       render: (product) => (
         <span>
-          {new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
+          {new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: "BRL",
           }).format(product.price)}
         </span>
       ),
     },
     {
-      key: 'active',
-      label: 'Status',
+      key: "active",
+      label: "Status",
       render: (product) => <StatusBadge active={product.active ?? true} />,
     },
     {
-      key: 'actions',
-      label: 'Opções',
+      key: "actions",
+      label: "Opções",
+      sortable: false,
       render: (product) => (
         <div className="flex items-center gap-2">
           <Button
@@ -147,28 +208,13 @@ export function ProductListPage() {
                 open: true,
                 productId: product.id,
                 currentStatus: product.active ?? true,
-                action: 'toggle',
+                action: "toggle",
               })
             }
-            title={product.active ? 'Desativar' : 'Ativar'}
+            title={product.active ? "Desativar" : "Ativar"}
             className="hover:text-yellow-600 hover:bg-yellow-50"
           >
             <Power className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() =>
-              setConfirmDialog({
-                open: true,
-                productId: product.id,
-                action: 'delete',
-              })
-            }
-            title="Excluir"
-            className="hover:text-red-600 hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       ),
@@ -190,7 +236,10 @@ export function ProductListPage() {
       <PageHeader
         title="Lista de Produtos"
         action={
-          <Button onClick={() => navigate('/backoffice/products/new')} className="bg-primary">
+          <Button
+            onClick={() => navigate("/backoffice/products/new")}
+            className="bg-primary"
+          >
             Novo Produto
           </Button>
         }
@@ -202,24 +251,27 @@ export function ProductListPage() {
         pagination={pagination}
         onSearch={handleSearch}
         onPageChange={handlePageChange}
+        onSort={handleSort}
+        sortKey={sortKey}
+        sortDirection={sortDirection}
         searchPlaceholder="Buscar produtos..."
       />
 
       <ConfirmDialog
         open={confirmDialog.open}
         title={
-          confirmDialog.action === 'delete'
-            ? 'Excluir Produto'
+          confirmDialog.action === "delete"
+            ? "Excluir Produto"
             : confirmDialog.currentStatus
-            ? 'Desativar Produto'
-            : 'Ativar Produto'
+            ? "Desativar Produto"
+            : "Ativar Produto"
         }
         description={
-          confirmDialog.action === 'delete'
-            ? 'Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.'
+          confirmDialog.action === "delete"
+            ? "Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita."
             : confirmDialog.currentStatus
-            ? 'Tem certeza que deseja desativar este produto?'
-            : 'Tem certeza que deseja ativar este produto?'
+            ? "Tem certeza que deseja desativar este produto?"
+            : "Tem certeza que deseja ativar este produto?"
         }
         onConfirm={handleConfirmAction}
         onCancel={() => setConfirmDialog({ open: false })}

@@ -14,7 +14,7 @@ import com.app.deskly.model.Product;
 import com.app.deskly.service.ProductService;
 
 @RestController
-@RequestMapping("/admin/products")
+@RequestMapping("/products")
 @PreAuthorize("hasRole('ADMIN','BACKOFFICE')")
 public class ProductController {
 

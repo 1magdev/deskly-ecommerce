@@ -27,7 +27,7 @@ export function BackofficeLayout({ children }: BackofficeLayoutProps) {
   }, []);
 
   return (
-    <SidebarProvider defaultOpen>
+    <SidebarProvider>
       <BackofficeTabs
         name={userProfile?.fullname || userEmail || ""}
         role={userProfile?.role || userRole || ""}

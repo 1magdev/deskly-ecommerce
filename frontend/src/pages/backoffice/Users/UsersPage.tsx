@@ -1,16 +1,22 @@
-import { DataTable, type Column } from '@/components/shared/DataTable';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { StatusBadge } from '@/components/shared/StatusBadge';
-import { Button } from '@/components/ui/button';
-import { userService } from '@/services/user.service';
-import type { User } from '@/types/api.types';
-import { Pencil, Power, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { DataTable, type Column } from "@/components/shared/DataTable";
+import { PageHeader } from "@/components/shared/PageHeader";
+import { StatusBadge } from "@/components/shared/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { userService } from "@/services/user.service";
+import type { User } from "@/types/api.types";
+import { Pencil, Power, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
+type UserRole = "ADMIN" | "BACKOFFICE" | "CUSTOMER";
 
 export function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRole, setSelectedRole] = useState<UserRole>("ADMIN");
+  const [sortKey, setSortKey] = useState<string>("id");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [pagination, setPagination] = useState({
     currentPage: 0,
     totalPages: 1,
@@ -18,11 +24,50 @@ export function UsersPage() {
     totalItems: 0,
   });
 
-  const fetchUsers = async () => {
+  const sortUsers = (data: User[], key: string, direction: "asc" | "desc") => {
+    return [...data].sort((a, b) => {
+      const aValue = a[key as keyof User];
+      const bValue = b[key as keyof User];
+
+      // Tratamento especial para valores numéricos
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return direction === "asc" ? aValue - bValue : bValue - aValue;
+      }
+
+      // Tratamento para booleanos
+      if (typeof aValue === "boolean" && typeof bValue === "boolean") {
+        return direction === "asc"
+          ? aValue === bValue
+            ? 0
+            : aValue
+            ? 1
+            : -1
+          : aValue === bValue
+          ? 0
+          : aValue
+          ? -1
+          : 1;
+      }
+
+      // Tratamento para strings
+      const aStr = String(aValue || "").toLowerCase();
+      const bStr = String(bValue || "").toLowerCase();
+
+      if (direction === "asc") {
+        return aStr.localeCompare(bStr);
+      }
+      return bStr.localeCompare(aStr);
+    });
+  };
+
+  const fetchUsers = async (role: UserRole) => {
     try {
       setLoading(true);
-      const data = await userService.getAllUsers();
-      setUsers(data);
+      const data = role
+        ? await userService.getUsersByRole(role)
+        : await userService.getAllUsers();
+      const sortedUsers = sortUsers(data, sortKey, sortDirection);
+      setUsers(sortedUsers);
       setPagination({
         currentPage: 0,
         totalPages: 1,
@@ -30,36 +75,45 @@ export function UsersPage() {
         totalItems: data.length,
       });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Erro ao carregar usuários');
+      toast.error(
+        error instanceof Error ? error.message : "Erro ao carregar usuários"
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSort = (key: string, direction: "asc" | "desc") => {
+    setSortKey(key);
+    setSortDirection(direction);
+    const sortedUsers = sortUsers(users, key, direction);
+    setUsers(sortedUsers);
+  };
+
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers(selectedRole);
+  }, [selectedRole]);
 
   const columns: Column<User>[] = [
     {
-      key: 'id',
-      label: 'Código',
+      key: "id",
+      label: "Código",
     },
     {
-      key: 'fullname',
-      label: 'Nome',
+      key: "fullname",
+      label: "Nome",
     },
     {
-      key: 'email',
-      label: 'Email',
+      key: "email",
+      label: "Email",
     },
     {
-      key: 'cpf',
-      label: 'CPF',
+      key: "cpf",
+      label: "CPF",
     },
     {
-      key: 'role',
-      label: 'Role',
+      key: "role",
+      label: "Role",
       render: (user) => (
         <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
           {user.role}
@@ -67,13 +121,14 @@ export function UsersPage() {
       ),
     },
     {
-      key: 'active',
-      label: 'Status',
+      key: "active",
+      label: "Status",
       render: (user) => <StatusBadge active={user.active} />,
     },
     {
-      key: 'actions',
-      label: 'Opções',
+      key: "actions",
+      label: "Opções",
+      sortable: false,
       render: (user) => (
         <div className="flex items-center gap-2">
           <Button
@@ -87,7 +142,7 @@ export function UsersPage() {
           <Button
             variant="ghost"
             size="icon"
-            title={user.active ? 'Desativar' : 'Ativar'}
+            title={user.active ? "Desativar" : "Ativar"}
             className="hover:text-yellow-600 hover:bg-yellow-50"
           >
             <Power className="h-4 w-4" />
@@ -119,20 +174,32 @@ export function UsersPage() {
     <div className="container mx-auto py-8 px-4">
       <PageHeader
         title="Lista de Usuários"
-        action={
-          <Button className="bg-primary">
-            Novo Usuário
-          </Button>
-        }
+        action={<Button className="bg-primary">Novo Usuário</Button>}
       />
 
-      <DataTable
-        columns={columns}
-        data={users}
-        pagination={pagination}
-        onPageChange={() => {}}
-        searchPlaceholder="Buscar usuários..."
-      />
+      <Tabs
+        value={selectedRole}
+        onValueChange={(value) => setSelectedRole(value as UserRole | "ADMIN")}
+      >
+        <TabsList className="mb-4">
+          <TabsTrigger value="ADMIN">Admin</TabsTrigger>
+          <TabsTrigger value="BACKOFFICE">Estoquista</TabsTrigger>
+          <TabsTrigger value="CUSTOMER">Clientes</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={selectedRole}>
+          <DataTable
+            columns={columns}
+            data={users}
+            pagination={pagination}
+            onPageChange={() => {}}
+            onSort={handleSort}
+            sortKey={sortKey}
+            sortDirection={sortDirection}
+            searchPlaceholder="Buscar usuários..."
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
