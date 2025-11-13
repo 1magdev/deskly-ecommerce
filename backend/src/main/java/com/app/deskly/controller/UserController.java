@@ -48,13 +48,27 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','BACKOFFICE')")
-    @GetMapping("/{role}")
+    @GetMapping("/all/{role}")
     public ResponseEntity<List<UserDTO>> getAll(@PathVariable UserRoles role) {
         List<User> users = userService.getAll(role);
         List<UserDTO> userDTOs = users.stream()
                 .map(this::toDTO)
                 .toList();
         return ResponseEntity.ok(userDTOs);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','BACKOFFICE')")
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getById(@PathVariable Long id) {
+        User user = userService.getById(id);
+        return ResponseEntity.ok(user);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','BACKOFFICE')")
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<User> toggleStatus(@PathVariable Long id,@RequestParam boolean active) {
+        User user = userService.enableDisable(id, active);
+        return ResponseEntity.ok(user);
     }
 
     ///// 

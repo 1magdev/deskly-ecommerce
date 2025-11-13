@@ -1,0 +1,119 @@
+### Variáveis
+@baseUrl = http://localhost:8080
+@token = seu_token_aqui
+
+### Criar Usuário
+POST {{baseUrl}}/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fullname": "João da Silva",
+  "email": "joao.silva@example.com",
+  "cpf": "123.456.789-00",
+  "gender": "Masculino",
+  "birthDate": "1990-05-15",
+  "password": "senha123",
+  "confirmPassword": "senha123",
+  "role": "CLIENT",
+  "addressStreet": "Rua das Flores",
+  "addressNumber": "123",
+  "addressComplement": "Apto 45",
+  "addressNeighborhood": "Centro",
+  "addressCity": "São Paulo",
+  "addressState": "SP",
+  "addressZipcode": "01234-567",
+  "cardHolderName": "JOAO DA SILVA",
+  "cardLastDigits": "1234",
+  "cardBrand": "Visa",
+  "cardExpiration": "12/2025",
+  "phone": "(11) 98765-4321"
+}
+
+### Criar Usuário (Campos Mínimos)
+POST {{baseUrl}}/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fullname": "Maria Santos",
+  "email": "maria.santos@example.com",
+  "cpf": "987.654.321-00",
+  "password": "senha456",
+  "confirmPassword": "senha456",
+  "role": "CLIENT"
+}
+
+### Atualizar Usuário (Todos os Campos)
+PUT {{baseUrl}}/users/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fullname": "João da Silva Santos",
+  "cpf": "123.456.789-00",
+  "gender": "Masculino",
+  "birthDate": "1990-05-15",
+  "password": "novaSenha123",
+  "confirmPassword": "novaSenha123",
+  "role": "CLIENT",
+  "addressStreet": "Av. Paulista",
+  "addressNumber": "1000",
+  "addressComplement": "Sala 200",
+  "addressNeighborhood": "Bela Vista",
+  "addressCity": "São Paulo",
+  "addressState": "SP",
+  "addressZipcode": "01310-100",
+  "cardHolderName": "JOAO DA SILVA SANTOS",
+  "cardLastDigits": "5678",
+  "cardBrand": "MasterCard",
+  "cardExpiration": "06/2026",
+  "phone": "(11) 91234-5678"
+}
+
+### Atualizar Usuário (Atualização Parcial - Apenas Endereço)
+PUT {{baseUrl}}/users/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "addressStreet": "Rua Nova",
+  "addressNumber": "500",
+  "addressNeighborhood": "Jardim América",
+  "addressCity": "São Paulo",
+  "addressState": "SP",
+  "addressZipcode": "05468-000"
+}
+
+### Atualizar Usuário (Atualização Parcial - Apenas Telefone)
+PUT {{baseUrl}}/users/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "phone": "(11) 99999-8888"
+}
+
+### Atualizar Usuário (Atualização Parcial - Dados Pessoais)
+PUT {{baseUrl}}/users/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "fullname": "João Silva Santos Jr",
+  "gender": "Masculino",
+  "birthDate": "1990-05-15"
+}
+
+### Buscar Perfil do Usuário Logado
+GET {{baseUrl}}/users/profile
+Authorization: Bearer {{token}}
+
+### Buscar Todos os Usuários por Role
+GET {{baseUrl}}/users/CLIENT
+Authorization: Bearer {{token}}
+
+### Exemplos de Roles Disponíveis
+# CLIENT - Cliente comum
+# ADMIN - Administrador
+# BACKOFFICE - Usuário de backoffice

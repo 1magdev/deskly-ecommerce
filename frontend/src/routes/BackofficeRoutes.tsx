@@ -3,6 +3,7 @@ import { BackofficeLayout } from "@/components/layout/BackofficeLayout";
 import { LoginPage } from "@/pages/backoffice/Auth/LoginPage";
 import { ProductFormPage } from "@/pages/backoffice/Products/ProductFormPage";
 import { ProductListPage } from "@/pages/backoffice/Products/ProductListPage";
+import { UserFormPage } from "@/pages/backoffice/Users/UserFormPage";
 import { UsersPage } from "@/pages/backoffice/Users/UsersPage";
 import { Navigate, Route } from "react-router-dom";
 
@@ -56,6 +57,26 @@ export default function backofficeRoutes() {
           <ProtectedRoute requiredRole={["ADMIN"]}>
             <BackofficeLayout>
               <UsersPage />
+            </BackofficeLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/backoffice/users/new"
+        element={
+          <ProtectedRoute requiredRole={["ADMIN"]}>
+            <BackofficeLayout>
+              <UserFormPage />
+            </BackofficeLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/backoffice/users/:id/edit"
+        element={
+          <ProtectedRoute requiredRole={["ADMIN"]}>
+            <BackofficeLayout>
+              <UserFormPage />
             </BackofficeLayout>
           </ProtectedRoute>
         }

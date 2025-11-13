@@ -43,15 +43,17 @@ export default function ProductGrid() {
         ? Array.from(items).map((product) => (
             <Card className="bg-white border-0 shadow-lg w-75 h-100 flex items-center flex-col relative">
               <CardContent
-                className={`top-0 w-64 h-64 bg-[url("data:image/png;base64,${product.productImage}")] bg-no-repeat bg-center bg-cover`}
-              ></CardContent>
+                className={`top-0 w-64 max-h-50 min-h-50 h-100 overflow-hidden flex items-start justify-center`}
+              >
+                <img src={product.productImage} className="p-3"></img>
+              </CardContent>
               <CardFooter className="w-full items-center text-left bg-white py-5 rounded-2xl justify-between gap-2 flex flex-col">
-                <CardTitle className="text-xl font-bold w-60 text-center">
+                <CardTitle className="text-xl font-bold w-60 text-center h-15">
                   {product.name}
                 </CardTitle>
                 <h3 className="text-2xl text-center">
                   <span className="font-bold text-xl text-primary">R$</span>{" "}
-                  {product.price}
+                  {product.price.toFixed(2)}
                 </h3>
                 <div className="flex items-center w-full justify-center">
                   <Button

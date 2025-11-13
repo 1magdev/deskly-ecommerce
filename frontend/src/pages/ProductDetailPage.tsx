@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { productService } from "@/services/product.service";
 import type { Product } from "@/types/api.types";
 import { toast } from "sonner";
-import { Navbar } from "@/components/shared/Navbar";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,19 +19,10 @@ export function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
-  useEffect(() => {
-    if (!id) {
-      navigate("/");
-      return;
-    }
-
-    loadProduct(id);
-  }, [id, navigate]);
-
   const loadProduct = async (productId: string) => {
     try {
       setLoading(true);
-      const data = await productService.getCatalogProduct({ id: productId });
+      const data = await productService.getCatalogProduct(productId);
       setProduct(data);
     } catch (error) {
       toast.error(
@@ -42,6 +33,16 @@ export function ProductDetailPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!id) {
+      navigate("/");
+      return;
+    }
+
+    loadProduct(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -62,9 +63,8 @@ export function ProductDetailPage() {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <PublicLayout>
+        <div className="mt-25 container mx-auto px-4 py-8 max-w-6xl">
           <Skeleton className="h-8 w-32 mb-6" />
           <div className="grid md:grid-cols-2 gap-8">
             <Skeleton className="aspect-square rounded-lg" />
@@ -76,7 +76,7 @@ export function ProductDetailPage() {
             </div>
           </div>
         </div>
-      </>
+      </PublicLayout>
     );
   }
 
@@ -88,9 +88,8 @@ export function ProductDetailPage() {
   const inStock = !product.quantity || product.quantity > 0;
 
   return (
-    <>
-      <Navbar />
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <PublicLayout>
+      <div className="container mx-auto px-4 py-50 max-w-6xl">
         <Button
           variant="ghost"
           onClick={() => navigate("/")}
@@ -214,6 +213,6 @@ export function ProductDetailPage() {
           </div>
         </div>
       </div>
-    </>
+    </PublicLayout>
   );
 }

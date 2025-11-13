@@ -29,7 +29,7 @@ public class ProductController {
   @PostMapping
   public ResponseEntity<Void> createProduct(@RequestBody ProductCreateDTO dto) {
     Product product = productService.getCreatedProduct(dto);
-    productService.create(product);
+    productService.create(product, dto.getQuantity());
     return ResponseEntity.ok().build();
   }
 

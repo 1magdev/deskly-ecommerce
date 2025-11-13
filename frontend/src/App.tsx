@@ -6,6 +6,10 @@ import backofficeRoutes from "./routes/BackofficeRoutes";
 import IndexPage from "./pages/IndexPage";
 import CartPage from "./pages/CartPage";
 import { ProductDetailPage } from "./pages/ProductDetailPage";
+import { LoginPage } from "./pages/Auth/LoginPage";
+import { RegisterPage } from "./pages/Auth/RegisterPage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { ProductsPage } from "./pages/ProductsPage";
 
 function App() {
   return (
@@ -16,8 +20,12 @@ function App() {
             <Routes>
               {backofficeRoutes()}
               <Route path="/" element={<IndexPage />} />
+              <Route path="/produtos" element={<ProductsPage />} />
               <Route path="/produto/:id" element={<ProductDetailPage />} />
               <Route path="/carrinho" element={<CartPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/cadastro" element={<RegisterPage />} />
+              <Route path="/perfil" element={<ProfilePage />} />
             </Routes>
             <Toaster position="top-right" richColors />
           </div>

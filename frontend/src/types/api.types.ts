@@ -29,27 +29,94 @@ export interface RegisterRequest {
   fullname: string;
   email: string;
   password: string;
+  confirmPassword?: string;
   cpf: string;
+  phone?: string;
+  gender?: string;
+  birthDate?: string;
   role?: "CUSTOMER" | "ADMIN" | "ESTOQUISTA";
+  addressStreet?: string;
+  addressNumber?: string;
+  addressComplement?: string;
+  addressNeighborhood?: string;
+  addressCity?: string;
+  addressState?: string;
+  addressZipcode?: string;
+  cardHolderName?: string;
+  cardLastDigits?: string;
+  cardBrand?: string;
+  cardExpiration?: string;
 }
 
 // User Types
-export type UserRole = "CUSTOMER" | "ADMIN" | "ESTOQUISTA";
+export type UserRole = "CUSTOMER" | "ADMIN" | "BACKOFFICE";
 
 export interface User {
   id: number;
   fullname: string;
   email: string;
   cpf: string;
+  gender?: string;
+  birthDate?: string;
   role: UserRole;
   active: boolean;
+  addressStreet?: string;
+  addressNumber?: string;
+  addressComplement?: string;
+  addressNeighborhood?: string;
+  addressCity?: string;
+  addressState?: string;
+  addressZipcode?: string;
+  cardHolderName?: string;
+  cardLastDigits?: string;
+  cardBrand?: string;
+  cardExpiration?: string;
+  phone?: string;
+}
+
+export interface CreateUserRequest {
+  fullname: string;
+  email: string;
+  cpf: string;
+  gender?: string;
+  birthDate?: string;
+  password: string;
+  confirmPassword: string;
+  role: UserRole;
+  addressStreet?: string;
+  addressNumber?: string;
+  addressComplement?: string;
+  addressNeighborhood?: string;
+  addressCity?: string;
+  addressState?: string;
+  addressZipcode?: string;
+  cardHolderName?: string;
+  cardLastDigits?: string;
+  cardBrand?: string;
+  cardExpiration?: string;
+  phone?: string;
 }
 
 export interface UpdateUserRequest {
   fullname?: string;
-  email?: string;
-  password?: string;
   cpf?: string;
+  gender?: string;
+  birthDate?: string;
+  password?: string;
+  confirmPassword?: string;
+  role?: UserRole;
+  addressStreet?: string;
+  addressNumber?: string;
+  addressComplement?: string;
+  addressNeighborhood?: string;
+  addressCity?: string;
+  addressState?: string;
+  addressZipcode?: string;
+  cardHolderName?: string;
+  cardLastDigits?: string;
+  cardBrand?: string;
+  cardExpiration?: string;
+  phone?: string;
 }
 
 // Product Types

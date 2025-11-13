@@ -90,8 +90,21 @@ public class ProductService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
   }
 
-  public Product create(Product product) {
-    return productRepository.save(product);
+  public Product create(Product product, Integer quantity) {
+      Product createdProduct = productRepository.save(product);
+      if (quantity != null && quantity >= 0) {
+          Stock stock = stockRepository.findByProductId(createdProduct.getId())
+                  .orElseGet(() -> {
+                      Stock newStock = new Stock();
+                      newStock.setProduct(createdProduct);
+                      newStock.setIdCatalog(createdProduct.getId());
+                      return newStock;
+                  });
+          stock.setQuantity(quantity);
+          stockRepository.save(stock);
+      }
+
+      return createdProduct;
   }
 
   public Product update(Long id, Product updatedProduct, Integer quantity) {

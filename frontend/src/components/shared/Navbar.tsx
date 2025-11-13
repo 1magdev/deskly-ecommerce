@@ -2,6 +2,7 @@ import {
   faCartShopping,
   faList,
   faSearch,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
@@ -14,14 +15,16 @@ import {
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Navbar() {
   const { getItemCount } = useCart();
+  const { isAuthenticated } = useAuth();
   const itemCount = getItemCount();
 
   return (
     <nav className="z-5 flex px-5 justify-between h-25 border-b border-primary fixed bg-white w-full">
-      <img src="branding/deskly-logo.svg" alt="logo" />
+      <img src="/branding/deskly-logo.svg" alt="logo" />
 
       <NavigationMenu>
         <NavigationMenuList className="flex gap-12 text-xl items-center">
@@ -85,6 +88,17 @@ export function Navbar() {
                     {itemCount}
                   </span>
                 )}
+              </Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+
+          <NavigationMenuItem>
+            <NavigationMenuLink asChild>
+              <Link
+                to={isAuthenticated ? "/perfil" : "/login"}
+                className="text-2xl p-2 h-12 w-12 text-primary rounded-full inline-flex items-center justify-center hover:border-1 hover:bg-primary/25 hover:border-primary/80 transition-all transition-.5s"
+              >
+                <FontAwesomeIcon icon={faUser} className="" />
               </Link>
             </NavigationMenuLink>
           </NavigationMenuItem>

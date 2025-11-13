@@ -8,8 +8,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 public class UserRequestDTO {
+    // Informações pessoais
     @NotBlank(message = "Nome não pode ser vázio.")
     @Size(min = 4, max = 50, message = "Nome deve ter entre 4 e 50 cáracteres")
     private String fullname;
@@ -21,6 +24,10 @@ public class UserRequestDTO {
     @NotBlank(message = "CPF não pode ser vázio")
     private String cpf;
 
+    private String gender;
+
+    private LocalDate birthDate;
+
     @NotBlank(message = "Senha não pode ser vázio")
     private String password;
 
@@ -29,4 +36,22 @@ public class UserRequestDTO {
 
     @NotNull(message = "Cargo não pode ser vázio")
     private UserRoles role;
+
+    // Endereço de entrega
+    private String addressStreet;
+    private String addressNumber;
+    private String addressComplement;
+    private String addressNeighborhood;
+    private String addressCity;
+    private String addressState;
+    private String addressZipcode;
+
+    // Informações de pagamento
+    private String cardHolderName;
+    private String cardLastDigits;
+    private String cardBrand;
+    private String cardExpiration;
+
+    // Contato adicional
+    private String phone;
 }

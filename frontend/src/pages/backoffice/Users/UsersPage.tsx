@@ -1,3 +1,4 @@
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
 import { DataTable, type Column } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
@@ -5,13 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { userService } from "@/services/user.service";
 import type { User } from "@/types/api.types";
-import { Pencil, Power, Trash2 } from "lucide-react";
+import { Pencil, Power } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 type UserRole = "ADMIN" | "BACKOFFICE" | "CUSTOMER";
 
 export function UsersPage() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRole, setSelectedRole] = useState<UserRole>("ADMIN");
@@ -22,6 +25,14 @@ export function UsersPage() {
     totalPages: 1,
     pageSize: 10,
     totalItems: 0,
+  });
+
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    userId?: number;
+    currentStatus?: boolean;
+  }>({
+    open: false,
   });
 
   const sortUsers = (data: User[], key: string, direction: "asc" | "desc") => {
@@ -90,6 +101,26 @@ export function UsersPage() {
     setUsers(sortedUsers);
   };
 
+  const handleConfirmToggleStatus = async () => {
+    if (!confirmDialog.userId || confirmDialog.currentStatus === undefined)
+      return;
+
+    try {
+      await userService.toggleUserStatus(
+        confirmDialog.userId,
+        !confirmDialog.currentStatus
+      );
+      toast.success("Status alterado com sucesso!");
+      fetchUsers(selectedRole);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Erro ao alterar status"
+      );
+    } finally {
+      setConfirmDialog({ open: false });
+    }
+  };
+
   useEffect(() => {
     fetchUsers(selectedRole);
   }, [selectedRole]);
@@ -134,6 +165,7 @@ export function UsersPage() {
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => navigate(`/backoffice/users/${user.id}/edit`)}
             title="Editar"
             className="hover:text-primary hover:bg-primary/10"
           >
@@ -142,18 +174,17 @@ export function UsersPage() {
           <Button
             variant="ghost"
             size="icon"
+            onClick={() =>
+              setConfirmDialog({
+                open: true,
+                userId: user.id,
+                currentStatus: user.active,
+              })
+            }
             title={user.active ? "Desativar" : "Ativar"}
             className="hover:text-yellow-600 hover:bg-yellow-50"
           >
             <Power className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            title="Excluir"
-            className="hover:text-red-600 hover:bg-red-50"
-          >
-            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       ),
@@ -174,7 +205,14 @@ export function UsersPage() {
     <div className="container mx-auto py-8 px-4">
       <PageHeader
         title="Lista de Usuários"
-        action={<Button className="bg-primary">Novo Usuário</Button>}
+        action={
+          <Button
+            onClick={() => navigate("/backoffice/users/new")}
+            className="bg-primary"
+          >
+            Novo Usuário
+          </Button>
+        }
       />
 
       <Tabs
@@ -200,6 +238,20 @@ export function UsersPage() {
           />
         </TabsContent>
       </Tabs>
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        title={
+          confirmDialog.currentStatus ? "Desativar Usuário" : "Ativar Usuário"
+        }
+        description={
+          confirmDialog.currentStatus
+            ? "Tem certeza que deseja desativar este usuário?"
+            : "Tem certeza que deseja ativar este usuário?"
+        }
+        onConfirm={handleConfirmToggleStatus}
+        onCancel={() => setConfirmDialog({ open: false })}
+      />
     </div>
   );
 }
