@@ -1,4 +1,3 @@
-/*
 package com.app.deskly.service;
 
 import com.app.deskly.dto.user.UserRequestDTO;
@@ -12,7 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,16 +40,16 @@ class UserServiceTest {
         validUserDto.setCpf("11144477735");
         validUserDto.setPassword("password123");
         validUserDto.setConfirmPassword("password123");
-        validUserDto.setRole(UserRoles.ADMIN);
+        validUserDto.setRole(UserRoles.CUSTOMER);
     }
 
     @Test
-    void shouldRegisterUserSuccessfully() {
+    void shouldCreateUserSuccessfully() {
         when(userRepository.findByCpf(anyString())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(new User());
 
-        User result = userService.register(validUserDto);
+        User result = userService.create(validUserDto);
 
         assertNotNull(result);
         verify(userRepository).save(any(User.class));
@@ -58,12 +59,7 @@ class UserServiceTest {
     void shouldThrowExceptionWhenPasswordsDoNotMatch() {
         validUserDto.setConfirmPassword("differentPassword");
 
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> userService.register(validUserDto)
-        );
-
-        assertEquals("senhas não coincidem", exception.getMessage());
+        assertThrows(ResponseStatusException.class, () -> userService.create(validUserDto));
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -71,12 +67,7 @@ class UserServiceTest {
     void shouldThrowExceptionWhenCpfIsInvalid() {
         validUserDto.setCpf("12345678901");
 
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> userService.register(validUserDto)
-        );
-
-        assertEquals("CPF inválido", exception.getMessage());
+        assertThrows(ResponseStatusException.class, () -> userService.create(validUserDto));
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -84,12 +75,7 @@ class UserServiceTest {
     void shouldThrowExceptionWhenCpfAlreadyExists() {
         when(userRepository.findByCpf(anyString())).thenReturn(Optional.of(new User()));
 
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> userService.register(validUserDto)
-        );
-
-        assertEquals("CPF já cadastrado", exception.getMessage());
+        assertThrows(ResponseStatusException.class, () -> userService.create(validUserDto));
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -98,17 +84,12 @@ class UserServiceTest {
         when(userRepository.findByCpf(anyString())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(new User()));
 
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> userService.register(validUserDto)
-        );
-
-        assertEquals("email já cadastrado", exception.getMessage());
+        assertThrows(ResponseStatusException.class, () -> userService.create(validUserDto));
         verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    void shouldEncryptPasswordWhenRegisteringUser() {
+    void shouldEncryptPasswordWhenCreatingUser() {
         when(userRepository.findByCpf(anyString())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
@@ -118,11 +99,11 @@ class UserServiceTest {
             return user;
         });
 
-        userService.register(validUserDto);
+        userService.create(validUserDto);
     }
 
     @Test
-    void shouldSetUserAsActiveWhenRegistering() {
+    void shouldSetUserAsActiveWhenCreating() {
         when(userRepository.findByCpf(anyString())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
@@ -131,6 +112,60 @@ class UserServiceTest {
             return user;
         });
 
-        userService.register(validUserDto);
+        userService.create(validUserDto);
     }
-}*/
+
+    @Test
+    void shouldGetUserById() {
+        User user = new User();
+        user.setId(1L);
+        user.setEmail("test@test.com");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        User result = userService.getById(1L);
+
+        assertNotNull(result);
+        assertEquals("test@test.com", result.getEmail());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUserNotFound() {
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> userService.getById(999L));
+    }
+
+    @Test
+    void shouldGetAllUsers() {
+        when(userRepository.findAll()).thenReturn(List.of(new User(), new User()));
+
+        List<User> result = userService.getAll(null);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void shouldGetUsersByRole() {
+        when(userRepository.findByRole(UserRoles.CUSTOMER)).thenReturn(List.of(new User()));
+
+        List<User> result = userService.getAll(UserRoles.CUSTOMER);
+
+        assertEquals(1, result.size());
+        verify(userRepository).findByRole(UserRoles.CUSTOMER);
+    }
+
+    @Test
+    void shouldToggleUserStatus() {
+        User user = new User();
+        user.setId(1L);
+        user.setActive(true);
+
+        when(userRepository.getById(1L)).thenReturn(user);
+
+        userService.enableDisable(1L, false);
+
+        assertFalse(user.isActive());
+        verify(userRepository).save(user);
+    }
+}
