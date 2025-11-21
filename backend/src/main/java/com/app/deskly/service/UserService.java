@@ -41,7 +41,6 @@ public class UserService {
         }
 
         User user = new User();
-        // Informações pessoais
         user.setFullname(dto.getFullname());
         user.setEmail(dto.getEmail());
         user.setCpf(dto.getCpf());
@@ -51,7 +50,6 @@ public class UserService {
         user.setRole(dto.getRole());
         user.setActive(true);
 
-        // Endereço de entrega
         user.setAddressStreet(dto.getAddressStreet());
         user.setAddressNumber(dto.getAddressNumber());
         user.setAddressComplement(dto.getAddressComplement());
@@ -60,13 +58,11 @@ public class UserService {
         user.setAddressState(dto.getAddressState());
         user.setAddressZipcode(dto.getAddressZipcode());
 
-        // Informações de pagamento
         user.setCardHolderName(dto.getCardHolderName());
         user.setCardLastDigits(dto.getCardLastDigits());
         user.setCardBrand(dto.getCardBrand());
         user.setCardExpiration(dto.getCardExpiration());
 
-        // Contato adicional
         user.setPhone(dto.getPhone());
 
         return userRepository.save(user);

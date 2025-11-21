@@ -2,9 +2,9 @@ package com.app.deskly.model;
 
 import lombok.Data;
 import jakarta.persistence.*;
-import org.springframework.http.ResponseEntity;
-
+import java.util.List;
 import java.time.LocalDate;
+
 
 @Entity
 @Table(name = "tbl_users")
@@ -80,5 +80,9 @@ public class User{
     //  Contato adicional
     @Column(name = "phone")
     private String phone;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses;
+
 }
 
