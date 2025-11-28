@@ -1,7 +1,8 @@
 package com.app.deskly.security;
 
-import com.app.deskly.model.user.User;
+import com.app.deskly.model.user.AuthenticatedUser;
 import com.app.deskly.service.AuthService;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,12 +35,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            Optional<User> userOpt = authService.getUserFromToken(token);
+            Optional<AuthenticatedUser> userOpt = authService.getUserFromToken(token);
 
             if (userOpt.isPresent()) {
-                User user = userOpt.get();
+                AuthenticatedUser user = userOpt.get();
+                Claims claims = authService.validateToken(token);
+                String role = claims.get("role", String.class);
+
                 List<SimpleGrantedAuthority> authorities = List.of(
-                        new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+                        new SimpleGrantedAuthority("ROLE_" + role)
                 );
 
                 UsernamePasswordAuthenticationToken authentication =

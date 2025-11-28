@@ -2,12 +2,8 @@ package com.app.deskly.service;
 
 import com.app.deskly.dto.user.UpdateUserDTO;
 import com.app.deskly.dto.user.UserRequestDTO;
-import com.app.deskly.model.*;
-import com.app.deskly.model.user.Customer;
+import com.app.deskly.model.UserRoles;
 import com.app.deskly.model.user.User;
-import com.app.deskly.repository.AdminRepository;
-import com.app.deskly.repository.BackofficeRepository;
-import com.app.deskly.repository.CustomerRepository;
 import com.app.deskly.repository.UserRepository;
 import com.app.deskly.util.CpfValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,18 +21,13 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private AdminRepository adminRepository;
-
-    @Autowired
-    private BackofficeRepository backofficeRepository;
-
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User create(UserRequestDTO dto) {
+        if (dto.getRole() == UserRoles.CUSTOMER) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Use CustomerService para criar clientes");
+        }
+
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "senhas não coincidem");
         }
@@ -53,9 +44,7 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "email já cadastrado");
         }
 
-        User user = createUserByRole(dto.getRole());
-
-        // Campos comuns
+        User user = new User();
         user.setFullname(dto.getFullname());
         user.setEmail(dto.getEmail());
         user.setCpf(dto.getCpf());
@@ -64,43 +53,7 @@ public class UserService {
         user.setActive(true);
         user.setPhone(dto.getPhone());
 
-        // Campos específicos de Customer
-        if (user instanceof Customer) {
-            Customer customer = (Customer) user;
-            customer.setGender(dto.getGender());
-            customer.setBirthDate(dto.getBirthDate());
-            customer.setAddressStreet(dto.getAddressStreet());
-            customer.setAddressNumber(dto.getAddressNumber());
-            customer.setAddressComplement(dto.getAddressComplement());
-            customer.setAddressNeighborhood(dto.getAddressNeighborhood());
-            customer.setAddressCity(dto.getAddressCity());
-            customer.setAddressState(dto.getAddressState());
-            customer.setAddressZipcode(dto.getAddressZipcode());
-            customer.setCardHolderName(dto.getCardHolderName());
-            customer.setCardLastDigits(dto.getCardLastDigits());
-            customer.setCardBrand(dto.getCardBrand());
-            customer.setCardExpiration(dto.getCardExpiration());
-            return customerRepository.save(customer);
-        } else if (user instanceof Admin) {
-            return adminRepository.save((Admin) user);
-        } else if (user instanceof Backoffice) {
-            return backofficeRepository.save((Backoffice) user);
-        }
-
         return userRepository.save(user);
-    }
-
-    private User createUserByRole(UserRoles role) {
-        switch (role) {
-            case CUSTOMER:
-                return new Customer();
-            case ADMIN:
-                return new Admin();
-            case BACKOFFICE:
-                return new Backoffice();
-            default:
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role inválido");
-        }
     }
 
     public User getById(long userId) {
@@ -117,7 +70,6 @@ public class UserService {
     }
 
     public void updateUser(Long id, UpdateUserDTO dto) {
-
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
@@ -128,78 +80,23 @@ public class UserService {
 
         boolean isSameUser = user.getId().equals(loggedUser.getId());
 
-        // Informações pessoais
         if (dto.getFullname() != null) {
             user.setFullname(dto.getFullname());
         }
         if (dto.getCpf() != null) {
             user.setCpf(dto.getCpf());
         }
-
-        // Atualizar senha apenas se foi fornecida
         if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
             if (!dto.getPassword().equals(dto.getConfirmPassword())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "As senhas não coincidem.");
             }
             user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         }
-
         if (!isSameUser && dto.getRole() != null) {
             user.setRole(dto.getRole());
         }
-
-        // Contato adicional
         if (dto.getPhone() != null) {
             user.setPhone(dto.getPhone());
-        }
-
-        // Campos específicos de Customer
-        if (user instanceof Customer) {
-            Customer customer = (Customer) user;
-
-            if (dto.getGender() != null) {
-                customer.setGender(dto.getGender());
-            }
-            if (dto.getBirthDate() != null) {
-                customer.setBirthDate(dto.getBirthDate());
-            }
-
-            // Endereço de entrega
-            if (dto.getAddressStreet() != null) {
-                customer.setAddressStreet(dto.getAddressStreet());
-            }
-            if (dto.getAddressNumber() != null) {
-                customer.setAddressNumber(dto.getAddressNumber());
-            }
-            if (dto.getAddressComplement() != null) {
-                customer.setAddressComplement(dto.getAddressComplement());
-            }
-            if (dto.getAddressNeighborhood() != null) {
-                customer.setAddressNeighborhood(dto.getAddressNeighborhood());
-            }
-            if (dto.getAddressCity() != null) {
-                customer.setAddressCity(dto.getAddressCity());
-            }
-            if (dto.getAddressState() != null) {
-                customer.setAddressState(dto.getAddressState());
-            }
-            if (dto.getAddressZipcode() != null) {
-                customer.setAddressZipcode(dto.getAddressZipcode());
-            }
-
-            // Informações de pagamento
-            if (dto.getCardHolderName() != null) {
-                customer.setCardHolderName(dto.getCardHolderName());
-            }
-            if (dto.getCardLastDigits() != null) {
-                customer.setCardLastDigits(dto.getCardLastDigits());
-            }
-            if (dto.getCardBrand() != null) {
-                customer.setCardBrand(dto.getCardBrand());
-            }
-            if (dto.getCardExpiration() != null) {
-                customer.setCardExpiration(dto.getCardExpiration());
-            }
         }
 
         userRepository.save(user);

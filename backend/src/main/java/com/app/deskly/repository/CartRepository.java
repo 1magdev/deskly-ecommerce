@@ -8,6 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.app.deskly.model.Cart;
 
 public interface CartRepository extends JpaRepository<Cart, Long> {
-    Optional<Cart> findByUserAndProduct(Long userId, Long productId);
-    List<Cart> findAllByUser(Long userId);
+    Optional<Cart> findByUserIdAndProductId(Long userId, Long productId);
+    List<Cart> findAllByUserId(Long userId);
 }

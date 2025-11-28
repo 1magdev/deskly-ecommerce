@@ -1,24 +1,20 @@
 package com.app.deskly.service;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
-
 import com.app.deskly.model.Cart;
-import com.app.deskly.model.CartItem;
 import com.app.deskly.model.Product;
-import com.app.deskly.repository.CartItemRepository;
 import com.app.deskly.repository.CartRepository;
 import com.app.deskly.repository.ProductRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Service
 public class CartService {
 
     @Autowired private CartRepository cartRepository;
-    @Autowired private CartItemRepository cartItemRepository;
     @Autowired private ProductRepository productRepository;
 
     /**
@@ -29,16 +25,16 @@ public class CartService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
 
         Cart cart;
-        cart = cartRepository.findByUserAndProduct(userId, productId)
+        cart = cartRepository.findByUserIdAndProductId(userId, productId)
                 .orElseGet(Cart::new);
 
         if(cart.getQuantity() >= 1){
             int newQuantity = cart.getQuantity() + 1;
             cart.setQuantity(newQuantity);
         } else {
-            cart.setProduct(productId);
+            cart.setProductId(productId);
             cart.setQuantity(1);
-            cart.setUser(userId);
+            cart.setUserId(userId);
         }
 
         Cart savedCart = cartRepository.save(cart);
@@ -51,7 +47,7 @@ public class CartService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
 
         Cart cart;
-        cart = cartRepository.findByUserAndProduct(userId, productId)
+        cart = cartRepository.findByUserIdAndProductId(userId, productId)
                 .orElseGet(Cart::new);
 
         if(cart.getQuantity() <= 1){
@@ -69,7 +65,7 @@ public class CartService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
 
         Cart cart;
-        cart = cartRepository.findByUserAndProduct(userId, productId)
+        cart = cartRepository.findByUserIdAndProductId(userId, productId)
                 .orElseGet(Cart::new);
         cartRepository.delete(cart);
 
@@ -78,6 +74,6 @@ public class CartService {
 
     public List<Cart> getByUser(Long userId){
         cartRepository.findAll();
-        return cartRepository.findAllByUser(userId);
+        return cartRepository.findAllByUserId(userId);
     }
 }

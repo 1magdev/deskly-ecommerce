@@ -1,34 +1,40 @@
 package com.app.deskly.model.user;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "tbl_customers")
-@DiscriminatorValue("CUSTOMER")
 @Data
-public class Customer extends BaseUser {
+@Table(name = "tbl_customers")
+public class Customer implements AuthenticatedUser {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
+
     @Column(name = "gender")
     private String gender;
 
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-/*
-    // Informações de pagamento
-    @Column(name = "card_holder_name")
-    private String cardHolderName;
+    @Column(name = "fullname", nullable = false)
+    private String fullname;
 
-    @Column(name = "card_last_digits", length = 4)
-    private String cardLastDigits;
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
 
-    @Column(name = "card_brand")
-    private String cardBrand;
+    @Column(name = "cpf", nullable = false, unique = true, length = 11)
+    private String cpf;
 
-    @Column(name = "card_expiration")
-    private String cardExpiration;
+    @Column(name = "phone")
+    private String phone;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Address> addresses;*/
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
 }

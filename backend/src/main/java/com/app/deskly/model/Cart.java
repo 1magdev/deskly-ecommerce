@@ -5,16 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_users_cart")
 public class Cart {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,14 +19,12 @@ public class Cart {
     @Column(name = "cpf", nullable = false, unique = true, length = 14)
     private String cpf;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Long user;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id",  referencedColumnName = "id", nullable = false)
-    private Long product;
+    @Column(name = "product_id", nullable = false)
+    private Long productId;
 
-    @Column(name="quantity")
+    @Column(name = "quantity", nullable = false)
     private Integer quantity;
 }

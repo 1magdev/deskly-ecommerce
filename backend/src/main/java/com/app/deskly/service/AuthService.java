@@ -2,8 +2,11 @@ package com.app.deskly.service;
 
 import com.app.deskly.dto.auth.AuthResponseDTO;
 import com.app.deskly.dto.user.UserRequestDTO;
-import com.app.deskly.model.user.User;
 import com.app.deskly.model.UserRoles;
+import com.app.deskly.model.user.AuthenticatedUser;
+import com.app.deskly.model.user.Customer;
+import com.app.deskly.model.user.User;
+import com.app.deskly.repository.CustomerRepository;
 import com.app.deskly.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -29,7 +32,9 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private UserService userService;
+    private CustomerRepository customerRepository;
+    @Autowired
+    private CustomerService customerService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();;
 
@@ -45,18 +50,31 @@ public class AuthService {
     }
 
     public String login(String email, String password) {
+        Optional<Customer> customerOpt = customerRepository.findByEmail(email);
+        if (customerOpt.isPresent()) {
+            Customer customer = customerOpt.get();
+            if (!customer.isActive()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credênciais inválidas!");
+            }
+            if (!passwordEncoder.matches(password, customer.getPasswordHash())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credênciais inválidas!");
+            }
+            return generateTokenCustomer(customer);
+        }
+
         Optional<User> userOpt = userRepository.findByEmail(email);
-
-        if (userOpt.isEmpty() || !userOpt.get().isActive()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credênciais inválidas!");
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (!user.isActive()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credênciais inválidas!");
+            }
+            if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credênciais inválidas!");
+            }
+            return generateToken(user);
         }
 
-        User user = userOpt.get();
-        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credênciais inválidas!");
-        }
-
-        return generateToken(user);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credênciais inválidas!");
     }
 
     public AuthResponseDTO register(UserRequestDTO userData){
@@ -64,10 +82,10 @@ public class AuthService {
             throw new IllegalArgumentException("Não é possível se registrar como ADMIN ou ESTOQUISTA");
         }
 
-        User user = userService.create(userData);
-        String token = this.generateToken(user);
+        Customer customer = customerService.create(userData);
+        String token = this.generateTokenCustomer(customer);
 
-        AuthResponseDTO response = new AuthResponseDTO(token, user.getEmail(), user.getRole().name());
+        AuthResponseDTO response = new AuthResponseDTO(token, customer.getEmail(), UserRoles.CUSTOMER.name());
 
         return response;
     }
@@ -86,6 +104,20 @@ public class AuthService {
                 .compact();
     }
 
+    public String generateTokenCustomer(Customer customer) {
+        Instant now = Instant.now();
+        Instant expiration = now.plus(this.jwtExpiration, ChronoUnit.SECONDS);
+
+        return Jwts.builder()
+                .subject(customer.getId().toString())
+                .claim("email", customer.getEmail())
+                .claim("role", UserRoles.CUSTOMER.name())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiration))
+                .signWith(jwtSecretKey)
+                .compact();
+    }
+
     public Claims validateToken(String token) {
 
         return Jwts.parser()
@@ -95,11 +127,16 @@ public class AuthService {
                 .getPayload();
     }
 
-    public Optional<User> getUserFromToken(String token) {
+    public Optional<AuthenticatedUser> getUserFromToken(String token) {
         try {
             Claims claims = validateToken(token);
             Long userId = Long.valueOf(claims.getSubject());
-            return userRepository.findById(userId);
+            String role = claims.get("role", String.class);
+
+            if (UserRoles.CUSTOMER.name().equals(role)) {
+                return customerRepository.findById(userId).map(c -> (AuthenticatedUser) c);
+            }
+            return userRepository.findById(userId).map(u -> (AuthenticatedUser) u);
         } catch (Exception e) {
             return Optional.empty();
         }

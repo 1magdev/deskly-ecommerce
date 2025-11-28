@@ -25,11 +25,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
         String token = authService.login(loginRequest.getEmail(), loginRequest.getPassword());
-
-        User user = authService.getUserFromToken(token).orElseThrow();
-        AuthResponseDTO response = new AuthResponseDTO(token, user.getEmail(), user.getRole().name());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new AuthResponseDTO(token, loginRequest.getEmail(), ""));
     }
 
     @PostMapping("/register")
