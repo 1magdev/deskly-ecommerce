@@ -2,7 +2,6 @@ package com.app.deskly.model;
 
 import lombok.Data;
 import jakarta.persistence.*;
-import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 
@@ -36,7 +35,7 @@ public class User{
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @Column(name = "role", nullable = false, columnDefinition = "ENUM('ADMIN','BACKOFFICE','CUSTOMER')")
     private UserRoles role;
 
     @Column(name = "active", nullable = false)

@@ -58,6 +58,16 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','BACKOFFICE')")
+    @GetMapping("/backoffice")
+    public ResponseEntity<List<UserDTO>> getBackofficeUsers() {
+        List<User> users = userService.getAllBackofficeUsers();
+        List<UserDTO> userDTOs = users.stream()
+                .map(this::toDTO)
+                .toList();
+        return ResponseEntity.ok(userDTOs);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','BACKOFFICE')")
     @GetMapping("/{id}")
     public ResponseEntity<User> getById(@PathVariable Long id) {
         User user = userService.getById(id);

@@ -24,6 +24,11 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User create(UserRequestDTO dto) {
+        if (dto.getRole() == UserRoles.CUSTOMER) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                "Não é permitido criar usuários CUSTOMER através do backoffice");
+        }
+
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "senhas não coincidem");
         }
@@ -45,29 +50,12 @@ public class UserService {
         user.setFullname(dto.getFullname());
         user.setEmail(dto.getEmail());
         user.setCpf(dto.getCpf());
-        user.setGender(dto.getGender());
-        user.setBirthDate(dto.getBirthDate());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(dto.getRole());
         user.setActive(true);
 
-        // Endereço de entrega
-        user.setAddressStreet(dto.getAddressStreet());
-        user.setAddressNumber(dto.getAddressNumber());
-        user.setAddressComplement(dto.getAddressComplement());
-        user.setAddressNeighborhood(dto.getAddressNeighborhood());
-        user.setAddressCity(dto.getAddressCity());
-        user.setAddressState(dto.getAddressState());
-        user.setAddressZipcode(dto.getAddressZipcode());
-
-        // Informações de pagamento
-        user.setCardHolderName(dto.getCardHolderName());
-        user.setCardLastDigits(dto.getCardLastDigits());
-        user.setCardBrand(dto.getCardBrand());
-        user.setCardExpiration(dto.getCardExpiration());
-
-        // Contato adicional
-        user.setPhone(dto.getPhone());
+        // Campos de endereço, pagamento, telefone, gênero e data de nascimento
+        // não são salvos para ADMIN e BACKOFFICE (apenas para CUSTOMER)
 
         return userRepository.save(user);
     }
@@ -85,15 +73,25 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public List<User> getAllBackofficeUsers() {
+        return userRepository.findByRoleIn(List.of(UserRoles.ADMIN, UserRoles.BACKOFFICE));
+    }
+
     public void updateUser(Long id, UpdateUserDTO dto) {
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String loggedEmail = authentication.getName();
-        User loggedUser = userRepository.findByEmail(loggedEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário logado não encontrado"));
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado");
+        }
+
+        if (!(authentication.getPrincipal() instanceof User)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tipo de autenticação inválido");
+        }
+
+        User loggedUser = (User) authentication.getPrincipal();
 
         boolean isSameUser = user.getId().equals(loggedUser.getId());
 
@@ -102,13 +100,15 @@ public class UserService {
             user.setFullname(dto.getFullname());
         }
         if (dto.getCpf() != null) {
+            if (!CpfValidator.isValid(dto.getCpf())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CPF inválido");
+            }
+            userRepository.findByCpf(dto.getCpf()).ifPresent(existingUser -> {
+                if (!existingUser.getId().equals(user.getId())) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "CPF já cadastrado");
+                }
+            });
             user.setCpf(dto.getCpf());
-        }
-        if (dto.getGender() != null) {
-            user.setGender(dto.getGender());
-        }
-        if (dto.getBirthDate() != null) {
-            user.setBirthDate(dto.getBirthDate());
         }
 
         // Atualizar senha apenas se foi fornecida
@@ -120,56 +120,22 @@ public class UserService {
         }
 
         if (!isSameUser && dto.getRole() != null) {
+            if (dto.getRole() == UserRoles.CUSTOMER) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, 
+                    "Não é permitido alterar o role para CUSTOMER através do backoffice");
+            }
             user.setRole(dto.getRole());
         }
 
-        // Endereço de entrega
-        if (dto.getAddressStreet() != null) {
-            user.setAddressStreet(dto.getAddressStreet());
-        }
-        if (dto.getAddressNumber() != null) {
-            user.setAddressNumber(dto.getAddressNumber());
-        }
-        if (dto.getAddressComplement() != null) {
-            user.setAddressComplement(dto.getAddressComplement());
-        }
-        if (dto.getAddressNeighborhood() != null) {
-            user.setAddressNeighborhood(dto.getAddressNeighborhood());
-        }
-        if (dto.getAddressCity() != null) {
-            user.setAddressCity(dto.getAddressCity());
-        }
-        if (dto.getAddressState() != null) {
-            user.setAddressState(dto.getAddressState());
-        }
-        if (dto.getAddressZipcode() != null) {
-            user.setAddressZipcode(dto.getAddressZipcode());
-        }
-
-        // Informações de pagamento
-        if (dto.getCardHolderName() != null) {
-            user.setCardHolderName(dto.getCardHolderName());
-        }
-        if (dto.getCardLastDigits() != null) {
-            user.setCardLastDigits(dto.getCardLastDigits());
-        }
-        if (dto.getCardBrand() != null) {
-            user.setCardBrand(dto.getCardBrand());
-        }
-        if (dto.getCardExpiration() != null) {
-            user.setCardExpiration(dto.getCardExpiration());
-        }
-
-        // Contato adicional
-        if (dto.getPhone() != null) {
-            user.setPhone(dto.getPhone());
-        }
+        // Campos de endereço, pagamento, telefone, gênero e data de nascimento
+        // não são atualizados para ADMIN e BACKOFFICE (apenas para CUSTOMER)
 
         userRepository.save(user);
     }
 
     public User enableDisable(Long id, boolean active) {
-        User user = userRepository.getById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
         user.setActive(active);
         userRepository.save(user);
         return user;

@@ -3,7 +3,6 @@ import { DataTable, type Column } from "@/components/shared/DataTable";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { userService } from "@/services/user.service";
 import type { User } from "@/types/api.types";
 import { Pencil, Power } from "lucide-react";
@@ -11,13 +10,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-type UserRole = "ADMIN" | "BACKOFFICE" | "CUSTOMER";
-
 export function UsersPage() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRole, setSelectedRole] = useState<UserRole>("ADMIN");
   const [sortKey, setSortKey] = useState<string>("id");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [pagination, setPagination] = useState({
@@ -71,12 +67,10 @@ export function UsersPage() {
     });
   };
 
-  const fetchUsers = async (role: UserRole) => {
+  const fetchUsers = async () => {
     try {
       setLoading(true);
-      const data = role
-        ? await userService.getUsersByRole(role)
-        : await userService.getAllUsers();
+      const data = await userService.getBackofficeUsers();
       const sortedUsers = sortUsers(data, sortKey, sortDirection);
       setUsers(sortedUsers);
       setPagination({
@@ -111,7 +105,7 @@ export function UsersPage() {
         !confirmDialog.currentStatus
       );
       toast.success("Status alterado com sucesso!");
-      fetchUsers(selectedRole);
+      fetchUsers();
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Erro ao alterar status"
@@ -122,8 +116,8 @@ export function UsersPage() {
   };
 
   useEffect(() => {
-    fetchUsers(selectedRole);
-  }, [selectedRole]);
+    fetchUsers();
+  }, []);
 
   const columns: Column<User>[] = [
     {
@@ -215,29 +209,16 @@ export function UsersPage() {
         }
       />
 
-      <Tabs
-        value={selectedRole}
-        onValueChange={(value) => setSelectedRole(value as UserRole | "ADMIN")}
-      >
-        <TabsList className="mb-4">
-          <TabsTrigger value="ADMIN">Admin</TabsTrigger>
-          <TabsTrigger value="BACKOFFICE">Estoquista</TabsTrigger>
-          <TabsTrigger value="CUSTOMER">Clientes</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={selectedRole}>
-          <DataTable
-            columns={columns}
-            data={users}
-            pagination={pagination}
-            onPageChange={() => {}}
-            onSort={handleSort}
-            sortKey={sortKey}
-            sortDirection={sortDirection}
-            searchPlaceholder="Buscar usuários..."
-          />
-        </TabsContent>
-      </Tabs>
+      <DataTable
+        columns={columns}
+        data={users}
+        pagination={pagination}
+        onPageChange={() => {}}
+        onSort={handleSort}
+        sortKey={sortKey}
+        sortDirection={sortDirection}
+        searchPlaceholder="Buscar usuários..."
+      />
 
       <ConfirmDialog
         open={confirmDialog.open}

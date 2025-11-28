@@ -18,6 +18,10 @@ class UserService {
     return apiClient.get<User[]>(`/users/all/${role}`);
   }
 
+  async getBackofficeUsers(): Promise<User[]> {
+    return apiClient.get<User[]>('/users/backoffice');
+  }
+
   async getUserById(id: number): Promise<User> {
     return apiClient.get<User>(`/users/${id}`);
   }
