@@ -1,6 +1,6 @@
 package com.app.deskly.repository;
 
-import com.app.deskly.model.User;
+import com.app.deskly.model.user.User;
 import com.app.deskly.model.UserRoles;
 
 import org.springframework.data.jpa.repository.JpaRepository;

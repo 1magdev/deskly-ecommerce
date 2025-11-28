@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Deskly - Users API",
-    "description": "Collection para gerenciamento de usuários do Deskly E-commerce",
+    "name": "Deskly E-commerce API",
+    "description": "Documentação completa da API do Deskly E-commerce - Organizada por workflows",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -18,258 +18,856 @@
   ],
   "item": [
     {
-      "name": "Criar Usuário - Completo",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+      "name": "01 - Autenticação",
+      "description": "Endpoints de autenticação (Login e Registro)",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@deskly.com\",\n  \"password\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Autentica um usuário e retorna um token JWT"
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"fullname\": \"João da Silva\",\n  \"email\": \"joao.silva@example.com\",\n  \"cpf\": \"123.456.789-00\",\n  \"gender\": \"Masculino\",\n  \"birthDate\": \"1990-05-15\",\n  \"password\": \"senha123\",\n  \"confirmPassword\": \"senha123\",\n  \"role\": \"CLIENT\",\n  \"addressStreet\": \"Rua das Flores\",\n  \"addressNumber\": \"123\",\n  \"addressComplement\": \"Apto 45\",\n  \"addressNeighborhood\": \"Centro\",\n  \"addressCity\": \"São Paulo\",\n  \"addressState\": \"SP\",\n  \"addressZipcode\": \"01234-567\",\n  \"cardHolderName\": \"JOAO DA SILVA\",\n  \"cardLastDigits\": \"1234\",\n  \"cardBrand\": \"Visa\",\n  \"cardExpiration\": \"12/2025\",\n  \"phone\": \"(11) 98765-4321\"\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/users",
-          "host": ["{{baseUrl}}"],
-          "path": ["users"]
-        },
-        "description": "Cria um novo usuário com todos os campos disponíveis"
-      }
+        {
+          "name": "Registrar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullname\": \"João Silva\",\n  \"email\": \"joao@example.com\",\n  \"cpf\": \"12345678900\",\n  \"password\": \"senha123\",\n  \"confirmPassword\": \"senha123\",\n  \"role\": \"CUSTOMER\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Registra um novo usuário (CUSTOMER) e retorna token JWT"
+          }
+        }
+      ]
     },
     {
-      "name": "Criar Usuário - Campos Mínimos",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+      "name": "02 - Catálogo (Público)",
+      "description": "Endpoints públicos para visualização de produtos",
+      "item": [
+        {
+          "name": "Listar Produtos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/catalog/products?search=cadeira&category=CHAIRS&page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalog", "products"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "cadeira"
+                },
+                {
+                  "key": "category",
+                  "value": "CHAIRS"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Lista produtos ativos do catálogo com filtros"
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"fullname\": \"Maria Santos\",\n  \"email\": \"maria.santos@example.com\",\n  \"cpf\": \"987.654.321-00\",\n  \"password\": \"senha456\",\n  \"confirmPassword\": \"senha456\",\n  \"role\": \"CLIENT\"\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/users",
-          "host": ["{{baseUrl}}"],
-          "path": ["users"]
-        },
-        "description": "Cria um novo usuário com apenas os campos obrigatórios"
-      }
+        {
+          "name": "Detalhes do Produto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/catalog/products/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalog", "products", "1"]
+            },
+            "description": "Obtém detalhes de um produto específico"
+          }
+        }
+      ]
     },
     {
-      "name": "Atualizar Usuário - Completo",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+      "name": "03 - Carrinho",
+      "description": "Gerenciamento do carrinho de compras",
+      "item": [
+        {
+          "name": "Adicionar ao Carrinho",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/cart/add",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart", "add"]
+            },
+            "description": "Adiciona um produto ao carrinho (aumenta quantidade se já existir) - Requer autenticação"
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"fullname\": \"João da Silva Santos\",\n  \"cpf\": \"123.456.789-00\",\n  \"gender\": \"Masculino\",\n  \"birthDate\": \"1990-05-15\",\n  \"password\": \"novaSenha123\",\n  \"confirmPassword\": \"novaSenha123\",\n  \"role\": \"CLIENT\",\n  \"addressStreet\": \"Av. Paulista\",\n  \"addressNumber\": \"1000\",\n  \"addressComplement\": \"Sala 200\",\n  \"addressNeighborhood\": \"Bela Vista\",\n  \"addressCity\": \"São Paulo\",\n  \"addressState\": \"SP\",\n  \"addressZipcode\": \"01310-100\",\n  \"cardHolderName\": \"JOAO DA SILVA SANTOS\",\n  \"cardLastDigits\": \"5678\",\n  \"cardBrand\": \"MasterCard\",\n  \"cardExpiration\": \"06/2026\",\n  \"phone\": \"(11) 91234-5678\"\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/users/1",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "1"]
+        {
+          "name": "Ver Carrinho",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart"]
+            },
+            "description": "Retorna o carrinho atual do usuário - Requer autenticação"
+          }
         },
-        "description": "Atualiza todos os campos de um usuário"
-      }
+        {
+          "name": "Diminuir Quantidade",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cart/decrease/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart", "decrease", "1"]
+            },
+            "description": "Diminui a quantidade de um item no carrinho (remove se quantidade = 1) - Requer autenticação"
+          }
+        },
+        {
+          "name": "Remover Item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cart/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["cart", "1"]
+            },
+            "description": "Remove um item completamente do carrinho - Requer autenticação"
+          }
+        }
+      ]
     },
     {
-      "name": "Atualizar Usuário - Apenas Endereço",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+      "name": "04 - Checkout",
+      "description": "⚠️ DESABILITADO - Processo de finalização da compra (endpoints comentados no backend)",
+      "item": [
+        {
+          "name": "Iniciar Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/checkout/start",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "start"]
+            },
+            "description": "Inicia o processo de checkout e valida carrinho"
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"addressStreet\": \"Rua Nova\",\n  \"addressNumber\": \"500\",\n  \"addressNeighborhood\": \"Jardim América\",\n  \"addressCity\": \"São Paulo\",\n  \"addressState\": \"SP\",\n  \"addressZipcode\": \"05468-000\"\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/users/1",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "1"]
+        {
+          "name": "Listar Endereços de Entrega",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/checkout/addresses",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "addresses"]
+            },
+            "description": "Lista endereços válidos para entrega"
+          }
         },
-        "description": "Atualiza apenas o endereço do usuário (atualização parcial)"
-      }
+        {
+          "name": "Selecionar Endereço",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addressId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkout/address",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "address"]
+            },
+            "description": "Seleciona o endereço de entrega"
+          }
+        },
+        {
+          "name": "Validar Endereço",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/checkout/address/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "address", "validate"]
+            },
+            "description": "Valida se endereço foi selecionado"
+          }
+        },
+        {
+          "name": "Opções de Frete",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/checkout/shipping-options",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "shipping-options"]
+            },
+            "description": "Lista as opções de frete disponíveis (default e express)"
+          }
+        },
+        {
+          "name": "Selecionar Frete - Padrão",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingType\": \"default\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkout/shipping",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "shipping"]
+            },
+            "description": "Seleciona frete padrão (R$ 15,00 - 7 dias úteis)"
+          }
+        },
+        {
+          "name": "Selecionar Frete - Expresso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingType\": \"express\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkout/shipping",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "shipping"]
+            },
+            "description": "Seleciona frete expresso (R$ 30,00 - 2 dias úteis)"
+          }
+        },
+        {
+          "name": "Validar Frete",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/checkout/shipping/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "shipping", "validate"]
+            },
+            "description": "Valida se tipo de frete foi selecionado"
+          }
+        },
+        {
+          "name": "Métodos de Pagamento",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/checkout/payment-methods",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "payment-methods"]
+            },
+            "description": "Lista métodos de pagamento disponíveis (BOLETO, CARD)"
+          }
+        },
+        {
+          "name": "Selecionar Pagamento - Cartão",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"CARD\",\n  \"cardNumber\": \"4111111111111111\",\n  \"cardHolderName\": \"JOAO SILVA\",\n  \"cardExpiration\": \"12/2025\",\n  \"cardCvv\": \"123\",\n  \"installments\": 3\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkout/payment",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "payment"]
+            },
+            "description": "Seleciona método de pagamento CARD com dados do cartão"
+          }
+        },
+        {
+          "name": "Selecionar Pagamento - Boleto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"method\": \"BOLETO\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/checkout/payment",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "payment"]
+            },
+            "description": "Seleciona método de pagamento BOLETO"
+          }
+        },
+        {
+          "name": "Validar Pagamento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/checkout/payment/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "payment", "validate"]
+            },
+            "description": "Valida se método de pagamento foi selecionado"
+          }
+        },
+        {
+          "name": "Finalizar Checkout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/checkout/finalize",
+              "host": ["{{baseUrl}}"],
+              "path": ["checkout", "finalize"]
+            },
+            "description": "Finaliza o processo de checkout (cria pedido)"
+          }
+        }
+      ]
     },
     {
-      "name": "Atualizar Usuário - Apenas Telefone",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+      "name": "05 - Endereços",
+      "description": "Gerenciamento de endereços do usuário",
+      "item": [
+        {
+          "name": "Listar Endereços",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/addresses",
+              "host": ["{{baseUrl}}"],
+              "path": ["addresses"]
+            },
+            "description": "Lista todos os endereços do usuário"
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"phone\": \"(11) 99999-8888\"\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/users/1",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "1"]
+        {
+          "name": "Criar Endereço",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"street\": \"Rua das Flores\",\n  \"number\": \"123\",\n  \"complement\": \"Apto 45\",\n  \"neighborhood\": \"Centro\",\n  \"city\": \"São Paulo\",\n  \"state\": \"SP\",\n  \"zipCode\": \"01234567\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addresses",
+              "host": ["{{baseUrl}}"],
+              "path": ["addresses"]
+            },
+            "description": "Cria um novo endereço"
+          }
         },
-        "description": "Atualiza apenas o telefone do usuário (atualização parcial)"
-      }
+        {
+          "name": "Atualizar Endereço",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"street\": \"Rua Nova\",\n  \"number\": \"456\",\n  \"complement\": \"Casa\",\n  \"neighborhood\": \"Jardins\",\n  \"city\": \"São Paulo\",\n  \"state\": \"SP\",\n  \"zipCode\": \"01234999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addresses/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["addresses", "1"]
+            },
+            "description": "Atualiza um endereço existente"
+          }
+        },
+        {
+          "name": "Deletar Endereço",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/addresses/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["addresses", "1"]
+            },
+            "description": "Remove um endereço"
+          }
+        }
+      ]
     },
     {
-      "name": "Atualizar Usuário - Dados Pessoais",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+      "name": "06 - Perfil do Usuário",
+      "description": "Visualização do perfil do usuário autenticado",
+      "item": [
+        {
+          "name": "Meu Perfil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "profile"]
+            },
+            "description": "Retorna dados do usuário autenticado"
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"fullname\": \"João Silva Santos Jr\",\n  \"gender\": \"Masculino\",\n  \"birthDate\": \"1990-05-15\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/users/1",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "1"]
-        },
-        "description": "Atualiza apenas dados pessoais do usuário (atualização parcial)"
-      }
+        }
+      ]
     },
     {
-      "name": "Atualizar Usuário - Dados de Pagamento",
-      "request": {
-        "method": "PUT",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          },
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+      "name": "07 - Produtos (Admin/Backoffice)",
+      "description": "CRUD de produtos - Requer permissão ADMIN ou BACKOFFICE",
+      "item": [
+        {
+          "name": "Criar Produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cadeira Gamer Pro\",\n  \"description\": \"Cadeira ergonômica para gamers profissionais\",\n  \"category\": \"CHAIRS\",\n  \"price\": 1299.90,\n  \"rating\": 4.5,\n  \"quantity\": 50,\n  \"image\": \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            },
+            "description": "Cria um novo produto (Admin/Backoffice)"
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"cardHolderName\": \"JOAO SILVA\",\n  \"cardLastDigits\": \"9999\",\n  \"cardBrand\": \"Visa\",\n  \"cardExpiration\": \"12/2027\"\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/users/1",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "1"]
+        {
+          "name": "Listar Produtos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products?search=cadeira&page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "cadeira"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Lista todos os produtos (com paginação)"
+          }
         },
-        "description": "Atualiza apenas dados de pagamento do usuário (atualização parcial)"
-      }
+        {
+          "name": "Obter Produto",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "1"]
+            },
+            "description": "Obtém detalhes de um produto específico"
+          }
+        },
+        {
+          "name": "Atualizar Produto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cadeira Gamer Pro Max\",\n  \"description\": \"Cadeira ergonômica premium\",\n  \"category\": \"CHAIRS\",\n  \"price\": 1499.90,\n  \"rating\": 5.0,\n  \"quantity\": 30,\n  \"image\": \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "1"]
+            },
+            "description": "Atualiza um produto existente"
+          }
+        },
+        {
+          "name": "Ativar/Desativar Produto",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/1/status?active=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "1", "status"],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Alterna o status de ativo/inativo do produto"
+          }
+        },
+        {
+          "name": "Deletar Produto",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "1"]
+            },
+            "description": "Remove um produto do sistema"
+          }
+        }
+      ]
     },
     {
-      "name": "Buscar Perfil do Usuário Logado",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+      "name": "08 - Usuários (Admin/Backoffice)",
+      "description": "Gerenciamento de usuários - Requer permissão ADMIN ou BACKOFFICE",
+      "item": [
+        {
+          "name": "Criar Usuário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullname\": \"Maria Santos\",\n  \"email\": \"maria@example.com\",\n  \"cpf\": \"98765432100\",\n  \"password\": \"senha123\",\n  \"confirmPassword\": \"senha123\",\n  \"role\": \"BACKOFFICE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Cria um novo usuário (Admin/Backoffice)"
           }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/users/profile",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "profile"]
         },
-        "description": "Retorna o perfil do usuário autenticado"
-      }
-    },
-    {
-      "name": "Listar Usuários - CLIENT",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+        {
+          "name": "Listar Usuários por Role",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/all/CUSTOMER",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "all", "CUSTOMER"]
+            },
+            "description": "Lista usuários filtrados por role (CUSTOMER, ADMIN, BACKOFFICE)"
           }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/users/CLIENT",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "CLIENT"]
         },
-        "description": "Lista todos os usuários com role CLIENT"
-      }
-    },
-    {
-      "name": "Listar Usuários - ADMIN",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+        {
+          "name": "Obter Usuário",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "1"]
+            },
+            "description": "Obtém dados de um usuário específico"
           }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/users/ADMIN",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "ADMIN"]
         },
-        "description": "Lista todos os usuários com role ADMIN"
-      }
-    },
-    {
-      "name": "Listar Usuários - BACKOFFICE",
-      "request": {
-        "method": "GET",
-        "header": [
-          {
-            "key": "Authorization",
-            "value": "Bearer {{token}}"
+        {
+          "name": "Atualizar Usuário",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullname\": \"Maria Santos Silva\",\n  \"email\": \"maria.silva@example.com\",\n  \"cpf\": \"98765432100\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "1"]
+            },
+            "description": "Atualiza dados de um usuário"
           }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/users/BACKOFFICE",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "BACKOFFICE"]
         },
-        "description": "Lista todos os usuários com role BACKOFFICE"
-      }
+        {
+          "name": "Ativar/Desativar Usuário",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/1/status?active=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "1", "status"],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Alterna o status de ativo/inativo do usuário"
+          }
+        }
+      ]
     }
   ]
 }

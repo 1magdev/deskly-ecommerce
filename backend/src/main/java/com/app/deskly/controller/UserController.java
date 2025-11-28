@@ -3,7 +3,7 @@ package com.app.deskly.controller;
 import com.app.deskly.dto.user.UpdateUserDTO;
 import com.app.deskly.dto.user.UserDTO;
 import com.app.deskly.dto.user.UserRequestDTO;
-import com.app.deskly.model.User;
+import com.app.deskly.model.user.User;
 import com.app.deskly.model.UserRoles;
 import com.app.deskly.service.AuthService;
 import com.app.deskly.service.UserService;

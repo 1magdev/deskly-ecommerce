@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { productService } from "@/services/product.service";
 import type { Product } from "@/types/api.types";
 import { PRODUCT_CATEGORIES } from "@/types/api.types";
-import { Pencil, Power } from "lucide-react";
+import { Eye, Pencil, Power } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -35,7 +35,11 @@ export function ProductListPage() {
     open: false,
   });
 
-  const sortProducts = (data: Product[], key: string, direction: "asc" | "desc") => {
+  const sortProducts = (
+    data: Product[],
+    key: string,
+    direction: "asc" | "desc"
+  ) => {
     return [...data].sort((a, b) => {
       const aValue = a[key as keyof Product];
       const bValue = b[key as keyof Product];
@@ -64,7 +68,11 @@ export function ProductListPage() {
         size: pagination.pageSize,
         search,
       });
-      const sortedProducts = sortProducts(response.content, sortKey, sortDirection);
+      const sortedProducts = sortProducts(
+        response.content,
+        sortKey,
+        sortDirection
+      );
       setProducts(sortedProducts);
       setPagination({
         currentPage: response.number,
@@ -209,6 +217,15 @@ export function ProductListPage() {
             className="hover:text-primary hover:bg-primary/10"
           >
             <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(`/backoffice/products/${product.id}`)}
+            title="View"
+            className="hover:text-primary hover:bg-primary/10"
+          >
+            <Eye className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"

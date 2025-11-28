@@ -1,16 +1,15 @@
 package com.app.deskly.service;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
-import com.app.deskly.dto.cart.CartDTO;
-import com.app.deskly.dto.cart.CartItemDTO;
+import com.app.deskly.model.Cart;
+import com.app.deskly.model.CartItem;
 import com.app.deskly.model.Product;
-import com.app.deskly.model.User;
 import com.app.deskly.repository.CartItemRepository;
 import com.app.deskly.repository.CartRepository;
 import com.app.deskly.repository.ProductRepository;
@@ -22,133 +21,63 @@ public class CartService {
     @Autowired private CartItemRepository cartItemRepository;
     @Autowired private ProductRepository productRepository;
 
-    public void addProductToCart(String sessionId, User user, Long productId) {
-        CartDTO cart;
+    /**
+     * Adiciona um produto ao carrinho do usuário autenticado
+     */
+    public Cart addProduct(Long userId, Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
 
-        if (user != null) {
-            cart = cartRepository.findByUser(user).orElse(new CartDTO());
-            cart.setUser(user);
+        Cart cart;
+        cart = cartRepository.findByUserAndProduct(userId, productId)
+                .orElseGet(Cart::new);
+
+        if(cart.getQuantity() >= 1){
+            int newQuantity = cart.getQuantity() + 1;
+            cart.setQuantity(newQuantity);
         } else {
-            cart = cartRepository.findBySessionId(sessionId).orElse(new CartDTO());
-            cart.setSessionId(sessionId);
+            cart.setProduct(productId);
+            cart.setQuantity(1);
+            cart.setUser(userId);
         }
 
-        Product product = productRepository.findById(productId).orElseThrow();
-        Optional<CartItemDTO> existingItem = cart.getItems().stream()
-            .filter(item -> item.getProduct().getId().equals(productId))
-            .findFirst();
+        Cart savedCart = cartRepository.save(cart);
+        return savedCart;
+    }
 
-        if (existingItem.isPresent()) {
-            CartItemDTO item = existingItem.get();
-            item.setQuantity(item.getQuantity() + 1);
+
+    public Cart decreaseProduct(Long userId, Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
+
+        Cart cart;
+        cart = cartRepository.findByUserAndProduct(userId, productId)
+                .orElseGet(Cart::new);
+
+        if(cart.getQuantity() <= 1){
+            cartRepository.delete(cart);
         } else {
-            CartItemDTO item = new CartItemDTO();
-            item.setProduct(product);
-            item.setQuantity(1);
-            item.setCart(cart);
-            cart.getItems().add(item);
+            cart.setQuantity(cart.getQuantity()-1);
         }
 
-        cartRepository.save(cart);
+        Cart savedCart = cartRepository.save(cart);
+        return savedCart;
     }
 
+    public Cart deleteProduct(Long userId, Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
 
-    public void increaseItem(Long productId, String sessionId, User user) {
-        CartDTO cart = findCart(sessionId, user);
-        CartItemDTO item = findItem(cart, productId);
+        Cart cart;
+        cart = cartRepository.findByUserAndProduct(userId, productId)
+                .orElseGet(Cart::new);
+        cartRepository.delete(cart);
 
-        item.setQuantity(item.getQuantity() + 1);
-        cartItemRepository.save(item);
-
-        recalculateSubtotal(cart);
-        cartRepository.save(cart);
+        return cartRepository.save(cart);
     }
 
-    public void decreaseItem(Long productId, String sessionId, User user) {
-        CartDTO cart = findCart(sessionId, user);
-        CartItemDTO item = findItem(cart, productId);
-
-        if (item.getQuantity() > 1) {
-            item.setQuantity(item.getQuantity() - 1);
-            cartItemRepository.save(item);
-        } else {
-            cart.getItems().remove(item);
-            cartItemRepository.delete(item);
-        }
-
-        recalculateSubtotal(cart);
-        cartRepository.save(cart);
+    public List<Cart> getByUser(Long userId){
+        cartRepository.findAll();
+        return cartRepository.findAllByUser(userId);
     }
-
-    public void removeItem(Long productId, String sessionId, User user) {
-        CartDTO cart = findCart(sessionId, user);
-        CartItemDTO item = findItem(cart, productId);
-
-        cart.getItems().remove(item);
-        cartItemRepository.delete(item);
-
-        recalculateSubtotal(cart);
-        cartRepository.save(cart);
-    }
-
-    private void recalculateSubtotal(CartDTO cart) {
-        BigDecimal subtotal = cart.getItems().stream()
-            .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal frete = cart.getShippingCost() != null ? cart.getShippingCost() : BigDecimal.ZERO;
-
-        cart.setSubtotal(subtotal.add(frete)); 
-    }
-
-//GET DO CARRINHO AINDA NÃO FINALIZADO
-
-//     public CartDTO getCart(String sessionId, User user) {
-//         Cart cart = findCart(sessionId, user);
-
-//         List<CartItemDTO> items = cart.getItems().stream().map(item -> {
-//             CartItemDTO dto = new CartItemDTO();
-//             dto.setProductId(item.getProduct().getId());
-//             dto.setProductName(item.getProduct().getName());
-//             dto.setUnitPrice(item.getProduct().getPrice());
-//             dto.setQuantity(item.getQuantity());
-//             dto.setTotal(item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
-//             return dto;
-//         }).toList();
-
-//         BigDecimal subtotal = items.stream()
-//             .map(CartDTO::getSubtotal)
-//             .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-//         BigDecimal shipping = cart.getShippingCost() != null ? cart.getShippingCost() : BigDecimal.ZERO;
-
-//         CartDTO response = new CartDTO();
-//         response.setItems(items);
-//         response.setSubtotal(subtotal);
-//         response.setShippingCost(shipping);
-//         response.setSubtotal(subtotal.add(shipping));
-
-//     return response;
-// }
-
-
-
-
-    private CartDTO findCart(String sessionId, User user) {
-        return user != null ?
-            cartRepository.findByUser(user).orElseThrow(() -> new RuntimeException("Carrinho não encontrado para usuário")) :
-            cartRepository.findBySessionId(sessionId).orElseThrow(() -> new RuntimeException("Carrinho não encontrado para sessão"));
-    }
-
-    private CartItemDTO findItem(CartDTO cart, Long productId) {
-        return cart.getItems().stream()
-            .filter(item -> item.getProduct().getId().equals(productId))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("Produto não encontrado no carrinho"));
-    }
-
-    
-
-
 }
-

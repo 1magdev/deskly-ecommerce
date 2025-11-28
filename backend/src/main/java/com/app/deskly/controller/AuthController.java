@@ -10,10 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.app.deskly.dto.auth.AuthResponseDTO;
 import com.app.deskly.dto.auth.LoginRequestDTO;
 import com.app.deskly.dto.user.UserRequestDTO;
-import com.app.deskly.model.UserRoles;
-import com.app.deskly.model.User;
+import com.app.deskly.model.user.User;
 import com.app.deskly.service.AuthService;
-import com.app.deskly.service.UserService;
 
 import jakarta.validation.Valid;
 

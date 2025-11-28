@@ -1,6 +1,6 @@
 package com.app.deskly.security;
 
-import com.app.deskly.model.User;
+import com.app.deskly.model.user.User;
 import com.app.deskly.service.AuthService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

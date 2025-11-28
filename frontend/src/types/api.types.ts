@@ -199,3 +199,68 @@ export interface PageRequest {
   size?: number;
   search?: string;
 }
+
+// Address Types
+export interface Address {
+  id: number;
+  label: string;
+  street: string;
+  number: string;
+  complement?: string;
+  district: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  deliveryAddress: boolean;
+}
+
+export interface AddressCreateRequest {
+  label: string;
+  street: string;
+  number: string;
+  complement?: string;
+  district: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  deliveryAddress?: boolean;
+}
+
+// Cart Types
+export interface CartItem {
+  id: number;
+  product: Product;
+  quantity: number;
+  cart: Cart;
+}
+
+export interface Cart {
+  id: number;
+  sessionId: string;
+  user?: User;
+  deliveryAddress?: Address;
+  shippingCost: number;
+  subtotal: number;
+  deliveryAddressSelected: boolean;
+  paymentMethod?: "BOLETO" | "CARD";
+  paymentInstallments?: number;
+  paymentCardHolderName?: string;
+  paymentCardLastDigits?: string;
+  paymentCardBrand?: string;
+  paymentCardExpiration?: string;
+  items: CartItem[];
+}
+
+// Checkout Types
+export interface SelectDeliveryAddressRequest {
+  addressId: number;
+}
+
+export interface PaymentRequest {
+  method: "BOLETO" | "CARD";
+  cardNumber?: string;
+  cardCvv?: string;
+  cardHolderName?: string;
+  cardExpiration?: string;
+  installments?: number;
+}

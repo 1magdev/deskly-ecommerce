@@ -1,19 +1,56 @@
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Navbar } from "@/components/shared/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faMinus, faPlus, faTruck, faBolt, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+
+type ShippingType = "normal" | "express";
+
+interface ShippingOption {
+  type: ShippingType;
+  label: string;
+  price: number;
+  estimatedDays: string;
+  icon: any;
+}
+
+const shippingOptions: ShippingOption[] = [
+  {
+    type: "normal",
+    label: "Frete Normal",
+    price: 15.90,
+    estimatedDays: "5-7 dias úteis",
+    icon: faTruck,
+  },
+  {
+    type: "express",
+    label: "Frete Expresso",
+    price: 29.90,
+    estimatedDays: "1-2 dias úteis",
+    icon: faBolt,
+  },
+];
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart, getItemCount } =
     useCart();
+  const { isAuthenticated } = useAuth();
+  const [selectedShipping, setSelectedShipping] = useState<ShippingType>("normal");
 
-  const total = items.reduce(
+  const subtotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  const shippingCost = shippingOptions.find(
+    (option) => option.type === selectedShipping
+  )?.price || 0;
+
+  const total = subtotal + shippingCost;
 
   if (items.length === 0) {
     return (
@@ -65,12 +102,9 @@ export default function CartPage() {
                       style={{ backgroundImage: `url(${item.productImage})` }}
                     />
                     <div className="flex-1">
-                      <CardTitle className="text-xl mb-2">
+                      <CardTitle className="text-xl mb-4">
                         {item.name}
                       </CardTitle>
-                      <p className="text-gray-600 text-sm mb-4">
-                        {item.description}
-                      </p>
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                           <Button
@@ -125,12 +159,51 @@ export default function CartPage() {
                 <CardContent className="p-0 space-y-4">
                   <div className="flex justify-between text-lg">
                     <span>Subtotal</span>
-                    <span>R$ {total.toFixed(2)}</span>
+                    <span>R$ {subtotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-lg">
-                    <span>Frete</span>
-                    <span className="text-green-600">Grátis</span>
+
+                  <div className="border-t pt-4">
+                    <h3 className="font-semibold mb-3 text-lg">Opções de Frete</h3>
+                    <div className="space-y-3">
+                      {shippingOptions.map((option) => (
+                        <div
+                          key={option.type}
+                          className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                            selectedShipping === option.type
+                              ? "border-primary bg-primary/5 ring-2 ring-primary"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                          onClick={() => setSelectedShipping(option.type)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3">
+                              <div className={`mt-1 ${
+                                selectedShipping === option.type
+                                  ? "text-primary"
+                                  : "text-gray-400"
+                              }`}>
+                                <FontAwesomeIcon icon={option.icon} className="text-xl" />
+                              </div>
+                              <div>
+                                <div className="font-medium">{option.label}</div>
+                                <div className="text-sm text-gray-600">
+                                  {option.estimatedDays}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="font-semibold">
+                              {option.price === 0 ? (
+                                <span className="text-green-600">Grátis</span>
+                              ) : (
+                                <span>R$ {option.price.toFixed(2)}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
+
                   <div className="border-t pt-4">
                     <div className="flex justify-between text-2xl font-bold">
                       <span>Total</span>
@@ -138,10 +211,23 @@ export default function CartPage() {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="p-0 mt-6">
-                  <Button size="lg" className="w-full">
-                    Finalizar compra
-                  </Button>
+                <CardFooter className="p-0 mt-6 flex-col gap-4">
+                  {!isAuthenticated && (
+                    <div className="w-full bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start gap-2">
+                      <FontAwesomeIcon
+                        icon={faInfoCircle}
+                        className="text-blue-600 mt-0.5 flex-shrink-0"
+                      />
+                      <p className="text-sm text-blue-800">
+                        Você precisa estar logado para finalizar a compra.
+                      </p>
+                    </div>
+                  )}
+                  <Link to="/checkout" className="w-full">
+                    <Button size="lg" className="w-full">
+                      Finalizar compra
+                    </Button>
+                  </Link>
                 </CardFooter>
               </Card>
             </div>

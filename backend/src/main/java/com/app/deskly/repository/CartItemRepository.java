@@ -4,10 +4,9 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.app.deskly.dto.cart.CartDTO;
-import com.app.deskly.dto.cart.CartItemDTO;
+import com.app.deskly.model.Cart;
+import com.app.deskly.model.CartItem;
 
-public interface CartItemRepository extends JpaRepository<CartItemDTO, Long> {
-    List<CartItemDTO> findByCart(CartDTO cart);
+public interface CartItemRepository extends JpaRepository<CartItem, Long> {
+    List<CartItem> findByCart(Cart cart);
 }
-

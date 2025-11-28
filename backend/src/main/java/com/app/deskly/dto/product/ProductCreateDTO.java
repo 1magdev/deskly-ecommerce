@@ -3,9 +3,7 @@ package com.app.deskly.dto.product;
 import java.math.BigDecimal;
 
 import com.app.deskly.model.ProductCategories;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+
 import jakarta.validation.constraints.*;
 import lombok.Data;
 

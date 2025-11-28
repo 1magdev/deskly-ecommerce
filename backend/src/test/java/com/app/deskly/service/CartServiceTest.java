@@ -3,7 +3,7 @@ package com.app.deskly.service;
 import com.app.deskly.dto.cart.CartDTO;
 import com.app.deskly.dto.cart.CartItemDTO;
 import com.app.deskly.model.Product;
-import com.app.deskly.model.User;
+import com.app.deskly.model.user.User;
 import com.app.deskly.repository.CartItemRepository;
 import com.app.deskly.repository.CartRepository;
 import com.app.deskly.repository.ProductRepository;

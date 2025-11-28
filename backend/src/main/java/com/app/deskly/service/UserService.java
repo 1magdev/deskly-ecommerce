@@ -2,8 +2,12 @@ package com.app.deskly.service;
 
 import com.app.deskly.dto.user.UpdateUserDTO;
 import com.app.deskly.dto.user.UserRequestDTO;
-import com.app.deskly.model.User;
-import com.app.deskly.model.UserRoles;
+import com.app.deskly.model.*;
+import com.app.deskly.model.user.Customer;
+import com.app.deskly.model.user.User;
+import com.app.deskly.repository.AdminRepository;
+import com.app.deskly.repository.BackofficeRepository;
+import com.app.deskly.repository.CustomerRepository;
 import com.app.deskly.repository.UserRepository;
 import com.app.deskly.util.CpfValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,15 @@ import java.util.List;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private AdminRepository adminRepository;
+
+    @Autowired
+    private BackofficeRepository backofficeRepository;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -40,36 +53,54 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "email já cadastrado");
         }
 
-        User user = new User();
-        // Informações pessoais
+        User user = createUserByRole(dto.getRole());
+
+        // Campos comuns
         user.setFullname(dto.getFullname());
         user.setEmail(dto.getEmail());
         user.setCpf(dto.getCpf());
-        user.setGender(dto.getGender());
-        user.setBirthDate(dto.getBirthDate());
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(dto.getRole());
         user.setActive(true);
-
-        // Endereço de entrega
-        user.setAddressStreet(dto.getAddressStreet());
-        user.setAddressNumber(dto.getAddressNumber());
-        user.setAddressComplement(dto.getAddressComplement());
-        user.setAddressNeighborhood(dto.getAddressNeighborhood());
-        user.setAddressCity(dto.getAddressCity());
-        user.setAddressState(dto.getAddressState());
-        user.setAddressZipcode(dto.getAddressZipcode());
-
-        // Informações de pagamento
-        user.setCardHolderName(dto.getCardHolderName());
-        user.setCardLastDigits(dto.getCardLastDigits());
-        user.setCardBrand(dto.getCardBrand());
-        user.setCardExpiration(dto.getCardExpiration());
-
-        // Contato adicional
         user.setPhone(dto.getPhone());
 
+        // Campos específicos de Customer
+        if (user instanceof Customer) {
+            Customer customer = (Customer) user;
+            customer.setGender(dto.getGender());
+            customer.setBirthDate(dto.getBirthDate());
+            customer.setAddressStreet(dto.getAddressStreet());
+            customer.setAddressNumber(dto.getAddressNumber());
+            customer.setAddressComplement(dto.getAddressComplement());
+            customer.setAddressNeighborhood(dto.getAddressNeighborhood());
+            customer.setAddressCity(dto.getAddressCity());
+            customer.setAddressState(dto.getAddressState());
+            customer.setAddressZipcode(dto.getAddressZipcode());
+            customer.setCardHolderName(dto.getCardHolderName());
+            customer.setCardLastDigits(dto.getCardLastDigits());
+            customer.setCardBrand(dto.getCardBrand());
+            customer.setCardExpiration(dto.getCardExpiration());
+            return customerRepository.save(customer);
+        } else if (user instanceof Admin) {
+            return adminRepository.save((Admin) user);
+        } else if (user instanceof Backoffice) {
+            return backofficeRepository.save((Backoffice) user);
+        }
+
         return userRepository.save(user);
+    }
+
+    private User createUserByRole(UserRoles role) {
+        switch (role) {
+            case CUSTOMER:
+                return new Customer();
+            case ADMIN:
+                return new Admin();
+            case BACKOFFICE:
+                return new Backoffice();
+            default:
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role inválido");
+        }
     }
 
     public User getById(long userId) {
@@ -104,12 +135,6 @@ public class UserService {
         if (dto.getCpf() != null) {
             user.setCpf(dto.getCpf());
         }
-        if (dto.getGender() != null) {
-            user.setGender(dto.getGender());
-        }
-        if (dto.getBirthDate() != null) {
-            user.setBirthDate(dto.getBirthDate());
-        }
 
         // Atualizar senha apenas se foi fornecida
         if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
@@ -123,46 +148,58 @@ public class UserService {
             user.setRole(dto.getRole());
         }
 
-        // Endereço de entrega
-        if (dto.getAddressStreet() != null) {
-            user.setAddressStreet(dto.getAddressStreet());
-        }
-        if (dto.getAddressNumber() != null) {
-            user.setAddressNumber(dto.getAddressNumber());
-        }
-        if (dto.getAddressComplement() != null) {
-            user.setAddressComplement(dto.getAddressComplement());
-        }
-        if (dto.getAddressNeighborhood() != null) {
-            user.setAddressNeighborhood(dto.getAddressNeighborhood());
-        }
-        if (dto.getAddressCity() != null) {
-            user.setAddressCity(dto.getAddressCity());
-        }
-        if (dto.getAddressState() != null) {
-            user.setAddressState(dto.getAddressState());
-        }
-        if (dto.getAddressZipcode() != null) {
-            user.setAddressZipcode(dto.getAddressZipcode());
-        }
-
-        // Informações de pagamento
-        if (dto.getCardHolderName() != null) {
-            user.setCardHolderName(dto.getCardHolderName());
-        }
-        if (dto.getCardLastDigits() != null) {
-            user.setCardLastDigits(dto.getCardLastDigits());
-        }
-        if (dto.getCardBrand() != null) {
-            user.setCardBrand(dto.getCardBrand());
-        }
-        if (dto.getCardExpiration() != null) {
-            user.setCardExpiration(dto.getCardExpiration());
-        }
-
         // Contato adicional
         if (dto.getPhone() != null) {
             user.setPhone(dto.getPhone());
+        }
+
+        // Campos específicos de Customer
+        if (user instanceof Customer) {
+            Customer customer = (Customer) user;
+
+            if (dto.getGender() != null) {
+                customer.setGender(dto.getGender());
+            }
+            if (dto.getBirthDate() != null) {
+                customer.setBirthDate(dto.getBirthDate());
+            }
+
+            // Endereço de entrega
+            if (dto.getAddressStreet() != null) {
+                customer.setAddressStreet(dto.getAddressStreet());
+            }
+            if (dto.getAddressNumber() != null) {
+                customer.setAddressNumber(dto.getAddressNumber());
+            }
+            if (dto.getAddressComplement() != null) {
+                customer.setAddressComplement(dto.getAddressComplement());
+            }
+            if (dto.getAddressNeighborhood() != null) {
+                customer.setAddressNeighborhood(dto.getAddressNeighborhood());
+            }
+            if (dto.getAddressCity() != null) {
+                customer.setAddressCity(dto.getAddressCity());
+            }
+            if (dto.getAddressState() != null) {
+                customer.setAddressState(dto.getAddressState());
+            }
+            if (dto.getAddressZipcode() != null) {
+                customer.setAddressZipcode(dto.getAddressZipcode());
+            }
+
+            // Informações de pagamento
+            if (dto.getCardHolderName() != null) {
+                customer.setCardHolderName(dto.getCardHolderName());
+            }
+            if (dto.getCardLastDigits() != null) {
+                customer.setCardLastDigits(dto.getCardLastDigits());
+            }
+            if (dto.getCardBrand() != null) {
+                customer.setCardBrand(dto.getCardBrand());
+            }
+            if (dto.getCardExpiration() != null) {
+                customer.setCardExpiration(dto.getCardExpiration());
+            }
         }
 
         userRepository.save(user);

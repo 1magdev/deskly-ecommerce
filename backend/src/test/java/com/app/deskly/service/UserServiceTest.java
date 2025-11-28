@@ -2,7 +2,7 @@ package com.app.deskly.service;
 
 import com.app.deskly.dto.user.UserRequestDTO;
 import com.app.deskly.model.UserRoles;
-import com.app.deskly.model.User;
+import com.app.deskly.model.user.User;
 import com.app.deskly.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
