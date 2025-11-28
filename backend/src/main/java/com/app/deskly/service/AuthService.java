@@ -85,7 +85,7 @@ public class AuthService {
         Customer customer = customerService.create(userData);
         String token = this.generateTokenCustomer(customer);
 
-        AuthResponseDTO response = new AuthResponseDTO(token, customer.getEmail(), UserRoles.CUSTOMER.name());
+        AuthResponseDTO response = new AuthResponseDTO(token, customer.getEmail());
 
         return response;
     }

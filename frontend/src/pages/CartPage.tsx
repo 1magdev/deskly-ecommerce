@@ -4,11 +4,21 @@ import { Navbar } from "@/components/shared/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faMinus, faPlus, faTruck, faBolt, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTrash,
+  faMinus,
+  faPlus,
+  faTruck,
+  faBolt,
+  faInfoCircle,
+  faMoneyCheckDollar,
+  faMoneyBill,
+  faDollar,
+} from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
-type ShippingType = "normal" | "express";
+type ShippingType = "normal" | "express" | "economico";
 
 interface ShippingOption {
   type: ShippingType;
@@ -22,14 +32,21 @@ const shippingOptions: ShippingOption[] = [
   {
     type: "normal",
     label: "Frete Normal",
-    price: 15.90,
+    price: 15.9,
     estimatedDays: "5-7 dias úteis",
     icon: faTruck,
   },
   {
+    type: "economico",
+    label: "Frete Economico",
+    price: 8.9,
+    estimatedDays: "7-10 dias úteis",
+    icon: faDollar,
+  },
+  {
     type: "express",
     label: "Frete Expresso",
-    price: 29.90,
+    price: 29.9,
     estimatedDays: "1-2 dias úteis",
     icon: faBolt,
   },
@@ -39,16 +56,17 @@ export default function CartPage() {
   const { items, removeFromCart, updateQuantity, clearCart, getItemCount } =
     useCart();
   const { isAuthenticated } = useAuth();
-  const [selectedShipping, setSelectedShipping] = useState<ShippingType>("normal");
+  const [selectedShipping, setSelectedShipping] =
+    useState<ShippingType>("normal");
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
-  const shippingCost = shippingOptions.find(
-    (option) => option.type === selectedShipping
-  )?.price || 0;
+  const shippingCost =
+    shippingOptions.find((option) => option.type === selectedShipping)?.price ||
+    0;
 
   const total = subtotal + shippingCost;
 
@@ -163,7 +181,9 @@ export default function CartPage() {
                   </div>
 
                   <div className="border-t pt-4">
-                    <h3 className="font-semibold mb-3 text-lg">Opções de Frete</h3>
+                    <h3 className="font-semibold mb-3 text-lg">
+                      Opções de Frete
+                    </h3>
                     <div className="space-y-3">
                       {shippingOptions.map((option) => (
                         <div
@@ -177,15 +197,22 @@ export default function CartPage() {
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex items-start gap-3">
-                              <div className={`mt-1 ${
-                                selectedShipping === option.type
-                                  ? "text-primary"
-                                  : "text-gray-400"
-                              }`}>
-                                <FontAwesomeIcon icon={option.icon} className="text-xl" />
+                              <div
+                                className={`mt-1 ${
+                                  selectedShipping === option.type
+                                    ? "text-primary"
+                                    : "text-gray-400"
+                                }`}
+                              >
+                                <FontAwesomeIcon
+                                  icon={option.icon}
+                                  className="text-xl"
+                                />
                               </div>
                               <div>
-                                <div className="font-medium">{option.label}</div>
+                                <div className="font-medium">
+                                  {option.label}
+                                </div>
                                 <div className="text-sm text-gray-600">
                                   {option.estimatedDays}
                                 </div>

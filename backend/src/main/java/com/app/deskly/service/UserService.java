@@ -69,6 +69,11 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public List<User> getAllBackofficeUsers() {
+        return userRepository.findByRoleIn(List.of(UserRoles.ADMIN, UserRoles.BACKOFFICE));
+    }
+
+
     public void updateUser(Long id, UpdateUserDTO dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));

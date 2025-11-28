@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { handleApiError } from "@/lib/error-handler";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,6 @@ import { Loader2 } from "lucide-react";
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { login, isLoading } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -34,9 +33,7 @@ export function LoginPage() {
 
     try {
       await login({ email, password });
-      // Redireciona para a página anterior (se veio de ProtectedRoute) ou para home
-      const from = (location.state as any)?.from?.pathname || "/";
-      navigate(from, { replace: true });
+      navigate("/");
     } catch (err) {
       const apiError = handleApiError(err);
 
