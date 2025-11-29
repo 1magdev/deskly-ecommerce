@@ -47,14 +47,13 @@ public class CustomerService {
         customer.setCpf(dto.getCpf());
         customer.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         customer.setActive(true);
-        customer.setPhone(dto.getPhone());
         customer.setGender(dto.getGender());
         customer.setBirthDate(dto.getBirthDate());
 
         return customerRepository.save(customer);
     }
 
-    public Customer getById(long customerId) {
+    public Customer getById(Long customerId) {
         return customerRepository.findById(customerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
     }
@@ -86,9 +85,7 @@ public class CustomerService {
             }
             customer.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         }
-        if (dto.getPhone() != null) {
-            customer.setPhone(dto.getPhone());
-        }
+
         if (dto.getGender() != null) {
             customer.setGender(dto.getGender());
         }

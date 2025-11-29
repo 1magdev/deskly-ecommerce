@@ -16,19 +16,18 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { cepService } from "@/services/cep.service";
+// import { cepService } from "@/services/cep.service";
 import { toast } from "sonner";
 
 interface RegisterFormData {
   fullname: string;
   email: string;
   cpf: string;
-  phone?: string;
   gender?: string;
   birthDate?: string;
   password: string;
   confirmPassword: string;
-  addressStreet?: string;
+  /*   addressStreet?: string;
   addressNumber?: string;
   addressComplement?: string;
   addressNeighborhood?: string;
@@ -38,7 +37,7 @@ interface RegisterFormData {
   cardHolderName?: string;
   cardLastDigits?: string;
   cardBrand?: string;
-  cardExpiration?: string;
+  cardExpiration?: string; */
 }
 
 export function RegisterPage() {
@@ -49,7 +48,7 @@ export function RegisterPage() {
     Record<string, string>
   >({});
   const [activeTab, setActiveTab] = useState("personal");
-  const [loadingCep, setLoadingCep] = useState(false);
+  // const [loadingCep, setLoadingCep] = useState(false);
 
   const [formData, setFormData] = useState<RegisterFormData>({
     fullname: "",
@@ -66,7 +65,7 @@ export function RegisterPage() {
     }
   };
 
-  const handleCepBlur = async () => {
+  /* const handleCepBlur = async () => {
     const cep = formData.addressZipcode;
     if (!cep || cep.replace(/\D/g, "").length !== 8) return;
 
@@ -92,7 +91,7 @@ export function RegisterPage() {
       setLoadingCep(false);
     }
   };
-
+ */
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
@@ -134,13 +133,12 @@ export function RegisterPage() {
         fullname: formData.fullname,
         email: formData.email,
         cpf: formData.cpf.replace(/\D/g, ""), // Remove formatação do CPF
-        phone: formData.phone?.replace(/\D/g, ""), // Remove formatação do telefone
         gender: formData.gender,
         birthDate: formData.birthDate,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
         role: "CUSTOMER",
-        addressStreet: formData.addressStreet,
+        /*         addressStreet: formData.addressStreet,
         addressNumber: formData.addressNumber,
         addressComplement: formData.addressComplement,
         addressNeighborhood: formData.addressNeighborhood,
@@ -150,7 +148,7 @@ export function RegisterPage() {
         cardHolderName: formData.cardHolderName,
         cardLastDigits: formData.cardLastDigits?.replace(/\D/g, ""), // Remove formatação dos dígitos
         cardBrand: formData.cardBrand,
-        cardExpiration: formData.cardExpiration?.replace(/\D/g, ""), // Remove formatação da validade
+        cardExpiration: formData.cardExpiration?.replace(/\D/g, ""), // Remove formatação da validade */
       });
 
       toast.success("Cadastro realizado com sucesso! Você já está logado.");
@@ -189,102 +187,85 @@ export function RegisterPage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
+            <div className="flex flex-col">
+              <FormInput
+                label="Nome Completo"
+                value={formData.fullname}
+                onChange={(e) => handleChange("fullname", e.target.value)}
+                error={validationErrors.fullname}
+                disabled={isLoading}
+                required
+              />
 
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="personal">Dados Pessoais</TabsTrigger>
-                <TabsTrigger value="address">Endereço</TabsTrigger>
-                <TabsTrigger value="payment">Pagamento</TabsTrigger>
-              </TabsList>
+              <FormInput
+                label="Email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange("email", e.target.value)}
+                error={validationErrors.email}
+                disabled={isLoading}
+                required
+              />
 
-              <TabsContent value="personal" className="space-y-4 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormInput
-                    label="Nome Completo"
-                    value={formData.fullname}
-                    onChange={(e) => handleChange("fullname", e.target.value)}
-                    error={validationErrors.fullname}
-                    disabled={isLoading}
-                    required
-                  />
+              <FormInputMask
+                label="CPF"
+                mask="999.999.999-99"
+                value={formData.cpf}
+                onChange={(e) => handleChange("cpf", e.target.value)}
+                error={validationErrors.cpf}
+                disabled={isLoading}
+                required
+              />
 
-                  <FormInput
-                    label="Email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleChange("email", e.target.value)}
-                    error={validationErrors.email}
-                    disabled={isLoading}
-                    required
-                  />
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gênero</Label>
+                <select
+                  id="gender"
+                  value={formData.gender || ""}
+                  onChange={(e) => handleChange("gender", e.target.value)}
+                  disabled={isLoading}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Selecione</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
 
-                  <FormInputMask
-                    label="CPF"
-                    mask="999.999.999-99"
-                    value={formData.cpf}
-                    onChange={(e) => handleChange("cpf", e.target.value)}
-                    error={validationErrors.cpf}
-                    disabled={isLoading}
-                    required
-                  />
+              <FormInput
+                label="Data de Nascimento"
+                type="date"
+                value={formData.birthDate}
+                onChange={(e) => handleChange("birthDate", e.target.value)}
+                error={validationErrors.birthDate}
+                disabled={isLoading}
+              />
 
-                  <FormInputMask
-                    label="Telefone"
-                    mask="(99) 99999-9999"
-                    value={formData.phone}
-                    onChange={(e) => handleChange("phone", e.target.value)}
-                    error={validationErrors.phone}
-                    disabled={isLoading}
-                  />
+              <FormInput
+                label="Senha"
+                type="password"
+                value={formData.password}
+                onChange={(e) => handleChange("password", e.target.value)}
+                error={validationErrors.password}
+                disabled={isLoading}
+                required
+              />
 
-                  <div className="space-y-2">
-                    <Label htmlFor="gender">Gênero</Label>
-                    <select
-                      id="gender"
-                      value={formData.gender || ""}
-                      onChange={(e) => handleChange("gender", e.target.value)}
-                      disabled={isLoading}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="">Selecione</option>
-                      <option value="Masculino">Masculino</option>
-                      <option value="Feminino">Feminino</option>
-                      <option value="Outro">Outro</option>
-                    </select>
-                  </div>
+              <FormInput
+                label="Confirmar Senha"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) =>
+                  handleChange("confirmPassword", e.target.value)
+                }
+                error={validationErrors.confirmPassword}
+                disabled={isLoading}
+                required
+              />
+            </div>
 
-                  <FormInput
-                    label="Data de Nascimento"
-                    type="date"
-                    value={formData.birthDate}
-                    onChange={(e) => handleChange("birthDate", e.target.value)}
-                    error={validationErrors.birthDate}
-                    disabled={isLoading}
-                  />
-
-                  <FormInput
-                    label="Senha"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => handleChange("password", e.target.value)}
-                    error={validationErrors.password}
-                    disabled={isLoading}
-                    required
-                  />
-
-                  <FormInput
-                    label="Confirmar Senha"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={(e) => handleChange("confirmPassword", e.target.value)}
-                    error={validationErrors.confirmPassword}
-                    disabled={isLoading}
-                    required
-                  />
-                </div>
-              </TabsContent>
-
-              <TabsContent value="address" className="space-y-4 mt-6">
+            {/*               <TabsContent value="address" className="space-y-4 mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormInputMask
                     label="CEP"
@@ -339,9 +320,9 @@ export function RegisterPage() {
                     maxLength={2}
                   />
                 </div>
-              </TabsContent>
+              </TabsContent> */}
 
-              <TabsContent value="payment" className="space-y-4 mt-6">
+            {/*               <TabsContent value="payment" className="space-y-4 mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormInput
                     label="Nome no Cartão"
@@ -386,8 +367,7 @@ export function RegisterPage() {
                     placeholder="12/2025"
                   />
                 </div>
-              </TabsContent>
-            </Tabs>
+              </TabsContent> */}
 
             <div className="flex flex-col gap-4 pt-4">
               <Button

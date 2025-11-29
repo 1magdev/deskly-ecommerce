@@ -51,8 +51,6 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
         user.setRole(dto.getRole());
         user.setActive(true);
-        user.setPhone(dto.getPhone());
-
         return userRepository.save(user);
     }
 
@@ -100,9 +98,7 @@ public class UserService {
         if (!isSameUser && dto.getRole() != null) {
             user.setRole(dto.getRole());
         }
-        if (dto.getPhone() != null) {
-            user.setPhone(dto.getPhone());
-        }
+
 
         userRepository.save(user);
     }

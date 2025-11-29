@@ -32,9 +32,6 @@ public class Customer implements AuthenticatedUser {
     @Column(name = "cpf", nullable = false, unique = true, length = 11)
     private String cpf;
 
-    @Column(name = "phone")
-    private String phone;
-
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 }
