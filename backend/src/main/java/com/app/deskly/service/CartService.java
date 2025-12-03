@@ -1,7 +1,7 @@
 package com.app.deskly.service;
 
 import com.app.deskly.model.Cart;
-import com.app.deskly.model.Product;
+import com.app.deskly.model.product.Product;
 import com.app.deskly.repository.CartRepository;
 import com.app.deskly.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +27,8 @@ public class CartService {
         Cart cart;
         cart = cartRepository.findByUserIdAndProductId(userId, productId)
                 .orElseGet(Cart::new);
-
-        if(cart.getQuantity() >= 1){
+        System.out.println(cart);
+        if(cart.getQuantity() != null && cart.getQuantity() >= 1){
             int newQuantity = cart.getQuantity() + 1;
             cart.setQuantity(newQuantity);
         } else {

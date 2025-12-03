@@ -37,21 +37,4 @@ public class UserRequestDTO {
     @NotNull(message = "Cargo não pode ser vázio")
     private UserRoles role;
 
-    // Endereço de entrega
-    private String addressStreet;
-    private String addressNumber;
-    private String addressComplement;
-    private String addressNeighborhood;
-    private String addressCity;
-    private String addressState;
-    private String addressZipcode;
-
-    // Informações de pagamento
-    private String cardHolderName;
-    private String cardLastDigits;
-    private String cardBrand;
-    private String cardExpiration;
-
-    // Contato adicional
-    private String phone;
 }

@@ -2,6 +2,7 @@ package com.app.deskly.controller;
 
 import com.app.deskly.dto.auth.AuthResponseDTO;
 import com.app.deskly.dto.auth.LoginRequestDTO;
+import com.app.deskly.dto.customer.CustomerRequestDTO;
 import com.app.deskly.dto.user.UserRequestDTO;
 import com.app.deskly.model.user.AuthenticatedUser;
 import com.app.deskly.model.user.User;
@@ -35,8 +36,9 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    // Só para CUSTOMERS(CLIENTES)
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody UserRequestDTO userRequest) {      
+    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody CustomerRequestDTO userRequest) {
       AuthResponseDTO userData = authService.register(userRequest);
       return ResponseEntity.ok(userData);
 

@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.app.deskly.dto.product.ProductCreateDTO;
 import com.app.deskly.dto.product.ProductDTO;
 import com.app.deskly.dto.product.ProductUpdateDTO;
-import com.app.deskly.model.Product;
+import com.app.deskly.model.product.Product;
 import com.app.deskly.service.ProductService;
 import com.app.deskly.repository.StockRepository;
 
@@ -29,7 +29,7 @@ public class ProductController {
   @PostMapping
   public ResponseEntity<Void> createProduct(@RequestBody ProductCreateDTO dto) {
     Product product = productService.getCreatedProduct(dto);
-    productService.create(product, dto.getQuantity());
+    productService.create(product, dto.getQuantity(), dto.getImages());
     return ResponseEntity.ok().build();
   }
 

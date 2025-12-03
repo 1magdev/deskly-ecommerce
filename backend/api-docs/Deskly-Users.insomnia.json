@@ -8,7 +8,7 @@
       "_id": "wrk_deskly",
       "_type": "workspace",
       "name": "Deskly E-commerce API",
-      "description": "Documentação completa da API do Deskly E-commerce",
+      "description": "Documenta\u00e7\u00e3o completa da API do Deskly E-commerce",
       "scope": "collection"
     },
     {
@@ -20,22 +20,25 @@
         "token": "seu_token_aqui"
       },
       "dataPropertyOrder": {
-        "&": ["baseUrl", "token"]
+        "&": [
+          "baseUrl",
+          "token"
+        ]
       },
       "parentId": "wrk_deskly"
     },
     {
       "_id": "fld_auth",
       "_type": "request_group",
-      "name": "01 - Autenticação",
-      "description": "Endpoints de autenticação (Login e Registro)",
+      "name": "01 - Autentica\u00e7\u00e3o",
+      "description": "Endpoints de autentica\u00e7\u00e3o (Login e Registro)",
       "parentId": "wrk_deskly"
     },
     {
       "_id": "fld_catalog",
       "_type": "request_group",
-      "name": "02 - Catálogo (Público)",
-      "description": "Endpoints públicos para visualização de produtos",
+      "name": "02 - Cat\u00e1logo (P\u00fablico)",
+      "description": "Endpoints p\u00fablicos para visualiza\u00e7\u00e3o de produtos",
       "parentId": "wrk_deskly"
     },
     {
@@ -46,45 +49,98 @@
       "parentId": "wrk_deskly"
     },
     {
-      "_id": "fld_checkout",
+      "_id": "fld_orders",
       "_type": "request_group",
-      "name": "04 - Checkout",
-      "description": "⚠️ DESABILITADO - Processo de finalização da compra (endpoints comentados no backend)",
+      "name": "04 - Pedidos",
+      "description": "Gerenciamento de pedidos do cliente",
       "parentId": "wrk_deskly"
+    },
+    {
+      "_id": "req_create_order",
+      "_type": "request",
+      "name": "Criar Pedido",
+      "description": "Cria um novo pedido - Requer autentica\u00e7\u00e3o",
+      "method": "POST",
+      "url": "{{ _.baseUrl }}/orders",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"shippingValue\": 15.00,\n  \"addressId\": 1,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 2\n    },\n    {\n      \"productId\": 3,\n      \"quantity\": 1\n    }\n  ]\n}"
+      },
+      "parentId": "fld_orders"
+    },
+    {
+      "_id": "req_list_orders",
+      "_type": "request",
+      "name": "Listar Meus Pedidos",
+      "description": "Lista todos os pedidos do cliente autenticado (ordenados por data) - Requer autentica\u00e7\u00e3o",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/orders",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parentId": "fld_orders"
+    },
+    {
+      "_id": "req_get_order",
+      "_type": "request",
+      "name": "Detalhes do Pedido",
+      "description": "Obt\u00e9m detalhes de um pedido espec\u00edfico - Requer autentica\u00e7\u00e3o",
+      "method": "GET",
+      "url": "{{ _.baseUrl }}/orders/1",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.token }}"
+        }
+      ],
+      "parentId": "fld_orders"
     },
     {
       "_id": "fld_addresses",
       "_type": "request_group",
-      "name": "05 - Endereços",
-      "description": "Gerenciamento de endereços do usuário",
+      "name": "04 - Endere\u00e7os",
+      "description": "Gerenciamento de endere\u00e7os do usu\u00e1rio",
       "parentId": "wrk_deskly"
     },
     {
       "_id": "fld_profile",
       "_type": "request_group",
-      "name": "06 - Perfil do Usuário",
-      "description": "Visualização do perfil do usuário autenticado",
+      "name": "05 - Perfil do Usu\u00e1rio",
+      "description": "Visualiza\u00e7\u00e3o do perfil do usu\u00e1rio autenticado",
       "parentId": "wrk_deskly"
     },
     {
       "_id": "fld_products_admin",
       "_type": "request_group",
-      "name": "07 - Produtos (Admin/Backoffice)",
-      "description": "CRUD de produtos - Requer permissão ADMIN ou BACKOFFICE",
+      "name": "06 - Produtos (Admin/Backoffice)",
+      "description": "CRUD de produtos - Requer permiss\u00e3o ADMIN ou BACKOFFICE",
       "parentId": "wrk_deskly"
     },
     {
       "_id": "fld_users_admin",
       "_type": "request_group",
-      "name": "08 - Usuários (Admin/Backoffice)",
-      "description": "Gerenciamento de usuários - Requer permissão ADMIN ou BACKOFFICE",
+      "name": "07 - Usu\u00e1rios (Admin/Backoffice)",
+      "description": "Gerenciamento de usu\u00e1rios - Requer permiss\u00e3o ADMIN ou BACKOFFICE",
       "parentId": "wrk_deskly"
     },
     {
       "_id": "req_login",
       "_type": "request",
       "name": "Login",
-      "description": "Autentica um usuário e retorna um token JWT",
+      "description": "Autentica um usu\u00e1rio e retorna um token JWT",
       "method": "POST",
       "url": "{{ _.baseUrl }}/auth/login",
       "headers": [
@@ -103,7 +159,7 @@
       "_id": "req_register",
       "_type": "request",
       "name": "Registrar",
-      "description": "Registra um novo usuário (CUSTOMER) e retorna token JWT",
+      "description": "Registra um novo usu\u00e1rio (CUSTOMER) e retorna token JWT",
       "method": "POST",
       "url": "{{ _.baseUrl }}/auth/register",
       "headers": [
@@ -114,7 +170,7 @@
       ],
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"fullname\": \"João Silva\",\n  \"email\": \"joao@example.com\",\n  \"cpf\": \"12345678900\",\n  \"password\": \"senha123\",\n  \"confirmPassword\": \"senha123\",\n  \"role\": \"CUSTOMER\"\n}"
+        "text": "{\n  \"fullname\": \"Jo\u00e3o Silva\",\n  \"email\": \"joao@example.com\",\n  \"cpf\": \"12345678900\",\n  \"password\": \"senha123\",\n  \"confirmPassword\": \"senha123\",\n  \"role\": \"CUSTOMER\"\n}"
       },
       "parentId": "fld_auth"
     },
@@ -122,7 +178,7 @@
       "_id": "req_catalog_list",
       "_type": "request",
       "name": "Listar Produtos",
-      "description": "Lista produtos ativos do catálogo com filtros",
+      "description": "Lista produtos ativos do cat\u00e1logo com filtros",
       "method": "GET",
       "url": "{{ _.baseUrl }}/catalog/products?search=cadeira&category=CHAIRS&page=0&size=10",
       "headers": [],
@@ -132,7 +188,7 @@
       "_id": "req_catalog_detail",
       "_type": "request",
       "name": "Detalhes do Produto",
-      "description": "Obtém detalhes de um produto específico",
+      "description": "Obt\u00e9m detalhes de um produto espec\u00edfico",
       "method": "GET",
       "url": "{{ _.baseUrl }}/catalog/products/1",
       "headers": [],
@@ -142,7 +198,7 @@
       "_id": "req_cart_add",
       "_type": "request",
       "name": "Adicionar ao Carrinho",
-      "description": "Adiciona um produto ao carrinho (aumenta quantidade se já existir) - Requer autenticação",
+      "description": "Adiciona um produto ao carrinho (aumenta quantidade se j\u00e1 existir) - Requer autentica\u00e7\u00e3o",
       "method": "POST",
       "url": "{{ _.baseUrl }}/cart/add",
       "headers": [
@@ -165,7 +221,7 @@
       "_id": "req_cart_get",
       "_type": "request",
       "name": "Ver Carrinho",
-      "description": "Retorna o carrinho atual do usuário - Requer autenticação",
+      "description": "Retorna o carrinho atual do usu\u00e1rio - Requer autentica\u00e7\u00e3o",
       "method": "GET",
       "url": "{{ _.baseUrl }}/cart",
       "headers": [
@@ -180,7 +236,7 @@
       "_id": "req_cart_decrease",
       "_type": "request",
       "name": "Diminuir Quantidade",
-      "description": "Diminui a quantidade de um item no carrinho (remove se quantidade = 1) - Requer autenticação",
+      "description": "Diminui a quantidade de um item no carrinho (remove se quantidade = 1) - Requer autentica\u00e7\u00e3o",
       "method": "PUT",
       "url": "{{ _.baseUrl }}/cart/decrease/1",
       "headers": [
@@ -195,7 +251,7 @@
       "_id": "req_cart_remove",
       "_type": "request",
       "name": "Remover Item",
-      "description": "Remove um item completamente do carrinho - Requer autenticação",
+      "description": "Remove um item completamente do carrinho - Requer autentica\u00e7\u00e3o",
       "method": "DELETE",
       "url": "{{ _.baseUrl }}/cart/1",
       "headers": [
@@ -207,245 +263,10 @@
       "parentId": "fld_cart"
     },
     {
-      "_id": "req_checkout_init",
-      "_type": "request",
-      "name": "Iniciar Checkout",
-      "description": "Inicia o processo de checkout e valida carrinho",
-      "method": "POST",
-      "url": "{{ _.baseUrl }}/checkout/start",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_addresses",
-      "_type": "request",
-      "name": "Listar Endereços de Entrega",
-      "description": "Lista endereços válidos para entrega",
-      "method": "GET",
-      "url": "{{ _.baseUrl }}/checkout/addresses",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_select_address",
-      "_type": "request",
-      "name": "Selecionar Endereço",
-      "description": "Seleciona o endereço de entrega",
-      "method": "POST",
-      "url": "{{ _.baseUrl }}/checkout/address",
-      "headers": [
-        {
-          "name": "Content-Type",
-          "value": "application/json"
-        },
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"addressId\": 1\n}"
-      },
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_validate_address",
-      "_type": "request",
-      "name": "Validar Endereço",
-      "description": "Valida se endereço foi selecionado",
-      "method": "POST",
-      "url": "{{ _.baseUrl }}/checkout/address/validate",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_shipping_options",
-      "_type": "request",
-      "name": "Opções de Frete",
-      "description": "Lista as opções de frete disponíveis (default e express)",
-      "method": "GET",
-      "url": "{{ _.baseUrl }}/checkout/shipping-options",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_select_shipping_default",
-      "_type": "request",
-      "name": "Selecionar Frete - Padrão",
-      "description": "Seleciona frete padrão (R$ 15,00 - 7 dias úteis)",
-      "method": "POST",
-      "url": "{{ _.baseUrl }}/checkout/shipping",
-      "headers": [
-        {
-          "name": "Content-Type",
-          "value": "application/json"
-        },
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"shippingType\": \"default\"\n}"
-      },
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_select_shipping_express",
-      "_type": "request",
-      "name": "Selecionar Frete - Expresso",
-      "description": "Seleciona frete expresso (R$ 30,00 - 2 dias úteis)",
-      "method": "POST",
-      "url": "{{ _.baseUrl }}/checkout/shipping",
-      "headers": [
-        {
-          "name": "Content-Type",
-          "value": "application/json"
-        },
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"shippingType\": \"express\"\n}"
-      },
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_validate_shipping",
-      "_type": "request",
-      "name": "Validar Frete",
-      "description": "Valida se tipo de frete foi selecionado",
-      "method": "POST",
-      "url": "{{ _.baseUrl }}/checkout/shipping/validate",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_payment_methods",
-      "_type": "request",
-      "name": "Métodos de Pagamento",
-      "description": "Lista métodos de pagamento disponíveis (BOLETO, CARD)",
-      "method": "GET",
-      "url": "{{ _.baseUrl }}/checkout/payment-methods",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_select_payment",
-      "_type": "request",
-      "name": "Selecionar Pagamento - Cartão",
-      "description": "Seleciona método de pagamento CARD com dados do cartão",
-      "method": "POST",
-      "url": "{{ _.baseUrl }}/checkout/payment",
-      "headers": [
-        {
-          "name": "Content-Type",
-          "value": "application/json"
-        },
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"method\": \"CARD\",\n  \"cardNumber\": \"4111111111111111\",\n  \"cardHolderName\": \"JOAO SILVA\",\n  \"cardExpiration\": \"12/2025\",\n  \"cardCvv\": \"123\",\n  \"installments\": 3\n}"
-      },
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_select_payment_boleto",
-      "_type": "request",
-      "name": "Selecionar Pagamento - Boleto",
-      "description": "Seleciona método de pagamento BOLETO",
-      "method": "POST",
-      "url": "{{ _.baseUrl }}/checkout/payment",
-      "headers": [
-        {
-          "name": "Content-Type",
-          "value": "application/json"
-        },
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"method\": \"BOLETO\"\n}"
-      },
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_validate_payment",
-      "_type": "request",
-      "name": "Validar Pagamento",
-      "description": "Valida se método de pagamento foi selecionado",
-      "method": "POST",
-      "url": "{{ _.baseUrl }}/checkout/payment/validate",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "parentId": "fld_checkout"
-    },
-    {
-      "_id": "req_checkout_finalize",
-      "_type": "request",
-      "name": "Finalizar Checkout",
-      "description": "Finaliza o processo de checkout (cria pedido)",
-      "method": "POST",
-      "url": "{{ _.baseUrl }}/checkout/finalize",
-      "headers": [
-        {
-          "name": "Authorization",
-          "value": "Bearer {{ _.token }}"
-        }
-      ],
-      "parentId": "fld_checkout"
-    },
-    {
       "_id": "req_address_list",
       "_type": "request",
-      "name": "Listar Endereços",
-      "description": "Lista todos os endereços do usuário",
+      "name": "Listar Endere\u00e7os",
+      "description": "Lista todos os endere\u00e7os do usu\u00e1rio",
       "method": "GET",
       "url": "{{ _.baseUrl }}/addresses",
       "headers": [
@@ -459,8 +280,8 @@
     {
       "_id": "req_address_create",
       "_type": "request",
-      "name": "Criar Endereço",
-      "description": "Cria um novo endereço",
+      "name": "Criar Endere\u00e7o",
+      "description": "Cria um novo endere\u00e7o",
       "method": "POST",
       "url": "{{ _.baseUrl }}/addresses",
       "headers": [
@@ -475,15 +296,15 @@
       ],
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"street\": \"Rua das Flores\",\n  \"number\": \"123\",\n  \"complement\": \"Apto 45\",\n  \"neighborhood\": \"Centro\",\n  \"city\": \"São Paulo\",\n  \"state\": \"SP\",\n  \"zipCode\": \"01234567\"\n}"
+        "text": "{\n  \"street\": \"Rua das Flores\",\n  \"number\": \"123\",\n  \"complement\": \"Apto 45\",\n  \"neighborhood\": \"Centro\",\n  \"city\": \"S\u00e3o Paulo\",\n  \"state\": \"SP\",\n  \"zipCode\": \"01234567\"\n}"
       },
       "parentId": "fld_addresses"
     },
     {
       "_id": "req_address_update",
       "_type": "request",
-      "name": "Atualizar Endereço",
-      "description": "Atualiza um endereço existente",
+      "name": "Atualizar Endere\u00e7o",
+      "description": "Atualiza um endere\u00e7o existente",
       "method": "PUT",
       "url": "{{ _.baseUrl }}/addresses/1",
       "headers": [
@@ -498,15 +319,15 @@
       ],
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"street\": \"Rua Nova\",\n  \"number\": \"456\",\n  \"complement\": \"Casa\",\n  \"neighborhood\": \"Jardins\",\n  \"city\": \"São Paulo\",\n  \"state\": \"SP\",\n  \"zipCode\": \"01234999\"\n}"
+        "text": "{\n  \"street\": \"Rua Nova\",\n  \"number\": \"456\",\n  \"complement\": \"Casa\",\n  \"neighborhood\": \"Jardins\",\n  \"city\": \"S\u00e3o Paulo\",\n  \"state\": \"SP\",\n  \"zipCode\": \"01234999\"\n}"
       },
       "parentId": "fld_addresses"
     },
     {
       "_id": "req_address_delete",
       "_type": "request",
-      "name": "Deletar Endereço",
-      "description": "Remove um endereço",
+      "name": "Deletar Endere\u00e7o",
+      "description": "Remove um endere\u00e7o",
       "method": "DELETE",
       "url": "{{ _.baseUrl }}/addresses/1",
       "headers": [
@@ -521,7 +342,7 @@
       "_id": "req_profile",
       "_type": "request",
       "name": "Meu Perfil",
-      "description": "Retorna dados do usuário autenticado",
+      "description": "Retorna dados do usu\u00e1rio autenticado",
       "method": "GET",
       "url": "{{ _.baseUrl }}/users/profile",
       "headers": [
@@ -551,7 +372,7 @@
       ],
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"name\": \"Cadeira Gamer Pro\",\n  \"description\": \"Cadeira ergonômica para gamers profissionais\",\n  \"category\": \"CHAIRS\",\n  \"price\": 1299.90,\n  \"rating\": 4.5,\n  \"quantity\": 50,\n  \"image\": \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\"\n}"
+        "text": "{\n  \"name\": \"Cadeira Gamer Pro\",\n  \"description\": \"Cadeira ergon\u00f4mica para gamers profissionais\",\n  \"category\": \"CHAIRS\",\n  \"price\": 1299.90,\n  \"rating\": 4.5,\n  \"quantity\": 50,\n  \"images\": [\n    \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\",\n    \"data:image/jpeg;base64,/9j/4BBRSkZJRg...\",\n    \"data:image/jpeg;base64,/9j/4CCSSkZJRg...\"\n  ]\n}"
       },
       "parentId": "fld_products_admin"
     },
@@ -559,7 +380,7 @@
       "_id": "req_product_list",
       "_type": "request",
       "name": "Listar Produtos",
-      "description": "Lista todos os produtos (com paginação)",
+      "description": "Lista todos os produtos (com pagina\u00e7\u00e3o)",
       "method": "GET",
       "url": "{{ _.baseUrl }}/products?search=cadeira&page=0&size=10",
       "headers": [
@@ -574,7 +395,7 @@
       "_id": "req_product_get",
       "_type": "request",
       "name": "Obter Produto",
-      "description": "Obtém detalhes de um produto específico",
+      "description": "Obt\u00e9m detalhes de um produto espec\u00edfico",
       "method": "GET",
       "url": "{{ _.baseUrl }}/products/1",
       "headers": [
@@ -604,7 +425,7 @@
       ],
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"name\": \"Cadeira Gamer Pro Max\",\n  \"description\": \"Cadeira ergonômica premium\",\n  \"category\": \"CHAIRS\",\n  \"price\": 1499.90,\n  \"rating\": 5.0,\n  \"quantity\": 30,\n  \"image\": \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\"\n}"
+        "text": "{\n  \"name\": \"Cadeira Gamer Pro Max\",\n  \"description\": \"Cadeira ergon\u00f4mica premium\",\n  \"category\": \"CHAIRS\",\n  \"price\": 1499.90,\n  \"rating\": 5.0,\n  \"quantity\": 30,\n  \"images\": [\n    \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\",\n    \"data:image/jpeg;base64,/9j/4BBRSkZJRg...\"\n  ]\n}"
       },
       "parentId": "fld_products_admin"
     },
@@ -641,8 +462,8 @@
     {
       "_id": "req_user_create",
       "_type": "request",
-      "name": "Criar Usuário",
-      "description": "Cria um novo usuário (Admin/Backoffice)",
+      "name": "Criar Usu\u00e1rio",
+      "description": "Cria um novo usu\u00e1rio (Admin/Backoffice)",
       "method": "POST",
       "url": "{{ _.baseUrl }}/users",
       "headers": [
@@ -664,8 +485,8 @@
     {
       "_id": "req_user_list",
       "_type": "request",
-      "name": "Listar Usuários por Role",
-      "description": "Lista usuários filtrados por role (CUSTOMER, ADMIN, BACKOFFICE)",
+      "name": "Listar Usu\u00e1rios por Role",
+      "description": "Lista usu\u00e1rios filtrados por role (CUSTOMER, ADMIN, BACKOFFICE)",
       "method": "GET",
       "url": "{{ _.baseUrl }}/users/all/CUSTOMER",
       "headers": [
@@ -679,8 +500,8 @@
     {
       "_id": "req_user_get",
       "_type": "request",
-      "name": "Obter Usuário",
-      "description": "Obtém dados de um usuário específico",
+      "name": "Obter Usu\u00e1rio",
+      "description": "Obt\u00e9m dados de um usu\u00e1rio espec\u00edfico",
       "method": "GET",
       "url": "{{ _.baseUrl }}/users/1",
       "headers": [
@@ -694,8 +515,8 @@
     {
       "_id": "req_user_update",
       "_type": "request",
-      "name": "Atualizar Usuário",
-      "description": "Atualiza dados de um usuário",
+      "name": "Atualizar Usu\u00e1rio",
+      "description": "Atualiza dados de um usu\u00e1rio",
       "method": "PUT",
       "url": "{{ _.baseUrl }}/users/1",
       "headers": [
@@ -717,8 +538,8 @@
     {
       "_id": "req_user_toggle_status",
       "_type": "request",
-      "name": "Ativar/Desativar Usuário",
-      "description": "Alterna o status de ativo/inativo do usuário",
+      "name": "Ativar/Desativar Usu\u00e1rio",
+      "description": "Alterna o status de ativo/inativo do usu\u00e1rio",
       "method": "PATCH",
       "url": "{{ _.baseUrl }}/users/1/status?active=true",
       "headers": [

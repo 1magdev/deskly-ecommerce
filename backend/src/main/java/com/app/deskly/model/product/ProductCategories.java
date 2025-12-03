@@ -1,4 +1,4 @@
-package com.app.deskly.model;
+package com.app.deskly.model.product;
 
 public enum ProductCategories {
     Monitor,

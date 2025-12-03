@@ -1,8 +1,9 @@
 package com.app.deskly.dto.product;
 
 import java.math.BigDecimal;
+import java.util.List;
 
-import com.app.deskly.model.ProductCategories;
+import com.app.deskly.model.product.ProductCategories;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -33,8 +34,7 @@ public class ProductCreateDTO {
     @Min(0)
     private Integer quantity;
 
-    @NotBlank(message = "Insira uma imagem válida")
-    private String image;
+    private List<String> images;
 
     @NotNull(message = "A categoria do produto é obrigatória.")
     private ProductCategories category;

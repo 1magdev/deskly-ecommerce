@@ -3,7 +3,7 @@ package com.app.deskly.service;
 import com.app.deskly.dto.address.AddressRequestDTO;
 import com.app.deskly.dto.address.AddressResponseDTO;
 import com.app.deskly.model.Address;
-import com.app.deskly.model.user.User;
+import com.app.deskly.model.user.Customer;
 import com.app.deskly.repository.AddressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,23 +19,23 @@ public class AddressService {
     @Autowired
     private AddressRepository addressRepository;
 
-    public List<AddressResponseDTO> listAddresses(User user) {
+    public List<AddressResponseDTO> listAddresses(Customer user) {
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado.");
         }
 
-        List<Address> addresses = addressRepository.findByUserAndDeliveryAddressTrue(user);
+        List<Address> addresses = addressRepository.findByCustomerAndDeliveryAddressTrue(user);
 
         return addresses.stream().map(this::toResponse).collect(Collectors.toList());
     }
 
-    public AddressResponseDTO createAddress(User user, AddressRequestDTO dto) {
+    public AddressResponseDTO createAddress(Customer user, AddressRequestDTO dto) {
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado.");
         }
 
         Address address = new Address();
-        address.setUser(user);
+        address.setCustomer(user);
         address.setLabel(dto.getLabel());
         address.setStreet(dto.getStreet());
         address.setNumber(dto.getNumber());
@@ -50,7 +50,7 @@ public class AddressService {
         return toResponse(saved);
     }
 
-    public AddressResponseDTO updateAddress(User user, Long id, AddressRequestDTO dto) {
+    public AddressResponseDTO updateAddress(Customer user, Long id, AddressRequestDTO dto) {
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado.");
         }
@@ -58,7 +58,7 @@ public class AddressService {
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Endereço não encontrado."));
 
-        if (!address.getUser().getId().equals(user.getId())) {
+        if (!address.getCustomer().getId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Endereço não pertence ao usuário logado.");
         }
 
@@ -76,7 +76,7 @@ public class AddressService {
         return toResponse(saved);
     }
 
-    public void deleteAddress(User user, Long id) {
+    public void deleteAddress(Customer user, Long id) {
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado.");
         }
@@ -84,7 +84,7 @@ public class AddressService {
         Address address = addressRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Endereço não encontrado."));
 
-        if (!address.getUser().getId().equals(user.getId())) {
+        if (!address.getCustomer().getId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Endereço não pertence ao usuário logado.");
         }
 

@@ -1,5 +1,6 @@
 package com.app.deskly.model;
 
+import com.app.deskly.model.product.Product;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;

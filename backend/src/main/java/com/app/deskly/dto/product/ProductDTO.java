@@ -2,7 +2,7 @@ package com.app.deskly.dto.product;
 
 import java.math.BigDecimal;
 
-import com.app.deskly.model.ProductCategories;
+import com.app.deskly.model.product.ProductCategories;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 

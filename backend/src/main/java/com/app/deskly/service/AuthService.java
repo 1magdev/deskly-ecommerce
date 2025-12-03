@@ -1,6 +1,7 @@
 package com.app.deskly.service;
 
 import com.app.deskly.dto.auth.AuthResponseDTO;
+import com.app.deskly.dto.customer.CustomerRequestDTO;
 import com.app.deskly.dto.user.UserRequestDTO;
 import com.app.deskly.model.UserRoles;
 import com.app.deskly.model.user.AuthenticatedUser;
@@ -36,7 +37,8 @@ public class AuthService {
     @Autowired
     private CustomerService customerService;
 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    ;
 
     @Value("${env.jwt.expiration}")
     private long jwtExpiration;
@@ -48,6 +50,7 @@ public class AuthService {
     public void init() {
         this.jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
+
 
     public String login(String email, String password) {
         Optional<Customer> customerOpt = customerRepository.findByEmail(email);
@@ -77,11 +80,7 @@ public class AuthService {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Credênciais inválidas!");
     }
 
-    public AuthResponseDTO register(UserRequestDTO userData){
-       if (userData.getRole() != UserRoles.CUSTOMER) {
-            throw new IllegalArgumentException("Não é possível se registrar como ADMIN ou ESTOQUISTA");
-        }
-
+    public AuthResponseDTO register(CustomerRequestDTO userData) {
         Customer customer = customerService.create(userData);
         String token = this.generateTokenCustomer(customer);
 
@@ -129,7 +128,8 @@ public class AuthService {
 
     public Optional<AuthenticatedUser> getUserFromToken(String token) {
         try {
-            Claims claims = validateToken(token);
+            String parsedToken = token.replaceAll("Bearer ", "");
+            Claims claims = validateToken(parsedToken);
             Long userId = Long.valueOf(claims.getSubject());
             String role = claims.get("role", String.class);
 
@@ -143,7 +143,9 @@ public class AuthService {
     }
 
     public Long getUserIdFromToken(String token) {
-            Claims claims = validateToken(token);
-            return Long.valueOf(claims.getSubject());
+        String parsedToken = token.replaceAll("Bearer ", "");
+        System.out.println(parsedToken);
+        Claims claims = validateToken(parsedToken);
+        return Long.valueOf(claims.getSubject());
     }
 }

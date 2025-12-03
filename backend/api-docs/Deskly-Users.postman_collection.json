@@ -204,29 +204,37 @@
       ]
     },
     {
-      "name": "04 - Checkout",
-      "description": "⚠️ DESABILITADO - Processo de finalização da compra (endpoints comentados no backend)",
+      "name": "04 - Pedidos",
+      "description": "Gerenciamento de pedidos do cliente",
       "item": [
         {
-          "name": "Iniciar Checkout",
+          "name": "Criar Pedido",
           "request": {
             "method": "POST",
             "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
               {
                 "key": "Authorization",
                 "value": "Bearer {{token}}"
               }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/checkout/start",
-              "host": ["{{baseUrl}}"],
-              "path": ["checkout", "start"]
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shippingValue\": 15.00,\n  \"addressId\": 1,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 2\n    },\n    {\n      \"productId\": 3,\n      \"quantity\": 1\n    }\n  ]\n}"
             },
-            "description": "Inicia o processo de checkout e valida carrinho"
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            },
+            "description": "Cria um novo pedido - Requer autenticação"
           }
         },
         {
-          "name": "Listar Endereços de Entrega",
+          "name": "Listar Meus Pedidos",
           "request": {
             "method": "GET",
             "header": [
@@ -236,59 +244,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/checkout/addresses",
+              "raw": "{{baseUrl}}/orders",
               "host": ["{{baseUrl}}"],
-              "path": ["checkout", "addresses"]
+              "path": ["orders"]
             },
-            "description": "Lista endereços válidos para entrega"
+            "description": "Lista todos os pedidos do cliente autenticado (ordenados por data) - Requer autenticação"
           }
         },
         {
-          "name": "Selecionar Endereço",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"addressId\": 1\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/checkout/address",
-              "host": ["{{baseUrl}}"],
-              "path": ["checkout", "address"]
-            },
-            "description": "Seleciona o endereço de entrega"
-          }
-        },
-        {
-          "name": "Validar Endereço",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/checkout/address/validate",
-              "host": ["{{baseUrl}}"],
-              "path": ["checkout", "address", "validate"]
-            },
-            "description": "Valida se endereço foi selecionado"
-          }
-        },
-        {
-          "name": "Opções de Frete",
+          "name": "Detalhes do Pedido",
           "request": {
             "method": "GET",
             "header": [
@@ -298,187 +262,11 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/checkout/shipping-options",
+              "raw": "{{baseUrl}}/orders/1",
               "host": ["{{baseUrl}}"],
-              "path": ["checkout", "shipping-options"]
+              "path": ["orders", "1"]
             },
-            "description": "Lista as opções de frete disponíveis (default e express)"
-          }
-        },
-        {
-          "name": "Selecionar Frete - Padrão",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"shippingType\": \"default\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/checkout/shipping",
-              "host": ["{{baseUrl}}"],
-              "path": ["checkout", "shipping"]
-            },
-            "description": "Seleciona frete padrão (R$ 15,00 - 7 dias úteis)"
-          }
-        },
-        {
-          "name": "Selecionar Frete - Expresso",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"shippingType\": \"express\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/checkout/shipping",
-              "host": ["{{baseUrl}}"],
-              "path": ["checkout", "shipping"]
-            },
-            "description": "Seleciona frete expresso (R$ 30,00 - 2 dias úteis)"
-          }
-        },
-        {
-          "name": "Validar Frete",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/checkout/shipping/validate",
-              "host": ["{{baseUrl}}"],
-              "path": ["checkout", "shipping", "validate"]
-            },
-            "description": "Valida se tipo de frete foi selecionado"
-          }
-        },
-        {
-          "name": "Métodos de Pagamento",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/checkout/payment-methods",
-              "host": ["{{baseUrl}}"],
-              "path": ["checkout", "payment-methods"]
-            },
-            "description": "Lista métodos de pagamento disponíveis (BOLETO, CARD)"
-          }
-        },
-        {
-          "name": "Selecionar Pagamento - Cartão",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"method\": \"CARD\",\n  \"cardNumber\": \"4111111111111111\",\n  \"cardHolderName\": \"JOAO SILVA\",\n  \"cardExpiration\": \"12/2025\",\n  \"cardCvv\": \"123\",\n  \"installments\": 3\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/checkout/payment",
-              "host": ["{{baseUrl}}"],
-              "path": ["checkout", "payment"]
-            },
-            "description": "Seleciona método de pagamento CARD com dados do cartão"
-          }
-        },
-        {
-          "name": "Selecionar Pagamento - Boleto",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"method\": \"BOLETO\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/checkout/payment",
-              "host": ["{{baseUrl}}"],
-              "path": ["checkout", "payment"]
-            },
-            "description": "Seleciona método de pagamento BOLETO"
-          }
-        },
-        {
-          "name": "Validar Pagamento",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/checkout/payment/validate",
-              "host": ["{{baseUrl}}"],
-              "path": ["checkout", "payment", "validate"]
-            },
-            "description": "Valida se método de pagamento foi selecionado"
-          }
-        },
-        {
-          "name": "Finalizar Checkout",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/checkout/finalize",
-              "host": ["{{baseUrl}}"],
-              "path": ["checkout", "finalize"]
-            },
-            "description": "Finaliza o processo de checkout (cria pedido)"
+            "description": "Obtém detalhes de um pedido específico - Requer autenticação"
           }
         }
       ]
@@ -521,7 +309,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"street\": \"Rua das Flores\",\n  \"number\": \"123\",\n  \"complement\": \"Apto 45\",\n  \"neighborhood\": \"Centro\",\n  \"city\": \"São Paulo\",\n  \"state\": \"SP\",\n  \"zipCode\": \"01234567\"\n}"
+              "raw": "{\n  \"label\": \"Casa\",\n  \"street\": \"Rua das Flores\",\n  \"number\": \"123\",\n  \"complement\": \"Apto 45\",\n  \"district\": \"Centro\",\n  \"city\": \"São Paulo\",\n  \"state\": \"SP\",\n  \"zipCode\": \"01234567\",\n  \"deliveryAddress\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/addresses",
@@ -547,7 +335,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"street\": \"Rua Nova\",\n  \"number\": \"456\",\n  \"complement\": \"Casa\",\n  \"neighborhood\": \"Jardins\",\n  \"city\": \"São Paulo\",\n  \"state\": \"SP\",\n  \"zipCode\": \"01234999\"\n}"
+              "raw": "{\n  \"label\": \"Trabalho\",\n  \"street\": \"Rua Nova\",\n  \"number\": \"456\",\n  \"complement\": \"Sala 10\",\n  \"district\": \"Jardins\",\n  \"city\": \"São Paulo\",\n  \"state\": \"SP\",\n  \"zipCode\": \"01234999\",\n  \"deliveryAddress\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/addresses/1",
@@ -621,7 +409,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Cadeira Gamer Pro\",\n  \"description\": \"Cadeira ergonômica para gamers profissionais\",\n  \"category\": \"CHAIRS\",\n  \"price\": 1299.90,\n  \"rating\": 4.5,\n  \"quantity\": 50,\n  \"image\": \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\"\n}"
+              "raw": "{\n  \"name\": \"Cadeira Gamer Pro\",\n  \"description\": \"Cadeira ergonômica para gamers profissionais\",\n  \"category\": \"CHAIRS\",\n  \"price\": 1299.90,\n  \"rating\": 4.5,\n  \"quantity\": 50,\n  \"images\": [\n    \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\",\n    \"data:image/jpeg;base64,/9j/4BBRSkZJRg...\",\n    \"data:image/jpeg;base64,/9j/4CCSSkZJRg...\"\n  ]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/products",
@@ -697,7 +485,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Cadeira Gamer Pro Max\",\n  \"description\": \"Cadeira ergonômica premium\",\n  \"category\": \"CHAIRS\",\n  \"price\": 1499.90,\n  \"rating\": 5.0,\n  \"quantity\": 30,\n  \"image\": \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\"\n}"
+              "raw": "{\n  \"name\": \"Cadeira Gamer Pro Max\",\n  \"description\": \"Cadeira ergonômica premium\",\n  \"category\": \"CHAIRS\",\n  \"price\": 1499.90,\n  \"rating\": 5.0,\n  \"quantity\": 30,\n  \"images\": [\n    \"data:image/jpeg;base64,/9j/4AAQSkZJRg...\",\n    \"data:image/jpeg;base64,/9j/4BBRSkZJRg...\"\n  ]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/products/1",

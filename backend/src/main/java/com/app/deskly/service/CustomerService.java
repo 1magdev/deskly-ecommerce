@@ -1,5 +1,6 @@
 package com.app.deskly.service;
 
+import com.app.deskly.dto.customer.CustomerRequestDTO;
 import com.app.deskly.dto.user.UpdateUserDTO;
 import com.app.deskly.dto.user.UserRequestDTO;
 import com.app.deskly.model.UserRoles;
@@ -24,7 +25,7 @@ public class CustomerService {
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public Customer create(UserRequestDTO dto) {
+    public Customer create(CustomerRequestDTO dto) {
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "senhas não coincidem");
         }

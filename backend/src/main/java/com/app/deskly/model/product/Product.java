@@ -1,4 +1,4 @@
-package com.app.deskly.model;
+package com.app.deskly.model.product;
 
 import jakarta.persistence.*;
 import lombok.Data;

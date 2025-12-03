@@ -1,6 +1,6 @@
 package com.app.deskly.model;
 
-import com.app.deskly.model.user.User;
+import com.app.deskly.model.user.Customer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class Address {
     private String street;
     private String number;
     private String complement;
-    private String district; 
+    private String district;
     private String city;
     private String state;
     private String zipCode;
@@ -27,7 +27,7 @@ public class Address {
     private boolean deliveryAddress = true;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "customer_id")
     @JsonIgnore
-    private User user;
+    private Customer customer;
 }

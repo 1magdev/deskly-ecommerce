@@ -21,8 +21,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.app.deskly.dto.product.ProductCreateDTO;
 import com.app.deskly.dto.product.ProductResponseDTO;
-import com.app.deskly.model.Product;
+import com.app.deskly.model.product.Product;
+import com.app.deskly.model.product.ProductImage;
 import com.app.deskly.model.Stock;
+import com.app.deskly.repository.ProductImageRepository;
 import com.app.deskly.repository.ProductRepository;
 import com.app.deskly.repository.StockRepository;
 
@@ -31,6 +33,9 @@ public class ProductService {
 
   @Autowired
   private ProductRepository productRepository;
+
+  @Autowired
+  private ProductImageRepository productImageRepository;
 
   @Autowired
   private StockRepository stockRepository;
@@ -44,6 +49,9 @@ public class ProductService {
       Stock stock = stockRepository.findByProductId(product.getId()).orElse(null);
       Integer quantity = stock != null ? stock.getQuantity() : 0;
 
+      List<ProductImage> productImages = productImageRepository.findByProductOrderByMainDesc(product);
+      List<String> images = productImages.stream().map(ProductImage::getImageBase64).toList();
+
       return new ProductResponseDTO(
           product.getId(),
           product.getName(),
@@ -52,7 +60,8 @@ public class ProductService {
           product.getActive(),
           product.getDescription(),
           product.getRating(),
-          product.getProductImage());
+          product.getProductImage(),
+          images);
     }).toList();
   }
 
@@ -63,6 +72,9 @@ public class ProductService {
     Stock productOnStock = stockRepository.findByProductId(product.getId()).orElse(null);
     Integer quantity = productOnStock != null ? productOnStock.getQuantity() : 0;
 
+    List<ProductImage> productImages = productImageRepository.findByProductOrderByMainDesc(product);
+    List<String> images = productImages.stream().map(ProductImage::getImageBase64).toList();
+
     return new ProductResponseDTO(
         product.getId(),
         product.getName(),
@@ -71,7 +83,8 @@ public class ProductService {
         product.getActive(),
         product.getDescription(),
         product.getRating(),
-        product.getProductImage());
+        product.getProductImage(),
+        images);
   }
 
   // *** Back-office ***
@@ -90,8 +103,19 @@ public class ProductService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Produto não encontrado"));
   }
 
-  public Product create(Product product, Integer quantity) {
+  public Product create(Product product, Integer quantity, List<String> images) {
       Product createdProduct = productRepository.save(product);
+
+      if (images != null && !images.isEmpty()) {
+          for (int i = 0; i < images.size(); i++) {
+              ProductImage productImage = new ProductImage();
+              productImage.setProduct(createdProduct);
+              productImage.setImageBase64(images.get(i));
+              productImage.setMain(i == 0);
+              productImageRepository.save(productImage);
+          }
+      }
+
       if (quantity != null && quantity >= 0) {
           Stock stock = stockRepository.findByProductId(createdProduct.getId())
                   .orElseGet(() -> {

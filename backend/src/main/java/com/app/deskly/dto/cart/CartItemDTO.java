@@ -1,6 +1,6 @@
 package com.app.deskly.dto.cart;
 
-import com.app.deskly.model.Product;
+import com.app.deskly.model.product.Product;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

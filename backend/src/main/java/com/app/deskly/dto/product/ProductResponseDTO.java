@@ -1,6 +1,7 @@
 package com.app.deskly.dto.product;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,4 +17,5 @@ public class ProductResponseDTO {
     private String description;
     private Double rating;
     private String productImage;
+    private List<String> images;
 }
