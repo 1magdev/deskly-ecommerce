@@ -17,6 +17,10 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cepService } from "@/services/cep.service";
+import { toast } from "sonner";
 
 type ShippingType = "normal" | "express" | "economico";
 
@@ -58,6 +62,9 @@ export default function CartPage() {
   const { isAuthenticated } = useAuth();
   const [selectedShipping, setSelectedShipping] =
     useState<ShippingType>("normal");
+  const [cep, setCep] = useState("");
+  const [cepError, setCepError] = useState("");
+  const [cepLoading, setCepLoading] = useState(false);
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -69,6 +76,42 @@ export default function CartPage() {
     0;
 
   const total = subtotal + shippingCost;
+
+  const handleCepChange = async (value: string) => {
+    // Remove caracteres não numéricos
+    const cleanCep = value.replace(/\D/g, "");
+    setCep(cleanCep);
+
+    if (cleanCep.length === 8) {
+      setCepLoading(true);
+      setCepError("");
+      try {
+        const cepData = await cepService.buscarCEP(cleanCep);
+        if (cepData?.erro) {
+          setCepError("CEP não encontrado");
+        } else {
+          setCepError("");
+          toast.success(`CEP encontrado: ${cepData?.localidade || ""} - ${cepData?.uf || ""}`);
+        }
+      } catch (error) {
+        setCepError("Erro ao buscar CEP");
+      } finally {
+        setCepLoading(false);
+      }
+    } else if (cleanCep.length > 0) {
+      setCepError("CEP deve ter 8 dígitos");
+    } else {
+      setCepError("");
+    }
+  };
+
+  const formatCep = (value: string) => {
+    const cleanCep = value.replace(/\D/g, "");
+    if (cleanCep.length <= 8) {
+      return cleanCep.replace(/(\d{5})(\d{3})/, "$1-$2");
+    }
+    return value;
+  };
 
   if (items.length === 0) {
     return (
@@ -182,8 +225,42 @@ export default function CartPage() {
 
                   <div className="border-t pt-4">
                     <h3 className="font-semibold mb-3 text-lg">
-                      Opções de Frete
+                      Calcular Frete
                     </h3>
+                    
+                    {/* Campo CEP */}
+                    <div className="mb-4">
+                      <Label htmlFor="cep" className="text-sm font-medium mb-2 block">
+                        CEP de Entrega
+                      </Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="cep"
+                          type="text"
+                          placeholder="00000-000"
+                          value={formatCep(cep)}
+                          onChange={(e) => handleCepChange(e.target.value)}
+                          maxLength={9}
+                          className={cepError ? "border-red-500" : ""}
+                          disabled={cepLoading}
+                        />
+                        {cepLoading && (
+                          <div className="flex items-center px-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                          </div>
+                        )}
+                      </div>
+                      {cepError && (
+                        <p className="text-sm text-red-500 mt-1">{cepError}</p>
+                      )}
+                      {cep.length === 8 && !cepError && (
+                        <p className="text-sm text-green-600 mt-1">CEP válido</p>
+                      )}
+                    </div>
+
+                    <h4 className="font-semibold mb-3 text-base">
+                      Opções de Frete
+                    </h4>
                     <div className="space-y-3">
                       {shippingOptions.map((option) => (
                         <div

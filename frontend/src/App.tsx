@@ -12,6 +12,8 @@ import { LoginPage } from "./pages/Auth/LoginPage";
 import { RegisterPage } from "./pages/Auth/RegisterPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { ProductsPage } from "./pages/ProductsPage";
+import { OrdersPage } from "./pages/OrdersPage";
+import { OrderDetailPage } from "./pages/OrderDetailPage";
 
 function App() {
   return (
@@ -36,6 +38,22 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/cadastro" element={<RegisterPage />} />
               <Route path="/perfil" element={<ProfilePage />} />
+              <Route
+                path="/pedidos"
+                element={
+                  <ProtectedRoute>
+                    <OrdersPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/pedido/:id"
+                element={
+                  <ProtectedRoute>
+                    <OrderDetailPage />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
             <Toaster position="top-right" richColors />
           </div>

@@ -13,7 +13,7 @@ import type {
 } from "@/types/api.types";
 import { PRODUCT_CATEGORIES } from "@/types/api.types";
 import { toast } from "sonner";
-import { Upload, Trash2, CheckCircle, ImageIcon, Info } from "lucide-react";
+import { Upload, Trash2, CheckCircle, ImageIcon, Info, Star, X } from "lucide-react";
 
 interface FormErrors {
   name?: string;
@@ -24,6 +24,12 @@ interface FormErrors {
   category?: string;
 }
 
+interface ImageData {
+  base64: string;
+  preview: string;
+  isMain: boolean;
+}
+
 interface FormData {
   name: string;
   description: string;
@@ -31,8 +37,7 @@ interface FormData {
   rating?: number;
   quantity?: number;
   category?: ProductCategory;
-  imageBase64?: string;
-  imagePreview?: string;
+  images: ImageData[];
 }
 
 const INITIAL_FORM_DATA: FormData = {
@@ -42,8 +47,7 @@ const INITIAL_FORM_DATA: FormData = {
   rating: 0,
   quantity: 0,
   category: undefined,
-  imageBase64: undefined,
-  imagePreview: undefined,
+  images: [],
 };
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -67,6 +71,30 @@ export function ProductFormPage() {
     try {
       setLoading(true);
       const product = await productService.getProductById(productId);
+      
+      // Carregar imagens do produto
+      const images: ImageData[] = [];
+      if (product.images && product.images.length > 0) {
+        product.images.forEach((img, index) => {
+          const base64 = img.includes("data:image/") ? img : `data:image/png;base64,${img}`;
+          images.push({
+            base64: img,
+            preview: base64,
+            isMain: index === 0, // Primeira imagem é principal por padrão
+          });
+        });
+      } else if (product.productImage) {
+        // Fallback para productImage antigo
+        const base64 = product.productImage.includes("data:image/") 
+          ? product.productImage 
+          : `data:image/png;base64,${product.productImage}`;
+        images.push({
+          base64: product.productImage,
+          preview: base64,
+          isMain: true,
+        });
+      }
+      
       setFormData({
         name: product.name,
         description: product.description || "",
@@ -74,14 +102,7 @@ export function ProductFormPage() {
         rating: product.rating,
         quantity: product.quantity,
         category: product.category,
-        imageBase64: product.productImage,
-        imagePreview: product.productImage
-          ? `${
-              !product.productImage.includes("data:image/")
-                ? "data:image/png;base64"
-                : ""
-            }${product.productImage}`
-          : undefined,
+        images,
       });
     } catch (error) {
       toast.error(
@@ -138,6 +159,16 @@ export function ProductFormPage() {
     try {
       setLoading(true);
 
+      // Extrair base64 das imagens (manter formato completo com data:image prefix)
+      // O backend aceita o formato completo conforme documentação da API
+      // Ordenar para colocar a imagem principal primeiro (backend marca primeira como principal)
+      const sortedImages = [...formData.images].sort((a, b) => {
+        if (a.isMain) return -1;
+        if (b.isMain) return 1;
+        return 0;
+      });
+      const imagesBase64 = sortedImages.map(img => img.base64);
+
       if (isEditing && id) {
         const updateData: ProductUpdateRequest = {
           name: formData.name,
@@ -146,7 +177,7 @@ export function ProductFormPage() {
           rating: formData.rating,
           quantity: formData.quantity,
           category: formData.category,
-          image: formData.imageBase64,
+          images: imagesBase64.length > 0 ? imagesBase64 : undefined,
         };
         await productService.updateProduct(parseInt(id), updateData);
         toast.success("Produto atualizado com sucesso!");
@@ -158,7 +189,7 @@ export function ProductFormPage() {
           rating: formData.rating,
           quantity: formData.quantity,
           category: formData.category!,
-          image: formData.imageBase64,
+          images: imagesBase64.length > 0 ? imagesBase64 : undefined,
         };
         await productService.createProduct(createData);
         toast.success("Produto cadastrado com sucesso!");
@@ -181,36 +212,65 @@ export function ProductFormPage() {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error("A imagem deve ter no máximo 5MB");
-      return;
-    }
+    Array.from(files).forEach((file) => {
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`${file.name}: A imagem deve ter no máximo 5MB`);
+        return;
+      }
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("Por favor, selecione apenas arquivos de imagem");
-      return;
-    }
+      if (!file.type.startsWith("image/")) {
+        toast.error(`${file.name}: Por favor, selecione apenas arquivos de imagem`);
+        return;
+      }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setFormData((prev) => ({
-        ...prev,
-        imageBase64: base64String,
-        imagePreview: base64String,
-      }));
-    };
-    reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        const isFirstImage = formData.images.length === 0;
+        
+        setFormData((prev) => ({
+          ...prev,
+          images: [
+            ...prev.images,
+            {
+              base64: base64String,
+              preview: base64String,
+              isMain: isFirstImage, // Primeira imagem é principal
+            },
+          ],
+        }));
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Limpar input para permitir selecionar o mesmo arquivo novamente
+    e.target.value = '';
   };
 
-  const handleRemoveImage = () => {
+  const handleRemoveImage = (index: number) => {
+    setFormData((prev) => {
+      const newImages = prev.images.filter((_, i) => i !== index);
+      // Se removemos a imagem principal, tornar a primeira restante como principal
+      if (prev.images[index].isMain && newImages.length > 0) {
+        newImages[0].isMain = true;
+      }
+      return {
+        ...prev,
+        images: newImages,
+      };
+    });
+  };
+
+  const handleSetMainImage = (index: number) => {
     setFormData((prev) => ({
       ...prev,
-      imageBase64: undefined,
-      imagePreview: undefined,
+      images: prev.images.map((img, i) => ({
+        ...img,
+        isMain: i === index,
+      })),
     }));
   };
 
@@ -320,12 +380,13 @@ export function ProductFormPage() {
                 <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-dashed border-primary/30 hover:border-primary/60 transition-all duration-300">
                   <label className="flex items-center gap-2 text-sm font-semibold text-dark mb-3">
                     <ImageIcon className="h-5 w-5 text-primary" />
-                    Imagem do Produto
+                    Imagens do Produto
                   </label>
 
-                  {!formData.imagePreview ? (
-                    <div className="text-center py-8">
-                      <Upload className="mx-auto h-16 w-16 text-primary/40 mb-4" />
+                  <div className="space-y-4">
+                    {/* Upload de imagens */}
+                    <div className="text-center py-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary transition-colors">
+                      <Upload className="mx-auto h-12 w-12 text-primary/40 mb-2" />
                       <div className="relative">
                         <input
                           type="file"
@@ -333,49 +394,85 @@ export function ProductFormPage() {
                           onChange={handleImageChange}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           id="image-upload"
+                          multiple
                         />
                         <label
                           htmlFor="image-upload"
-                          className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-blue-600 hover:shadow-lg hover:scale-105 transition-all duration-200 cursor-pointer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-blue-600 hover:shadow-lg transition-all duration-200 cursor-pointer"
                         >
-                          <Upload className="h-5 w-5" />
-                          Escolher Imagem
+                          <Upload className="h-4 w-4" />
+                          Adicionar Imagens
                         </label>
                       </div>
-                      <p className="mt-4 text-xs text-gray-600 flex items-center justify-center gap-1.5">
-                        <Info className="h-4 w-4 text-gray-400" />
-                        Máx: 5MB • JPG, PNG, GIF
+                      <p className="mt-2 text-xs text-gray-600 flex items-center justify-center gap-1.5">
+                        <Info className="h-3 w-3 text-gray-400" />
+                        Máx: 5MB por imagem • JPG, PNG, GIF • Múltiplas imagens
                       </p>
                     </div>
-                  ) : (
-                    <div className="space-y-4 animate-in fade-in zoom-in duration-300">
-                      <div className="relative group">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-purple-500/20 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-50"></div>
-                        <div className="relative w-full h-72 bg-white rounded-xl overflow-hidden shadow-xl border-2 border-primary/20">
-                          <img
-                            src={formData.imagePreview}
-                            alt="Preview"
-                            className="w-full h-full object-contain p-4"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent pointer-events-none"></div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleRemoveImage}
-                          className="absolute -top-2 -right-2 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-full p-2.5 hover:from-red-600 hover:to-red-700 hover:scale-110 transition-all duration-200 shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 z-10"
-                          title="Remover imagem"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
+
+                    {/* Lista de imagens */}
+                    {formData.images.length > 0 && (
+                      <div className="grid grid-cols-2 gap-4">
+                        {formData.images.map((image, index) => (
+                          <div
+                            key={index}
+                            className={`relative group rounded-lg overflow-hidden border-2 ${
+                              image.isMain
+                                ? "border-primary ring-2 ring-primary"
+                                : "border-gray-200"
+                            }`}
+                          >
+                            <div className="aspect-square bg-white">
+                              <img
+                                src={image.preview}
+                                alt={`Imagem ${index + 1}`}
+                                className="w-full h-full object-contain p-2"
+                              />
+                            </div>
+                            
+                            {/* Badge de imagem principal */}
+                            {image.isMain && (
+                              <div className="absolute top-2 left-2 bg-primary text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+                                <Star className="h-3 w-3 fill-current" />
+                                Principal
+                              </div>
+                            )}
+
+                            {/* Botões de ação */}
+                            <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              {!image.isMain && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleSetMainImage(index)}
+                                  className="bg-blue-500 text-white p-1.5 rounded-full hover:bg-blue-600 transition-colors"
+                                  title="Definir como principal"
+                                >
+                                  <Star className="h-4 w-4" />
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveImage(index)}
+                                className="bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors"
+                                title="Remover imagem"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div className="flex items-center justify-center gap-2 bg-success/10 text-success px-4 py-2.5 rounded-lg">
+                    )}
+
+                    {formData.images.length > 0 && (
+                      <div className="flex items-center gap-2 bg-success/10 text-success px-4 py-2.5 rounded-lg">
                         <CheckCircle className="h-5 w-5" />
                         <span className="text-sm font-semibold">
-                          Imagem carregada com sucesso!
+                          {formData.images.length} imagem(ns) carregada(s). A primeira será a principal.
                         </span>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

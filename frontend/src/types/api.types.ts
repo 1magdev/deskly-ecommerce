@@ -158,6 +158,7 @@ export interface Product {
   price: number;
   active: boolean;
   productImage?: string;
+  images?: string[]; // Array de imagens do produto
   category: ProductCategory;
 }
 
@@ -167,7 +168,8 @@ export interface ProductCreateRequest {
   rating?: number;
   quantity?: number;
   price: number;
-  image?: string;
+  image?: string; // Deprecated - usar images
+  images?: string[]; // Array de imagens em base64
   category: ProductCategory;
 }
 
@@ -178,7 +180,8 @@ export interface ProductUpdateRequest {
   quantity?: number;
   price?: number;
   active?: boolean;
-  image?: string;
+  image?: string; // Deprecated - usar images
+  images?: string[]; // Array de imagens em base64
   category?: ProductCategory;
 }
 
@@ -263,4 +266,33 @@ export interface PaymentRequest {
   cardHolderName?: string;
   cardExpiration?: string;
   installments?: number;
+}
+
+// Order Types
+export interface OrderItem {
+  id: number;
+  productId: number;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+}
+
+export interface Order {
+  id: number;
+  totalValue: number;
+  shippingValue: number;
+  address: Address;
+  items: OrderItem[];
+  createdAt: string;
+  status?: string; // Status do pedido (se existir no backend)
+}
+
+export interface OrderRequest {
+  shippingValue: number;
+  addressId: number;
+  items: {
+    productId: number;
+    quantity: number;
+  }[];
 }

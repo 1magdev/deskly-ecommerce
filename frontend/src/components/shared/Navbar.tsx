@@ -3,6 +3,7 @@ import {
   faList,
   faSearch,
   faUser,
+  faBox,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
@@ -91,6 +92,21 @@ export function Navbar() {
               </Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
+
+          {isAuthenticated && (
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  to="/pedidos"
+                  className="text-xl p-2 text-primary rounded-full inline-flex items-center justify-center hover:border-1 hover:bg-primary/25 hover:border-primary/80 transition-all transition-.5s"
+                  title="Meus Pedidos"
+                >
+                  <FontAwesomeIcon icon={faBox} className="mr-2" />
+                  Meus Pedidos
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+          )}
 
           <NavigationMenuItem>
             <NavigationMenuLink asChild>
