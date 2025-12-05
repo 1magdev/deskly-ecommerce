@@ -80,7 +80,17 @@ public class UserController {
         User user = userService.enableDisable(id, active);
         return ResponseEntity.ok(user);
     }
+    // alteração de usuario
 
+    @PutMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateUserDTO dto) {
+    return ResponseEntity.ok(userService);
+}
+// fim da alteração
+
+    ///// 
+    /// 
     ///// 
     
     private UserDTO toDTO(User user) {
@@ -95,4 +105,5 @@ public class UserController {
     }
 
 }
+
 
