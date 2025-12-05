@@ -1,11 +1,16 @@
 package com.app.deskly.dto.customer;
 
+import com.app.deskly.dto.address.AddressRequestDTO;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
+
 @Data
 public class CustomerRequestDTO {
 
@@ -30,5 +35,8 @@ public class CustomerRequestDTO {
         @NotBlank(message = "Confirme a senha!")
         private String confirmPassword;
 
+        @NotEmpty(message = "Pelo menos um endereço é obrigatório")
+        @Valid
+        private List<AddressRequestDTO> addresses;
 
 }
