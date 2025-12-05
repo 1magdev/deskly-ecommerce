@@ -12,8 +12,12 @@ import com.app.deskly.dto.product.ProductCreateDTO;
 import com.app.deskly.dto.product.ProductDTO;
 import com.app.deskly.dto.product.ProductUpdateDTO;
 import com.app.deskly.model.product.Product;
+import com.app.deskly.model.product.ProductImage;
 import com.app.deskly.service.ProductService;
 import com.app.deskly.repository.StockRepository;
+import com.app.deskly.repository.ProductImageRepository;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -25,6 +29,9 @@ public class ProductController {
 
   @Autowired
   private StockRepository stockRepository;
+
+  @Autowired
+  private ProductImageRepository productImageRepository;
 
   @PostMapping
   public ResponseEntity<Void> createProduct(@RequestBody ProductCreateDTO dto) {
@@ -50,7 +57,7 @@ public class ProductController {
   @PutMapping("/{id}")
   public ProductDTO updateProduct(@PathVariable Long id, @RequestBody ProductCreateDTO dto) {
     Product product = productService.getUpdatedProduct(id, dto);
-    return toDTO(productService.update(id, product, dto.getQuantity()));
+    return toDTO(productService.update(id, product, dto.getQuantity(), dto.getImages()));
   }
 
   @PatchMapping("/{id}/status")
@@ -75,6 +82,11 @@ public class ProductController {
     dto.setPrice(product.getPrice());
     dto.setActive(product.getActive());
     dto.setProductImage(product.getProductImage());
+
+    // Buscar imagens do produto
+    List<ProductImage> productImages = productImageRepository.findByProductOrderByMainDesc(product);
+    List<String> images = productImages.stream().map(ProductImage::getImageBase64).toList();
+    dto.setImages(images);
 
     // Buscar quantidade do estoque
     Integer quantity = stockRepository.findByProductId(product.getId())

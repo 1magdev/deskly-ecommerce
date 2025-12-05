@@ -306,7 +306,13 @@ export function ProductsPage() {
                           onClick={() => handleProductClick(product.id)}
                         >
                           <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
-                            {product.productImage ? (
+                            {product.images && product.images.length > 0 ? (
+                              <img
+                                src={product.images[0].includes("data:image/") ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
+                                alt={product.name}
+                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                              />
+                            ) : product.productImage ? (
                               <img
                                 src={`data:image/jpeg;base64,${product.productImage}`}
                                 alt={product.name}

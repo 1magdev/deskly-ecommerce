@@ -148,23 +148,25 @@ export function ProductListPage() {
     {
       key: "productImage",
       label: "Imagem",
-      render: (product) => (
-        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-          {product.productImage ? (
-            <img
-              src={`${
-                !product.productImage.includes("data:image/")
-                  ? "data:image/png;base64"
-                  : ""
-              }${product.productImage}`}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <Skeleton></Skeleton>
-          )}
-        </div>
-      ),
+      render: (product) => {
+        const imageToDisplay = product.images && product.images.length > 0
+          ? product.images[0]
+          : product.productImage;
+
+        return (
+          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+            {imageToDisplay ? (
+              <img
+                src={imageToDisplay.includes("data:image/") ? imageToDisplay : `data:image/png;base64,${imageToDisplay}`}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Skeleton></Skeleton>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "name",

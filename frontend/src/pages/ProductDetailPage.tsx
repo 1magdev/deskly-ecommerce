@@ -89,9 +89,9 @@ export function ProductDetailPage() {
   const inStock = !product.quantity || product.quantity > 0;
 
   const images = product.images && product.images.length > 0
-    ? product.images
+    ? product.images.map(img => img.includes("data:image/") ? img : `data:image/png;base64,${img}`)
     : product.productImage
-    ? [product.productImage]
+    ? [product.productImage.includes("data:image/") ? product.productImage : `data:image/png;base64,${product.productImage}`]
     : [];
 
   const handlePreviousImage = () => {

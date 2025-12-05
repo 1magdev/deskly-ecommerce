@@ -13,7 +13,7 @@ import type {
 } from "@/types/api.types";
 import { PRODUCT_CATEGORIES } from "@/types/api.types";
 import { toast } from "sonner";
-import { Upload, Trash2, CheckCircle, ImageIcon, Info, Star, X } from "lucide-react";
+import { Upload, CheckCircle, ImageIcon, Info, Star, X } from "lucide-react";
 
 interface FormErrors {
   name?: string;
