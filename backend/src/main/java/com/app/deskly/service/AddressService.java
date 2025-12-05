@@ -24,7 +24,7 @@ public class AddressService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado.");
         }
 
-        List<Address> addresses = addressRepository.findByCustomerAndDeliveryAddressTrue(user);
+        List<Address> addresses = addressRepository.findByCustomer(user);
 
         return addresses.stream().map(this::toResponse).collect(Collectors.toList());
     }
@@ -45,6 +45,15 @@ public class AddressService {
         address.setState(dto.getState());
         address.setZipCode(dto.getZipCode());
         address.setDeliveryAddress(dto.isDeliveryAddress());
+
+        if (dto.isDeliveryAddress()) {
+            List<Address> currentDeliveryAddresses = addressRepository.findByCustomerAndDeliveryAddressTrue(user);
+
+            for (Address addr : currentDeliveryAddresses) {
+                addr.setDeliveryAddress(false);
+                addressRepository.save(addr); // SAVE, não DELETE!
+            }
+        }
 
         Address saved = addressRepository.save(address);
         return toResponse(saved);
@@ -72,6 +81,14 @@ public class AddressService {
         address.setZipCode(dto.getZipCode());
         address.setDeliveryAddress(dto.isDeliveryAddress());
 
+        if (dto.isDeliveryAddress()) {
+            List<Address> currentDeliveryAddresses = addressRepository.findByCustomerAndDeliveryAddressTrue(user);
+
+            for (Address addr : currentDeliveryAddresses) {
+                addr.setDeliveryAddress(false);
+                addressRepository.save(addr); // SAVE, não DELETE!
+            }
+        }
         Address saved = addressRepository.save(address);
         return toResponse(saved);
     }
