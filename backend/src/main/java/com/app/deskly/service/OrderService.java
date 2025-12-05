@@ -93,6 +93,11 @@ public class OrderService {
         return orders.stream().map(this::toResponse).collect(Collectors.toList());
     }
 
+    public List<OrderResponseDTO> listAllOrders() {
+        List<Order> orders = orderRepository.findAllByOrderByCreatedAtDesc();
+        return orders.stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
     public OrderResponseDTO getOrder(Customer customer, Long id) {
         if (customer == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado.");
@@ -113,13 +118,18 @@ public class OrderService {
         return orders.map(this::toResponse);
     }
 
-    public OrderResponseDTO updateOrderStatus(Long orderId, OrderStatus newStatus) {
+    public OrderResponseDTO updateOrderStatus(Long orderId, String status) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
 
-        order.setStatus(newStatus);
-        Order updated = orderRepository.save(order);
-        return toResponse(updated);
+        try {
+            OrderStatus newStatus = OrderStatus.valueOf(status.toUpperCase());
+            order.setStatus(newStatus);
+            orderRepository.save(order);
+            return toResponse(order);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status inválido: " + status);
+        }
     }
 
     private OrderResponseDTO toResponse(Order order) {
@@ -129,6 +139,7 @@ public class OrderService {
         dto.setShippingValue(order.getShippingValue());
         dto.setStatus(order.getStatus());
         dto.setCreatedAt(order.getCreatedAt());
+        dto.setStatus(order.getStatus());
 
         AddressResponseDTO addressDto = new AddressResponseDTO();
         addressDto.setId(order.getAddress().getId());

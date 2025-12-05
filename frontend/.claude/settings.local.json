@@ -5,7 +5,8 @@
       "Bash(npm install:*)",
       "Bash(curl:*)",
       "Bash(find:*)",
-      "Bash(./mvnw clean:*)"
+      "Bash(./mvnw clean:*)",
+      "Bash(mvn clean compile:*)"
     ],
     "deny": [],
     "ask": []

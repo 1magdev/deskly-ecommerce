@@ -11,6 +11,10 @@ class OrderService {
     return apiClient.get<Order[]>('/orders');
   }
 
+  async getAllOrders(): Promise<Order[]> {
+    return apiClient.get<Order[]>('/orders/all');
+  }
+
   async getOrderById(id: number): Promise<Order> {
     return apiClient.get<Order>(`/orders/${id}`);
   }
@@ -20,7 +24,7 @@ class OrderService {
   }
 
   async updateOrderStatus(orderId: number, status: OrderStatus): Promise<Order> {
-    return apiClient.patch<Order>(`/orders/${orderId}/status`, { status });
+    return apiClient.patch<Order>(`/orders/${orderId}/status?status=${status}`);
   }
 }
 

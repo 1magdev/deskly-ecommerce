@@ -45,6 +45,13 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
+    @GetMapping("/all")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'BACKOFFICE')")
+    public ResponseEntity<List<OrderResponseDTO>> listAll() {
+        List<OrderResponseDTO> orders = orderService.listAllOrders();
+        return ResponseEntity.ok(orders);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponseDTO> get(
             @RequestHeader("Authorization") String token,
@@ -55,7 +62,7 @@ public class OrderController {
         return ResponseEntity.ok(order);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'BACKOFFICE')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'BACKOFFICE')")
     @GetMapping("/backoffice/all")
     public ResponseEntity<Page<OrderResponseDTO>> listAllForBackoffice(
             @RequestParam(defaultValue = "0") int page,
@@ -66,13 +73,13 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'BACKOFFICE')")
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'BACKOFFICE')")
     public ResponseEntity<OrderResponseDTO> updateStatus(
             @PathVariable Long id,
-            @RequestBody UpdateOrderStatusDTO body
+            @RequestParam String status
     ) {
-        OrderResponseDTO updated = orderService.updateOrderStatus(id, body.getStatus());
-        return ResponseEntity.ok(updated);
+        OrderResponseDTO order = orderService.updateOrderStatus(id, status);
+        return ResponseEntity.ok(order);
     }
 }

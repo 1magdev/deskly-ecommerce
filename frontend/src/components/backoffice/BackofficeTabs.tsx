@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Package, Users, LogOut, ShoppingCart } from "lucide-react";
+import { Package, Users, LogOut, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
@@ -69,7 +69,7 @@ export function BackofficeTabs(userData: UserData) {
                   onClick={() => navigate("/backoffice/orders")}
                   className="text-white hover:bg-gray-800"
                 >
-                  <ShoppingCart className="h-4 w-4" />
+                  <ShoppingBag className="h-4 w-4" />
                   <span>Pedidos</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>

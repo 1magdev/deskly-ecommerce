@@ -39,6 +39,10 @@ public class Order {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private OrderStatus status;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

@@ -17,4 +17,5 @@ public class OrderResponseDTO {
     private AddressResponseDTO address;
     private List<OrderItemResponseDTO> items;
     private LocalDateTime createdAt;
+    private OrderStatus status;
 }

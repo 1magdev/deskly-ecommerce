@@ -131,7 +131,7 @@ public class ProductService {
       return createdProduct;
   }
 
-  public Product update(Long id, Product updatedProduct, Integer quantity) {
+  public Product update(Long id, Product updatedProduct, Integer quantity, List<String> images) {
     Product existing = getById(id);
 
     System.out.println("Categoria: " + updatedProduct.getCategory().toString());
@@ -139,9 +139,27 @@ public class ProductService {
     existing.setName(updatedProduct.getName());
     existing.setPrice(updatedProduct.getPrice());
     existing.setCategory(updatedProduct.getCategory());
+    existing.setDescription(updatedProduct.getDescription());
+    existing.setRating(updatedProduct.getRating());
 
     if (updatedProduct.getProductImage() != null) {
       existing.setProductImage(updatedProduct.getProductImage());
+    }
+
+    // Atualizar imagens do produto
+    if (images != null && !images.isEmpty()) {
+      // Remover imagens antigas
+      List<ProductImage> existingImages = productImageRepository.findByProductOrderByMainDesc(existing);
+      productImageRepository.deleteAll(existingImages);
+
+      // Adicionar novas imagens
+      for (int i = 0; i < images.size(); i++) {
+        ProductImage productImage = new ProductImage();
+        productImage.setProduct(existing);
+        productImage.setImageBase64(images.get(i));
+        productImage.setMain(i == 0); // Primeira imagem é principal
+        productImageRepository.save(productImage);
+      }
     }
 
     if (quantity != null && quantity >= 0) {

@@ -35,7 +35,18 @@ export interface RegisterRequest {
   gender?: string;
   birthDate?: string;
   role?: "CUSTOMER" | "ADMIN" | "BACKOFFICE";
-  addresses: AddressCreateRequest[];
+  addresses?: AddressCreateRequest[];
+  addressStreet?: string;
+  addressNumber?: string;
+  addressComplement?: string;
+  addressNeighborhood?: string;
+  addressCity?: string;
+  addressState?: string;
+  addressZipcode?: string;
+  cardHolderName?: string;
+  cardLastDigits?: string;
+  cardBrand?: string;
+  cardExpiration?: string;
 }
 
 // User Types
@@ -248,7 +259,15 @@ export interface PaymentRequest {
 }
 
 // Order Types
-export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+export type OrderStatus = "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+
+export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  PENDING: "Pendente",
+  PROCESSING: "Em Processamento",
+  SHIPPED: "Enviado",
+  DELIVERED: "Entregue",
+  CANCELLED: "Cancelado",
+};
 
 export interface OrderItem {
   id: number;

@@ -32,21 +32,9 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String token) {
-        long userId = authService.getUserIdFromToken(token.replace("Bearer ", ""));
-
-        // Tentar buscar como Customer primeiro
-        try {
-            Customer customer = customerService.getById(userId);
-            return ResponseEntity.ok(customer);
-        } catch (ResponseStatusException e) {
-            // Se não encontrou como Customer, buscar como User
-            try {
-                User user = userService.getById(userId);
-                return ResponseEntity.ok(user);
-            } catch (ResponseStatusException ex) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado");
-            }
-        }
+        var authenticatedUser = authService.getUserFromToken(token)
+                .orElseThrow();
+        return ResponseEntity.ok(authenticatedUser);
     }
 
 

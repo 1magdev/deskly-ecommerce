@@ -49,7 +49,11 @@ export default function ProductGrid() {
               <CardContent
                 className={`top-0 w-64 max-h-50 min-h-50 h-100 overflow-hidden flex items-start justify-center`}
               >
-                <img src={product.productImage} className="p-3"></img>
+                <img
+                  src={product.images && product.images.length > 0 ? product.images[0] : product.productImage}
+                  className="p-3"
+                  alt={product.name}
+                />
               </CardContent>
               <CardFooter className="w-full items-center text-left bg-white py-5 rounded-2xl justify-between gap-2 flex flex-col">
                 <CardTitle className="text-xl font-bold w-60 text-center h-15">

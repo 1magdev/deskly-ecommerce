@@ -6,7 +6,7 @@ import { ProductListPage } from "@/pages/backoffice/Products/ProductListPage";
 import { ProductViewPage } from "@/pages/backoffice/Products/ProductViewPage";
 import { UserFormPage } from "@/pages/backoffice/Users/UserFormPage";
 import { UsersPage } from "@/pages/backoffice/Users/UsersPage";
-import { OrdersPage } from "@/pages/backoffice/Orders/OrdersPage";
+import { OrdersManagementPage } from "@/pages/backoffice/Orders/OrdersManagementPage";
 import { Navigate, Route } from "react-router-dom";
 
 export default function backofficeRoutes() {
@@ -77,7 +77,7 @@ export default function backofficeRoutes() {
         element={
           <ProtectedRoute requiredRole={["ADMIN", "BACKOFFICE"]}>
             <BackofficeLayout>
-              <OrdersPage />
+              <OrdersManagementPage />
             </BackofficeLayout>
           </ProtectedRoute>
         }

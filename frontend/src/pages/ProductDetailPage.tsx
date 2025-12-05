@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/contexts/CartContext";
-import { ArrowLeft, ShoppingCart, Star } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Star, ChevronLeft, ChevronRight } from "lucide-react";
 
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +18,7 @@ export function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const loadProduct = async (productId: string) => {
     try {
@@ -87,6 +88,20 @@ export function ProductDetailPage() {
   const maxQuantity = product.quantity ?? 99;
   const inStock = !product.quantity || product.quantity > 0;
 
+  const images = product.images && product.images.length > 0
+    ? product.images.map(img => img.includes("data:image/") ? img : `data:image/png;base64,${img}`)
+    : product.productImage
+    ? [product.productImage.includes("data:image/") ? product.productImage : `data:image/png;base64,${product.productImage}`]
+    : [];
+
+  const handlePreviousImage = () => {
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = () => {
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
   return (
     <PublicLayout>
       <div className="container mx-auto px-4 py-50 max-w-6xl">
@@ -100,23 +115,72 @@ export function ProductDetailPage() {
         </Button>
 
         <div className="grid md:grid-cols-2 gap-8">
-          <Card className="overflow-hidden">
-            <CardContent className="p-0">
-              {product.productImage ? (
-                <img
-                  src={product.productImage}
-                  alt={product.name}
-                  className="w-full aspect-square object-cover"
-                />
-              ) : (
-                <div className="w-full aspect-square bg-muted flex items-center justify-center">
-                  <span className="text-muted-foreground text-lg">
-                    Sem imagem
-                  </span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            <Card className="overflow-hidden relative">
+              <CardContent className="p-0">
+                {images.length > 0 ? (
+                  <>
+                    <img
+                      src={images[currentImageIndex]}
+                      alt={`${product.name} - Imagem ${currentImageIndex + 1}`}
+                      className="w-full aspect-square object-cover"
+                    />
+                    {images.length > 1 && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white"
+                          onClick={handlePreviousImage}
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white"
+                          onClick={handleNextImage}
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                          {currentImageIndex + 1} / {images.length}
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <div className="w-full aspect-square bg-muted flex items-center justify-center">
+                    <span className="text-muted-foreground text-lg">
+                      Sem imagem
+                    </span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {images.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                {images.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                      currentImageIndex === index
+                        ? "border-primary ring-2 ring-primary"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`${product.name} - Miniatura ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           <div className="flex flex-col gap-6">
             <div>
