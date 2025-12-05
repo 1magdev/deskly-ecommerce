@@ -180,10 +180,6 @@ public class ProductService {
     product.setCategory(dto.getCategory());
     product.setActive(true);
 
-    if (dto.getImage() != null) {
-      product.setProductImage(dto.getImage());
-    }
-
     return product;
 
   }
@@ -198,10 +194,6 @@ public class ProductService {
 
     if (dto.getRating() != null) {
       product.setRating(dto.getRating());
-    }
-
-    if (dto.getImage() != null) {
-      product.setProductImage(dto.getImage());
     }
 
     return product;
