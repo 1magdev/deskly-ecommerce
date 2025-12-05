@@ -22,7 +22,13 @@ public class AuthUtil {
     }
 
     public Customer getCustomerFromToken(String token) {
-        return (Customer) authService.getUserFromToken(token)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Cliente não encontrado."));
+        var authenticatedUser = authService.getUserFromToken(token)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não encontrado."));
+
+        if (authenticatedUser instanceof Customer) {
+            return (Customer) authenticatedUser;
+        }
+
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acesso negado. Apenas clientes podem acessar este recurso.");
     }
 }

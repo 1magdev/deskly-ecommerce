@@ -24,12 +24,10 @@ public class UserController {
     private AuthService authService;
 
     @GetMapping("/profile")
-    public ResponseEntity<User> getProfile(@RequestHeader("Authorization") String token) {
-        System.out.println(token);
-        long userId = authService.getUserIdFromToken(token.replace("Bearer ", ""));
-      User user = userService.getById(userId);
-        System.out.println("Profile of: " + userId);
-      return ResponseEntity.ok(user);
+    public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String token) {
+        var authenticatedUser = authService.getUserFromToken(token)
+                .orElseThrow();
+        return ResponseEntity.ok(authenticatedUser);
     }
 
 

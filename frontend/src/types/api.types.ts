@@ -34,7 +34,7 @@ export interface RegisterRequest {
   phone?: string;
   gender?: string;
   birthDate?: string;
-  role?: "CUSTOMER" | "ADMIN" | "ESTOQUISTA";
+  role?: "CUSTOMER" | "ADMIN" | "BACKOFFICE";
   addressStreet?: string;
   addressNumber?: string;
   addressComplement?: string;
@@ -269,6 +269,16 @@ export interface PaymentRequest {
 }
 
 // Order Types
+export type OrderStatus = "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+
+export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  PENDING: "Pendente",
+  PROCESSING: "Em Processamento",
+  SHIPPED: "Enviado",
+  DELIVERED: "Entregue",
+  CANCELLED: "Cancelado",
+};
+
 export interface OrderItem {
   id: number;
   productId: number;
@@ -285,7 +295,7 @@ export interface Order {
   address: Address;
   items: OrderItem[];
   createdAt: string;
-  status?: string; // Status do pedido (se existir no backend)
+  status: OrderStatus;
 }
 
 export interface OrderRequest {

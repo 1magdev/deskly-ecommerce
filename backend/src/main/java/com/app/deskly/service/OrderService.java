@@ -8,6 +8,7 @@ import com.app.deskly.dto.order.OrderResponseDTO;
 import com.app.deskly.model.Address;
 import com.app.deskly.model.Order;
 import com.app.deskly.model.OrderItem;
+import com.app.deskly.model.OrderStatus;
 import com.app.deskly.model.product.Product;
 import com.app.deskly.model.user.Customer;
 import com.app.deskly.repository.AddressRepository;
@@ -90,6 +91,11 @@ public class OrderService {
         return orders.stream().map(this::toResponse).collect(Collectors.toList());
     }
 
+    public List<OrderResponseDTO> listAllOrders() {
+        List<Order> orders = orderRepository.findAllByOrderByCreatedAtDesc();
+        return orders.stream().map(this::toResponse).collect(Collectors.toList());
+    }
+
     public OrderResponseDTO getOrder(Customer customer, Long id) {
         if (customer == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado.");
@@ -105,12 +111,27 @@ public class OrderService {
         return toResponse(order);
     }
 
+    public OrderResponseDTO updateOrderStatus(Long orderId, String status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
+
+        try {
+            OrderStatus newStatus = OrderStatus.valueOf(status.toUpperCase());
+            order.setStatus(newStatus);
+            orderRepository.save(order);
+            return toResponse(order);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status inválido: " + status);
+        }
+    }
+
     private OrderResponseDTO toResponse(Order order) {
         OrderResponseDTO dto = new OrderResponseDTO();
         dto.setId(order.getId());
         dto.setTotalValue(order.getTotalValue());
         dto.setShippingValue(order.getShippingValue());
         dto.setCreatedAt(order.getCreatedAt());
+        dto.setStatus(order.getStatus());
 
         AddressResponseDTO addressDto = new AddressResponseDTO();
         addressDto.setId(order.getAddress().getId());

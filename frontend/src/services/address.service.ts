@@ -3,7 +3,7 @@ import type { Address, AddressCreateRequest } from '@/types/api.types';
 
 class AddressService {
   async getMyAddresses(): Promise<Address[]> {
-    return apiClient.get<Address[]>('/addresses/my-addresses');
+    return apiClient.get<Address[]>('/addresses');
   }
 
   async createAddress(data: AddressCreateRequest): Promise<Address> {
