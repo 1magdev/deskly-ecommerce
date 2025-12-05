@@ -34,28 +34,5 @@ public class Customer implements AuthenticatedUser {
 
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
-
-    // cadastro de endereço entrega
-
-    @Column(name = "cep", nullable = false, unique = true, length = 8)
-        private String CEP;
-
-    @Column(name = "logradouro", nullable = false, unique = true)
-        private String logradouro;
-
-    @Column(name = "número", nullable = false, unique = true)
-        private String number;
-
-    @Column(name = "complemento", nullable = false, unique = true)
-        private String complement;
-
-    @Column(name = "bairro", nullable = false, unique = true)
-        private String bairro;
-
-    @Column(name = "cidade", nullable = false, unique = true)
-        private String city;
-
-    @Column(name = "UF", nullable = false, unique = true, length = 2)
-        private String uf;
 }
 

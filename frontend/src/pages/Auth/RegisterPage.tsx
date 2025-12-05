@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { cepService } from "@/services/cep.service";
 import { handleApiError } from "@/lib/error-handler";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { FormInput } from "@/components/shared/FormInput";
 import { FormInputMask } from "@/components/shared/FormInputMask";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -15,11 +15,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
-// import { cepService } from "@/services/cep.service";
+import { Loader2, Plus, Trash2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import type { AddressCreateRequest } from "@/types/api.types";
 
-interface RegisterFormData {
+interface PersonalFormData {
   fullname: string;
   email: string;
   cpf: string;
@@ -27,30 +27,24 @@ interface RegisterFormData {
   birthDate?: string;
   password: string;
   confirmPassword: string;
-  /*   addressStreet?: string;
-  addressNumber?: string;
-  addressComplement?: string;
-  addressNeighborhood?: string;
-  addressCity?: string;
-  addressState?: string;
-  addressZipcode?: string;
-  cardHolderName?: string;
-  cardLastDigits?: string;
-  cardBrand?: string;
-  cardExpiration?: string; */
 }
+
+interface AddressFormData extends Omit<AddressCreateRequest, 'deliveryAddress'> {
+  deliveryAddress: boolean;
+}
+
+type Step = 'personal' | 'address';
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const { register, isLoading } = useAuth();
+  const [currentStep, setCurrentStep] = useState<Step>('personal');
   const [error, setError] = useState("");
-  const [validationErrors, setValidationErrors] = useState<
-    Record<string, string>
-  >({});
-  const [activeTab, setActiveTab] = useState("personal");
-  // const [loadingCep, setLoadingCep] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingCep, setLoadingCep] = useState<Record<number, boolean>>({});
 
-  const [formData, setFormData] = useState<RegisterFormData>({
+  const [personalData, setPersonalData] = useState<PersonalFormData>({
     fullname: "",
     email: "",
     cpf: "",
@@ -58,60 +52,119 @@ export function RegisterPage() {
     confirmPassword: "",
   });
 
-  const handleChange = (field: keyof RegisterFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const [addresses, setAddresses] = useState<AddressFormData[]>([
+    {
+      label: "Casa",
+      street: "",
+      number: "",
+      complement: "",
+      district: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      deliveryAddress: true,
+    }
+  ]);
+
+  const handlePersonalChange = (field: keyof PersonalFormData, value: string) => {
+    setPersonalData((prev) => ({ ...prev, [field]: value }));
     if (validationErrors[field]) {
       setValidationErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
-  /* const handleCepBlur = async () => {
-    const cep = formData.addressZipcode;
+  const handleAddressChange = (index: number, field: keyof AddressFormData, value: string | boolean) => {
+    setAddresses((prev) => {
+      const newAddresses = [...prev];
+      newAddresses[index] = { ...newAddresses[index], [field]: value };
+      return newAddresses;
+    });
+  };
+
+  const handleAddAddress = () => {
+    setAddresses((prev) => [
+      ...prev,
+      {
+        label: `Endereço ${prev.length + 1}`,
+        street: "",
+        number: "",
+        complement: "",
+        district: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        deliveryAddress: false,
+      }
+    ]);
+  };
+
+  const handleRemoveAddress = (index: number) => {
+    if (addresses.length === 1) {
+      toast.error("Você precisa ter pelo menos um endereço");
+      return;
+    }
+    setAddresses((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSetPrimaryAddress = (index: number) => {
+    setAddresses((prev) =>
+      prev.map((addr, i) => ({
+        ...addr,
+        deliveryAddress: i === index,
+      }))
+    );
+  };
+
+  const handleCepBlur = async (index: number) => {
+    const cep = addresses[index].zipCode;
     if (!cep || cep.replace(/\D/g, "").length !== 8) return;
 
     try {
-      setLoadingCep(true);
+      setLoadingCep((prev) => ({ ...prev, [index]: true }));
       const data = await cepService.buscarCEP(cep);
 
       if (data) {
-        setFormData((prev) => ({
-          ...prev,
-          addressStreet: data.logradouro,
-          addressNeighborhood: data.bairro,
-          addressCity: data.localidade,
-          addressState: data.uf,
-        }));
-        toast.success("CEP encontrado!");
+        setAddresses((prev) => {
+          const newAddresses = [...prev];
+          newAddresses[index] = {
+            ...newAddresses[index],
+            street: data.logradouro,
+            district: data.bairro,
+            city: data.localidade,
+            state: data.uf,
+            complement: data.complemento || newAddresses[index].complement,
+          };
+          return newAddresses;
+        });
+        toast.success("CEP encontrado! Endereço preenchido automaticamente.");
       }
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Erro ao buscar CEP"
-      );
+      toast.error(error instanceof Error ? error.message : "Erro ao buscar CEP");
     } finally {
-      setLoadingCep(false);
+      setLoadingCep((prev) => ({ ...prev, [index]: false }));
     }
   };
- */
-  const validateForm = (): boolean => {
+
+  const validatePersonalData = (): boolean => {
     const errors: Record<string, string> = {};
 
-    if (!formData.fullname.trim() || formData.fullname.length < 4) {
+    if (!personalData.fullname.trim() || personalData.fullname.length < 4) {
       errors.fullname = "Nome deve ter no mínimo 4 caracteres";
     }
 
-    if (!formData.email.trim()) {
+    if (!personalData.email.trim()) {
       errors.email = "Email é obrigatório";
     }
 
-    if (!formData.cpf.trim()) {
+    if (!personalData.cpf.trim()) {
       errors.cpf = "CPF é obrigatório";
     }
 
-    if (!formData.password) {
+    if (!personalData.password) {
       errors.password = "Senha é obrigatória";
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (personalData.password !== personalData.confirmPassword) {
       errors.confirmPassword = "As senhas não coincidem";
     }
 
@@ -119,36 +172,79 @@ export function RegisterPage() {
     return Object.keys(errors).length === 0;
   };
 
+  const validateAddresses = (): boolean => {
+    const hasValidAddress = addresses.some(
+      (addr) => addr.street && addr.number && addr.district && addr.city && addr.state && addr.zipCode
+    );
+
+    if (!hasValidAddress) {
+      toast.error("Você precisa cadastrar pelo menos um endereço completo");
+      return false;
+    }
+
+    const hasPrimaryAddress = addresses.some((addr) => addr.deliveryAddress);
+    if (!hasPrimaryAddress) {
+      toast.error("Você precisa definir um endereço como principal");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleNextStep = () => {
+    setError("");
+
+    if (currentStep === 'personal') {
+      if (!validatePersonalData()) {
+        setError("Por favor, corrija os erros no formulário");
+        return;
+      }
+      setCurrentStep('address');
+    }
+  };
+
+  const handlePreviousStep = () => {
+    setCurrentStep('personal');
+    setError("");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!validateForm()) {
-      setError("Por favor, corrija os erros no formulário");
+    if (!validateAddresses()) {
       return;
     }
 
     try {
+      setIsSubmitting(true);
+
+      // Preparar endereços válidos
+      const validAddresses = addresses.filter(
+        (addr) => addr.street && addr.number && addr.district && addr.city && addr.state && addr.zipCode
+      ).map(address => ({
+        label: address.label,
+        street: address.street,
+        number: address.number,
+        complement: address.complement || "",
+        district: address.district,
+        city: address.city,
+        state: address.state,
+        zipCode: address.zipCode.replace(/\D/g, ""),
+        deliveryAddress: address.deliveryAddress,
+      }));
+
+      // Registrar usuário com endereços em uma única chamada
       await register({
-        fullname: formData.fullname,
-        email: formData.email,
-        cpf: formData.cpf.replace(/\D/g, ""), // Remove formatação do CPF
-        gender: formData.gender,
-        birthDate: formData.birthDate,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
+        fullname: personalData.fullname,
+        email: personalData.email,
+        cpf: personalData.cpf.replace(/\D/g, ""),
+        gender: personalData.gender,
+        birthDate: personalData.birthDate,
+        password: personalData.password,
+        confirmPassword: personalData.confirmPassword,
         role: "CUSTOMER",
-        /*         addressStreet: formData.addressStreet,
-        addressNumber: formData.addressNumber,
-        addressComplement: formData.addressComplement,
-        addressNeighborhood: formData.addressNeighborhood,
-        addressCity: formData.addressCity,
-        addressState: formData.addressState,
-        addressZipcode: formData.addressZipcode?.replace(/\D/g, ""), // Remove formatação do CEP
-        cardHolderName: formData.cardHolderName,
-        cardLastDigits: formData.cardLastDigits?.replace(/\D/g, ""), // Remove formatação dos dígitos
-        cardBrand: formData.cardBrand,
-        cardExpiration: formData.cardExpiration?.replace(/\D/g, ""), // Remove formatação da validade */
+        addresses: validAddresses,
       });
 
       toast.success("Cadastro realizado com sucesso! Você já está logado.");
@@ -166,6 +262,8 @@ export function RegisterPage() {
       if (import.meta.env.DEV) {
         console.error("Erro no cadastro:", apiError);
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -177,8 +275,27 @@ export function RegisterPage() {
             Criar Conta
           </CardTitle>
           <CardDescription className="text-center">
-            Preencha seus dados para se cadastrar
+            {currentStep === 'personal'
+              ? 'Preencha seus dados pessoais'
+              : 'Cadastre seus endereços de entrega'}
           </CardDescription>
+
+          {/* Progress indicator */}
+          <div className="flex items-center justify-center gap-2 pt-4">
+            <div className={`flex items-center gap-2 ${currentStep === 'personal' ? 'text-primary' : 'text-green-600'}`}>
+              {currentStep === 'address' ? (
+                <CheckCircle2 className="h-5 w-5" />
+              ) : (
+                <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center text-white text-xs">1</div>
+              )}
+              <span className="text-sm font-medium">Dados Pessoais</span>
+            </div>
+            <div className="h-px w-12 bg-gray-300" />
+            <div className={`flex items-center gap-2 ${currentStep === 'address' ? 'text-primary' : 'text-gray-400'}`}>
+              <div className="h-5 w-5 rounded-full bg-current flex items-center justify-center text-white text-xs">2</div>
+              <span className="text-sm font-medium">Endereços</span>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -187,203 +304,237 @@ export function RegisterPage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <div className="flex flex-col">
-              <FormInput
-                label="Nome Completo"
-                value={formData.fullname}
-                onChange={(e) => handleChange("fullname", e.target.value)}
-                error={validationErrors.fullname}
-                disabled={isLoading}
-                required
-              />
 
-              <FormInput
-                label="Email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-                error={validationErrors.email}
-                disabled={isLoading}
-                required
-              />
-
-              <FormInputMask
-                label="CPF"
-                mask="999.999.999-99"
-                value={formData.cpf}
-                onChange={(e) => handleChange("cpf", e.target.value)}
-                error={validationErrors.cpf}
-                disabled={isLoading}
-                required
-              />
-
-              <div className="space-y-2">
-                <Label htmlFor="gender">Gênero</Label>
-                <select
-                  id="gender"
-                  value={formData.gender || ""}
-                  onChange={(e) => handleChange("gender", e.target.value)}
+            {currentStep === 'personal' && (
+              <div className="space-y-4">
+                <FormInput
+                  label="Nome Completo"
+                  value={personalData.fullname}
+                  onChange={(e) => handlePersonalChange("fullname", e.target.value)}
+                  error={validationErrors.fullname}
                   disabled={isLoading}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Selecione</option>
-                  <option value="Masculino">Masculino</option>
-                  <option value="Feminino">Feminino</option>
-                  <option value="Outro">Outro</option>
-                </select>
+                  required
+                />
+
+                <FormInput
+                  label="Email"
+                  type="email"
+                  value={personalData.email}
+                  onChange={(e) => handlePersonalChange("email", e.target.value)}
+                  error={validationErrors.email}
+                  disabled={isLoading}
+                  required
+                />
+
+                <FormInputMask
+                  label="CPF"
+                  mask="999.999.999-99"
+                  value={personalData.cpf}
+                  onChange={(e) => handlePersonalChange("cpf", e.target.value)}
+                  error={validationErrors.cpf}
+                  disabled={isLoading}
+                  required
+                />
+
+                <div className="space-y-2">
+                  <Label htmlFor="gender">Gênero</Label>
+                  <select
+                    id="gender"
+                    value={personalData.gender || ""}
+                    onChange={(e) => handlePersonalChange("gender", e.target.value)}
+                    disabled={isLoading}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">Selecione</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Outro">Outro</option>
+                  </select>
+                </div>
+
+                <FormInput
+                  label="Data de Nascimento"
+                  type="date"
+                  value={personalData.birthDate}
+                  onChange={(e) => handlePersonalChange("birthDate", e.target.value)}
+                  error={validationErrors.birthDate}
+                  disabled={isLoading}
+                />
+
+                <FormInput
+                  label="Senha"
+                  type="password"
+                  value={personalData.password}
+                  onChange={(e) => handlePersonalChange("password", e.target.value)}
+                  error={validationErrors.password}
+                  disabled={isLoading}
+                  required
+                />
+
+                <FormInput
+                  label="Confirmar Senha"
+                  type="password"
+                  value={personalData.confirmPassword}
+                  onChange={(e) => handlePersonalChange("confirmPassword", e.target.value)}
+                  error={validationErrors.confirmPassword}
+                  disabled={isLoading}
+                  required
+                />
               </div>
+            )}
 
-              <FormInput
-                label="Data de Nascimento"
-                type="date"
-                value={formData.birthDate}
-                onChange={(e) => handleChange("birthDate", e.target.value)}
-                error={validationErrors.birthDate}
-                disabled={isLoading}
-              />
+            {currentStep === 'address' && (
+              <div className="space-y-6">
+                {addresses.map((address, index) => (
+                  <Card key={index} className={`p-4 ${address.deliveryAddress ? 'border-primary border-2' : ''}`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <FormInput
+                          label=""
+                          value={address.label}
+                          onChange={(e) => handleAddressChange(index, "label", e.target.value)}
+                          placeholder="Ex: Casa, Trabalho"
+                          className="font-semibold"
+                        />
+                        {address.deliveryAddress && (
+                          <span className="text-xs bg-primary text-white px-2 py-1 rounded">Principal</span>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {!address.deliveryAddress && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSetPrimaryAddress(index)}
+                          >
+                            Definir como principal
+                          </Button>
+                        )}
+                        {addresses.length > 1 && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            onClick={() => handleRemoveAddress(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
 
-              <FormInput
-                label="Senha"
-                type="password"
-                value={formData.password}
-                onChange={(e) => handleChange("password", e.target.value)}
-                error={validationErrors.password}
-                disabled={isLoading}
-                required
-              />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormInputMask
+                        label="CEP"
+                        mask="99999-999"
+                        value={address.zipCode}
+                        onChange={(e) => handleAddressChange(index, "zipCode", e.target.value)}
+                        onBlur={() => handleCepBlur(index)}
+                        disabled={loadingCep[index]}
+                        required
+                      />
 
-              <FormInput
-                label="Confirmar Senha"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) =>
-                  handleChange("confirmPassword", e.target.value)
-                }
-                error={validationErrors.confirmPassword}
-                disabled={isLoading}
-                required
-              />
-            </div>
+                      <FormInput
+                        label="Rua"
+                        value={address.street}
+                        onChange={(e) => handleAddressChange(index, "street", e.target.value)}
+                        disabled={loadingCep[index]}
+                        required
+                      />
 
-            {/*               <TabsContent value="address" className="space-y-4 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormInputMask
-                    label="CEP"
-                    mask="99999-999"
-                    value={formData.addressZipcode}
-                    onChange={(e) => handleChange("addressZipcode", e.target.value)}
-                    onBlur={handleCepBlur}
-                    error={validationErrors.addressZipcode}
-                    disabled={isLoading || loadingCep}
-                  />
+                      <FormInput
+                        label="Número"
+                        value={address.number}
+                        onChange={(e) => handleAddressChange(index, "number", e.target.value)}
+                        disabled={loadingCep[index]}
+                        required
+                      />
 
-                  <FormInput
-                    label="Rua"
-                    value={formData.addressStreet}
-                    onChange={(e) => handleChange("addressStreet", e.target.value)}
-                    disabled={isLoading}
-                  />
+                      <FormInput
+                        label="Complemento"
+                        value={address.complement}
+                        onChange={(e) => handleAddressChange(index, "complement", e.target.value)}
+                        disabled={loadingCep[index]}
+                      />
 
-                  <FormInput
-                    label="Número"
-                    value={formData.addressNumber}
-                    onChange={(e) => handleChange("addressNumber", e.target.value)}
-                    disabled={isLoading}
-                  />
+                      <FormInput
+                        label="Bairro"
+                        value={address.district}
+                        onChange={(e) => handleAddressChange(index, "district", e.target.value)}
+                        disabled={loadingCep[index]}
+                        required
+                      />
 
-                  <FormInput
-                    label="Complemento"
-                    value={formData.addressComplement}
-                    onChange={(e) => handleChange("addressComplement", e.target.value)}
-                    disabled={isLoading}
-                  />
+                      <FormInput
+                        label="Cidade"
+                        value={address.city}
+                        onChange={(e) => handleAddressChange(index, "city", e.target.value)}
+                        disabled={loadingCep[index]}
+                        required
+                      />
 
-                  <FormInput
-                    label="Bairro"
-                    value={formData.addressNeighborhood}
-                    onChange={(e) => handleChange("addressNeighborhood", e.target.value)}
-                    disabled={isLoading}
-                  />
+                      <FormInput
+                        label="Estado"
+                        value={address.state}
+                        onChange={(e) => handleAddressChange(index, "state", e.target.value)}
+                        maxLength={2}
+                        disabled={loadingCep[index]}
+                        required
+                      />
+                    </div>
+                  </Card>
+                ))}
 
-                  <FormInput
-                    label="Cidade"
-                    value={formData.addressCity}
-                    onChange={(e) => handleChange("addressCity", e.target.value)}
-                    disabled={isLoading}
-                  />
-
-                  <FormInput
-                    label="Estado"
-                    value={formData.addressState}
-                    onChange={(e) => handleChange("addressState", e.target.value)}
-                    disabled={isLoading}
-                    maxLength={2}
-                  />
-                </div>
-              </TabsContent> */}
-
-            {/*               <TabsContent value="payment" className="space-y-4 mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormInput
-                    label="Nome no Cartão"
-                    value={formData.cardHolderName}
-                    onChange={(e) => handleChange("cardHolderName", e.target.value)}
-                    disabled={isLoading}
-                  />
-
-                  <FormInputMask
-                    label="Últimos 4 Dígitos"
-                    mask="9999"
-                    value={formData.cardLastDigits}
-                    onChange={(e) => handleChange("cardLastDigits", e.target.value)}
-                    error={validationErrors.cardLastDigits}
-                    disabled={isLoading}
-                  />
-
-                  <div className="space-y-2">
-                    <Label htmlFor="cardBrand">Bandeira</Label>
-                    <select
-                      id="cardBrand"
-                      value={formData.cardBrand || ""}
-                      onChange={(e) => handleChange("cardBrand", e.target.value)}
-                      disabled={isLoading}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="">Selecione</option>
-                      <option value="Visa">Visa</option>
-                      <option value="MasterCard">MasterCard</option>
-                      <option value="Elo">Elo</option>
-                      <option value="American Express">American Express</option>
-                    </select>
-                  </div>
-
-                  <FormInputMask
-                    label="Validade (MM/AAAA)"
-                    mask="99/9999"
-                    value={formData.cardExpiration}
-                    onChange={(e) => handleChange("cardExpiration", e.target.value)}
-                    error={validationErrors.cardExpiration}
-                    disabled={isLoading}
-                    placeholder="12/2025"
-                  />
-                </div>
-              </TabsContent> */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleAddAddress}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar outro endereço
+                </Button>
+              </div>
+            )}
 
             <div className="flex flex-col gap-4 pt-4">
-              <Button
-                type="submit"
-                className="w-full bg-primary"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Cadastrando...
-                  </>
-                ) : (
-                  "Cadastrar"
-                )}
-              </Button>
+              {currentStep === 'personal' ? (
+                <Button
+                  type="button"
+                  onClick={handleNextStep}
+                  className="w-full bg-primary"
+                  disabled={isLoading}
+                >
+                  Próximo
+                </Button>
+              ) : (
+                <div className="flex gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handlePreviousStep}
+                    className="w-full"
+                    disabled={isSubmitting}
+                  >
+                    Voltar
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="w-full bg-primary"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Cadastrando...
+                      </>
+                    ) : (
+                      "Finalizar Cadastro"
+                    )}
+                  </Button>
+                </div>
+              )}
 
               <div className="text-center text-sm">
                 <span className="text-gray-600">Já tem uma conta? </span>

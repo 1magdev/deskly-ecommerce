@@ -102,7 +102,7 @@ export function useAuth() {
   };
 
   const isEstoquista = (): boolean => {
-    return authState.userRole === 'ESTOQUISTA';
+    return authState.userRole === 'BACKOFFICE';
   };
 
   const isCustomer = (): boolean => {

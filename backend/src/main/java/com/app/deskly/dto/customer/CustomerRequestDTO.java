@@ -1,11 +1,16 @@
 package com.app.deskly.dto.customer;
 
+import com.app.deskly.dto.address.AddressRequestDTO;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
+
 @Data
 public class CustomerRequestDTO {
 
@@ -30,27 +35,8 @@ public class CustomerRequestDTO {
         @NotBlank(message = "Confirme a senha!")
         private String confirmPassword;
 
-        //dados de endereço de entrega e endereço de faturamento
-
-        @NotBlank(message = "O CEP não pode ser vazio")
-        private String CEP;
-
-        @NotBlank(message = "O logradouro não pode ser vazio")
-        private String logradouro;
-
-        @NotBlank(message = "O número não pode ser vazio")
-        private String number;
-
-        @NotBlank(message = "O complemento não pode ser vazio")
-        private String complement;
-
-        @NotBlank(message = "O bairro não pode ser vazio")
-        private String bairro;
-
-        @NotBlank(message = "A cidade não pode ser vazia")
-        private String city;
-
-        @NotBlank(message = "O UF não pode ser vazio")
-        private String uf;
+        @NotEmpty(message = "Pelo menos um endereço é obrigatório")
+        @Valid
+        private List<AddressRequestDTO> addresses;
 
 }

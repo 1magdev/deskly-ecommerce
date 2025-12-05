@@ -34,18 +34,8 @@ export interface RegisterRequest {
   phone?: string;
   gender?: string;
   birthDate?: string;
-  role?: "CUSTOMER" | "ADMIN" | "ESTOQUISTA";
-  addressStreet?: string;
-  addressNumber?: string;
-  addressComplement?: string;
-  addressNeighborhood?: string;
-  addressCity?: string;
-  addressState?: string;
-  addressZipcode?: string;
-  cardHolderName?: string;
-  cardLastDigits?: string;
-  cardBrand?: string;
-  cardExpiration?: string;
+  role?: "CUSTOMER" | "ADMIN" | "BACKOFFICE";
+  addresses: AddressCreateRequest[];
 }
 
 // User Types
@@ -60,17 +50,6 @@ export interface User {
   birthDate?: string;
   role: UserRole;
   active: boolean;
-  addressStreet?: string;
-  addressNumber?: string;
-  addressComplement?: string;
-  addressNeighborhood?: string;
-  addressCity?: string;
-  addressState?: string;
-  addressZipcode?: string;
-  cardHolderName?: string;
-  cardLastDigits?: string;
-  cardBrand?: string;
-  cardExpiration?: string;
   phone?: string;
 }
 
@@ -269,6 +248,8 @@ export interface PaymentRequest {
 }
 
 // Order Types
+export type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+
 export interface OrderItem {
   id: number;
   productId: number;
@@ -282,10 +263,10 @@ export interface Order {
   id: number;
   totalValue: number;
   shippingValue: number;
+  status: OrderStatus;
   address: Address;
   items: OrderItem[];
   createdAt: string;
-  status?: string; // Status do pedido (se existir no backend)
 }
 
 export interface OrderRequest {

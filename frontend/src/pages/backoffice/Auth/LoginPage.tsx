@@ -35,6 +35,7 @@ export function LoginPage() {
       await login({ email, password });
       // Redireciona para a página de produtos após login bem-sucedido
       navigate("/backoffice/products");
+      window.location.reload();
     } catch (err) {
       const apiError = handleApiError(err);
 

@@ -8,6 +8,7 @@ import com.app.deskly.dto.order.OrderResponseDTO;
 import com.app.deskly.model.Address;
 import com.app.deskly.model.Order;
 import com.app.deskly.model.OrderItem;
+import com.app.deskly.model.OrderStatus;
 import com.app.deskly.model.product.Product;
 import com.app.deskly.model.user.Customer;
 import com.app.deskly.repository.AddressRepository;
@@ -15,6 +16,8 @@ import com.app.deskly.repository.OrderItemRepository;
 import com.app.deskly.repository.OrderRepository;
 import com.app.deskly.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -105,11 +108,26 @@ public class OrderService {
         return toResponse(order);
     }
 
+    public Page<OrderResponseDTO> listAllOrders(Pageable pageable) {
+        Page<Order> orders = orderRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return orders.map(this::toResponse);
+    }
+
+    public OrderResponseDTO updateOrderStatus(Long orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
+
+        order.setStatus(newStatus);
+        Order updated = orderRepository.save(order);
+        return toResponse(updated);
+    }
+
     private OrderResponseDTO toResponse(Order order) {
         OrderResponseDTO dto = new OrderResponseDTO();
         dto.setId(order.getId());
         dto.setTotalValue(order.getTotalValue());
         dto.setShippingValue(order.getShippingValue());
+        dto.setStatus(order.getStatus());
         dto.setCreatedAt(order.getCreatedAt());
 
         AddressResponseDTO addressDto = new AddressResponseDTO();
