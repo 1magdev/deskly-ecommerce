@@ -11,9 +11,11 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   const { isAuthenticated, checkPermission } = useAuth();
   const location = useLocation();
 
-  // Se não estiver autenticado, redireciona para login
+  // Se não estiver autenticado, redireciona para login apropriado
   if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    const isBackofficeRoute = location.pathname.startsWith('/backoffice');
+    const loginPath = isBackofficeRoute ? '/backoffice' : '/login';
+    return <Navigate to={loginPath} state={{ from: location }} replace />;
   }
 
   // Se tiver role requerida, verifica permissão

@@ -32,12 +32,7 @@ export function LoginPage() {
     setValidationErrors({});
 
     try {
-      const response = await login({ email, password });
-      console.log("Login bem-sucedido:", {
-        email: response.email,
-        role: response.role,
-      });
-
+      await login({ email, password });
       navigate("/");
     } catch (err) {
       const apiError = handleApiError(err);

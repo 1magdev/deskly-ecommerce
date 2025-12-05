@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuthState((prev) => ({ ...prev, isLoading: true }));
     try {
       const response = await authService.register(data);
-      // Não marcar o usuário como autenticado automaticamente após registro.
+      // Não autenticar automaticamente após registro
       setAuthState((prev) => ({ ...prev, isLoading: false }));
       return response;
     } catch (error) {
