@@ -35,3 +35,4 @@ public class Customer implements AuthenticatedUser {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 }
+

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Package, Users, LogOut } from "lucide-react";
+import { Package, Users, LogOut, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
@@ -21,7 +21,7 @@ interface UserData {
 
 export function BackofficeTabs(userData: UserData) {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, isAdmin } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -32,7 +32,7 @@ export function BackofficeTabs(userData: UserData) {
     switch (role) {
       case "ADMIN":
         return "Administrador";
-      case "ESTOQUISTA":
+      case "BACKOFFICE":
         return "Estoquista";
       case "CUSTOMER":
         return "Cliente";
@@ -66,13 +66,24 @@ export function BackofficeTabs(userData: UserData) {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  onClick={() => navigate("/backoffice/users")}
+                  onClick={() => navigate("/backoffice/orders")}
                   className="text-white hover:bg-gray-800"
                 >
-                  <Users className="h-4 w-4" />
-                  <span>Usuários</span>
+                  <ShoppingCart className="h-4 w-4" />
+                  <span>Pedidos</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              {isAdmin() && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => navigate("/backoffice/users")}
+                    className="text-white hover:bg-gray-800"
+                  >
+                    <Users className="h-4 w-4" />
+                    <span>Usuários</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

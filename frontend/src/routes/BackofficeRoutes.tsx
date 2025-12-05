@@ -6,6 +6,7 @@ import { ProductListPage } from "@/pages/backoffice/Products/ProductListPage";
 import { ProductViewPage } from "@/pages/backoffice/Products/ProductViewPage";
 import { UserFormPage } from "@/pages/backoffice/Users/UserFormPage";
 import { UsersPage } from "@/pages/backoffice/Users/UsersPage";
+import { OrdersPage } from "@/pages/backoffice/Orders/OrdersPage";
 import { Navigate, Route } from "react-router-dom";
 
 export default function backofficeRoutes() {
@@ -34,7 +35,7 @@ export default function backofficeRoutes() {
       <Route
         path="/backoffice/products"
         element={
-          <ProtectedRoute requiredRole={["ADMIN", "ESTOQUISTA"]}>
+          <ProtectedRoute requiredRole={["ADMIN", "BACKOFFICE"]}>
             <BackofficeLayout>
               <ProductListPage />
             </BackofficeLayout>
@@ -44,7 +45,7 @@ export default function backofficeRoutes() {
       <Route
         path="/backoffice/products/new"
         element={
-          <ProtectedRoute requiredRole={["ADMIN", "ESTOQUISTA"]}>
+          <ProtectedRoute requiredRole={["ADMIN", "BACKOFFICE"]}>
             <BackofficeLayout>
               <ProductFormPage />
             </BackofficeLayout>
@@ -54,7 +55,7 @@ export default function backofficeRoutes() {
       <Route
         path="/backoffice/products/:id/edit"
         element={
-          <ProtectedRoute requiredRole={["ADMIN", "ESTOQUISTA"]}>
+          <ProtectedRoute requiredRole={["ADMIN", "BACKOFFICE"]}>
             <BackofficeLayout>
               <ProductFormPage />
             </BackofficeLayout>
@@ -64,9 +65,19 @@ export default function backofficeRoutes() {
       <Route
         path="/backoffice/products/:id"
         element={
-          <ProtectedRoute requiredRole={["ADMIN", "ESTOQUISTA"]}>
+          <ProtectedRoute requiredRole={["ADMIN", "BACKOFFICE"]}>
             <BackofficeLayout>
               <ProductViewPage />
+            </BackofficeLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/backoffice/orders"
+        element={
+          <ProtectedRoute requiredRole={["ADMIN", "BACKOFFICE"]}>
+            <BackofficeLayout>
+              <OrdersPage />
             </BackofficeLayout>
           </ProtectedRoute>
         }

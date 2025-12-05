@@ -3,14 +3,18 @@ package com.app.deskly.controller;
 import com.app.deskly.dto.user.UpdateUserDTO;
 import com.app.deskly.dto.user.UserDTO;
 import com.app.deskly.dto.user.UserRequestDTO;
+import com.app.deskly.model.user.Customer;
 import com.app.deskly.model.user.User;
 import com.app.deskly.model.UserRoles;
 import com.app.deskly.service.AuthService;
+import com.app.deskly.service.CustomerService;
 import com.app.deskly.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -21,15 +25,28 @@ public class UserController {
     private UserService userService;
 
     @Autowired
+    private CustomerService customerService;
+
+    @Autowired
     private AuthService authService;
 
     @GetMapping("/profile")
-    public ResponseEntity<User> getProfile(@RequestHeader("Authorization") String token) {
-        System.out.println(token);
+    public ResponseEntity<?> getProfile(@RequestHeader("Authorization") String token) {
         long userId = authService.getUserIdFromToken(token.replace("Bearer ", ""));
-      User user = userService.getById(userId);
-        System.out.println("Profile of: " + userId);
-      return ResponseEntity.ok(user);
+
+        // Tentar buscar como Customer primeiro
+        try {
+            Customer customer = customerService.getById(userId);
+            return ResponseEntity.ok(customer);
+        } catch (ResponseStatusException e) {
+            // Se não encontrou como Customer, buscar como User
+            try {
+                User user = userService.getById(userId);
+                return ResponseEntity.ok(user);
+            } catch (ResponseStatusException ex) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado");
+            }
+        }
     }
 
 
@@ -80,7 +97,17 @@ public class UserController {
         User user = userService.enableDisable(id, active);
         return ResponseEntity.ok(user);
     }
+    // alteração de usuario
 
+    @PutMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UpdateUserDTO dto) {
+    return ResponseEntity.ok(userService);
+}
+// fim da alteração
+
+    ///// 
+    /// 
     ///// 
     
     private UserDTO toDTO(User user) {
@@ -95,4 +122,5 @@ public class UserController {
     }
 
 }
+
 

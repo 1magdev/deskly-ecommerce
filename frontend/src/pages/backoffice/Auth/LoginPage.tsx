@@ -40,6 +40,7 @@ export function LoginPage() {
 
       // Redirecionar direto para produtos
       navigate("/backoffice/products");
+      window.location.reload();
     } catch (err) {
       const apiError = handleApiError(err);
 

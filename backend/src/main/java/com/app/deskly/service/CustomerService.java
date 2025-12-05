@@ -1,5 +1,6 @@
 package com.app.deskly.service;
 
+import com.app.deskly.dto.address.AddressRequestDTO;
 import com.app.deskly.dto.customer.CustomerRequestDTO;
 import com.app.deskly.dto.user.UpdateUserDTO;
 import com.app.deskly.dto.user.UserRequestDTO;
@@ -23,6 +24,9 @@ public class CustomerService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private AddressService addressService;
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public Customer create(CustomerRequestDTO dto) {
@@ -42,6 +46,15 @@ public class CustomerService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "email já cadastrado");
         }
 
+        // Validar se há pelo menos um endereço principal
+        boolean hasPrimaryAddress = dto.getAddresses().stream()
+                .anyMatch(AddressRequestDTO::isDeliveryAddress);
+
+        if (!hasPrimaryAddress) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pelo menos um endereço deve ser marcado como principal");
+        }
+
+        // 1. Criar o customer
         Customer customer = new Customer();
         customer.setFullname(dto.getFullname());
         customer.setEmail(dto.getEmail());
@@ -51,7 +64,14 @@ public class CustomerService {
         customer.setGender(dto.getGender());
         customer.setBirthDate(dto.getBirthDate());
 
-        return customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
+
+        // 2. Criar os endereços associados ao customer
+        for (AddressRequestDTO addressDTO : dto.getAddresses()) {
+            addressService.createAddress(savedCustomer, addressDTO);
+        }
+
+        return savedCustomer;
     }
 
     public Customer getById(Long customerId) {
