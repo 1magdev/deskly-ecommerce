@@ -24,8 +24,11 @@ export function BackofficeTabs(userData: UserData) {
   const { logout } = useAuth();
 
   const handleLogout = () => {
-    logout();
-    navigate("/backoffice/");
+    // Limpar token DIRETO do localStorage sem passar por AuthContext
+   // localStorage.removeItem("auth_token");
+
+    // Redirecionar direto para backoffice sem nenhuma intermediação
+    window.location.replace("/backoffice/");
   };
 
   const getRoleLabel = (role: string) => {

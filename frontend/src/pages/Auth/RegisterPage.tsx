@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { FormInput } from "@/components/shared/FormInput";
 import { FormInputMask } from "@/components/shared/FormInputMask";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -151,8 +150,8 @@ export function RegisterPage() {
         cardExpiration: formData.cardExpiration?.replace(/\D/g, ""), // Remove formatação da validade */
       });
 
-      toast.success("Cadastro realizado com sucesso! Você já está logado.");
-      navigate("/");
+      toast.success("Cadastro realizado com sucesso! Faça login para continuar.");
+      navigate("/login");
     } catch (err) {
       const apiError = handleApiError(err);
 

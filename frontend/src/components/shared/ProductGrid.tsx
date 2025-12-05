@@ -24,8 +24,12 @@ export default function ProductGrid() {
     (async () => {
       try {
         const catalogRes = await productService.getCatalog();
-        console.log(catalogRes);
-        setItems(catalogRes);
+        // productService.getCatalog pode retornar PageResponse<Product> ou um array direto.
+        // Normaliza para Product[].
+        const list: Product[] =
+          Array.isArray(catalogRes) ? catalogRes : (catalogRes as any)?.content || [];
+        console.log("Produtos carregados:", list);
+        setItems(list);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -39,9 +43,9 @@ export default function ProductGrid() {
 
   return (
     <div className="grid grid-cols-4 gap-5 w-full px-25 py-15 bg-gray-300/20">
-      {Array.from(items).length > 0
-        ? Array.from(items).map((product) => (
-            <Card className="bg-white border-0 shadow-lg w-75 h-100 flex items-center flex-col relative">
+      {items.length > 0
+        ? items.map((product) => (
+            <Card key={product.id} className="bg-white border-0 shadow-lg w-75 h-100 flex items-center flex-col relative">
               <CardContent
                 className={`top-0 w-64 max-h-50 min-h-50 h-100 overflow-hidden flex items-start justify-center`}
               >
@@ -73,9 +77,9 @@ export default function ProductGrid() {
               </CardFooter>
             </Card>
           ))
-        : new Array(12)
-            .fill(undefined)
-            .map(() => <Skeleton className="h-80 w-80 rounded-xl" />)}
+        : new Array(12).fill(undefined).map((_, index) => (
+            <Skeleton key={index} className="h-80 w-80 rounded-xl" />
+          ))}
     </div>
   );
 }

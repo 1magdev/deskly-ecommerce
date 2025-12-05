@@ -13,6 +13,15 @@ export default function backofficeRoutes() {
     <>
       <Route path="/backoffice/" element={<LoginPage />} />
 
+      {/* Rota dashboard protegida - requer ADMIN ou BACKOFFICE */}
+      <Route
+        path="/backoffice/dashboard"
+        element={
+          <ProtectedRoute requiredRole={["ADMIN", "BACKOFFICE"]}>
+            <Navigate to="/backoffice/products" replace />
+          </ProtectedRoute>
+        }
+      />
       {/* Rotas protegidas - requer autenticação */}
       <Route
         path="/backoffice/"

@@ -59,13 +59,14 @@ export function UserFormPage() {
     try {
       setLoading(true);
       const user = await userService.getUserById(userId);
-      
+
+      // Bloqueia edição de clientes (CUSTOMER) no backoffice — restaura comportamento anterior
       if (user.role === "CUSTOMER") {
         toast.error("Usuários do tipo CUSTOMER não podem ser editados no backoffice");
         navigate("/backoffice/users");
         return;
       }
-      
+
       setFormData({
         fullname: user.fullname,
         email: user.email,

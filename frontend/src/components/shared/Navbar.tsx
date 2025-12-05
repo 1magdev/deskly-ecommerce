@@ -1,7 +1,5 @@
 import {
   faCartShopping,
-  faList,
-  faSearch,
   faUser,
   faBox,
 } from "@fortawesome/free-solid-svg-icons";
@@ -36,54 +34,12 @@ export function Navbar() {
           </NavigationMenuItem>
 
           <NavigationMenuItem>
-            <NavigationMenuTrigger className="font-normal text-xl">
-              Produtos
-            </NavigationMenuTrigger>
-            <NavigationMenuContent className="border-1 border-gray-500/20 !shadow-lg">
-              <ul className="bg-white grid gap-3 p-4 w-[200px] ">
-                <li>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      to="/produtos/pesquisar"
-                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-primary/20 hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                    >
-                      <div className="text-sm font-medium leading-none">
-                        <FontAwesomeIcon
-                          icon={faSearch}
-                          className="text-primary"
-                        />{" "}
-                        Pesquisar
-                      </div>
-                    </Link>
-                  </NavigationMenuLink>
-                </li>
-                <li>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      to="/produtos/categorias"
-                      className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-primary/20  hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                    >
-                      <div className="text-sm font-medium leading-none">
-                        <FontAwesomeIcon
-                          icon={faList}
-                          className="text-primary"
-                        />{" "}
-                        Categorias
-                      </div>
-                    </Link>
-                  </NavigationMenuLink>
-                </li>
-              </ul>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-
-          <NavigationMenuItem>
             <NavigationMenuLink asChild>
               <Link
                 to="/carrinho"
-                className="text-2xl p-2 h-12 w-12 text-primary rounded-full inline-flex items-center justify-center hover:border-1 hover:bg-primary/25 hover:border-primary/80 transition-all transition-.5s relative"
+                className="text-2xl p-2 h-12 w-12 text-primary rounded-full inline-flex items-center justify-center hover:bg-primary/25 transition-all relative"
               >
-                <FontAwesomeIcon icon={faCartShopping} className="" />
+                <FontAwesomeIcon icon={faCartShopping} />
                 {itemCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                     {itemCount}
@@ -98,7 +54,7 @@ export function Navbar() {
               <NavigationMenuLink asChild>
                 <Link
                   to="/pedidos"
-                  className="text-xl p-2 text-primary rounded-full inline-flex items-center justify-center hover:border-1 hover:bg-primary/25 hover:border-primary/80 transition-all transition-.5s"
+                  className="text-xl p-2 text-primary inline-flex items-center justify-center hover:bg-primary/25 transition-all"
                   title="Meus Pedidos"
                 >
                   <FontAwesomeIcon icon={faBox} className="mr-2" />
@@ -112,9 +68,9 @@ export function Navbar() {
             <NavigationMenuLink asChild>
               <Link
                 to={isAuthenticated ? "/perfil" : "/login"}
-                className="text-2xl p-2 h-12 w-12 text-primary rounded-full inline-flex items-center justify-center hover:border-1 hover:bg-primary/25 hover:border-primary/80 transition-all transition-.5s"
+                className="text-2xl p-2 h-12 w-12 text-primary rounded-full inline-flex items-center justify-center hover:bg-primary/25 transition-all"
               >
-                <FontAwesomeIcon icon={faUser} className="" />
+                <FontAwesomeIcon icon={faUser} />
               </Link>
             </NavigationMenuLink>
           </NavigationMenuItem>

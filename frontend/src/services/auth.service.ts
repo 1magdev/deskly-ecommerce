@@ -7,15 +7,28 @@ import type {
 
 class AuthService {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
+    // Remove qualquer token antigo antes de fazer login (evita race com headers antigos)
+    apiClient.clearToken();
     const response = await apiClient.post<AuthResponse>("/auth/login", credentials);
     if (response.token) apiClient.setToken(response.token);
-    return response;
+
+    const payload = this.decodeToken();
+    const email = (payload?.email as string) || response.email || "";
+    const role = (payload?.role as string) || (response.role as string) || "";
+
+    return { token: response.token, email, role };
   }
 
   async register(data: RegisterRequest): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>("/auth/register", data);
-    if (response.token) apiClient.setToken(response.token);
-    return response;
+    // NÃO salva o token - usuário deve fazer login na tela de login
+    // if (response.token) apiClient.setToken(response.token);
+
+    const payload = this.decodeToken();
+    const email = (payload?.email as string) || response.email || "";
+    const role = (payload?.role as string) || (response.role as string) || "";
+
+    return { token: response.token, email, role };
   }
 
   logout(): void {
@@ -63,7 +76,8 @@ class AuthService {
 
   getUserEmail(): string | null {
     const payload = this.decodeToken();
-    return (payload?.sub as string) || null;
+    // Corrigido: ler claim "email" em vez de "sub"
+    return (payload?.email as string) || null;
   }
 }
 

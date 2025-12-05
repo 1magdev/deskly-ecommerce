@@ -68,7 +68,9 @@ export function useAuth() {
     setAuthState((prev) => ({ ...prev, isLoading: true }));
     try {
       const response = await authService.register(data);
-      updateAuthState(response);
+      // Não atualizar o estado de autenticação automaticamente após registro.
+      // O usuário deve fazer login manualmente (backend retorna token, mas não o aplicamos automaticamente).
+      setAuthState((prev) => ({ ...prev, isLoading: false }));
       return response;
     } catch (error) {
       setAuthState((prev) => ({ ...prev, isLoading: false }));

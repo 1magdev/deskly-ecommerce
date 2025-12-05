@@ -32,22 +32,24 @@ export function LoginPage() {
     setValidationErrors({});
 
     try {
-      await login({ email, password });
-      // Redireciona para a página de produtos após login bem-sucedido
+      const response = await login({ email, password });
+      console.log("Login bem-sucedido:", {
+        email: response.email,
+        role: response.role,
+      });
+
+      // Redirecionar direto para produtos
       navigate("/backoffice/products");
     } catch (err) {
       const apiError = handleApiError(err);
 
-      // Se for erro de validação, exibe erros por campo
       if (apiError.isValidationError() && apiError.validationErrors) {
         setValidationErrors(apiError.validationErrors);
         setError("Por favor, corrija os erros abaixo.");
       } else {
-        // Outros tipos de erro
         setError(apiError.message);
       }
 
-      // Log detalhado do erro (apenas em dev)
       if (import.meta.env.DEV) {
         console.error("Erro no login:", apiError);
       }

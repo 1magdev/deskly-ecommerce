@@ -38,6 +38,8 @@ export function ProfilePage() {
   const loadUserProfile = async () => {
     try {
       setLoading(true);
+
+      // Usa serviço que chama /users/profile — backend resolve usuário ou cliente pelo token
       const userData = await userService.getUserProfile();
       setUser(userData);
     } catch (error) {
