@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { orderService } from "@/services/order.service";
 import type { Order } from "@/types/api.types";
+import { ORDER_STATUS_LABELS } from "@/types/api.types";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Package, Calendar, MapPin, DollarSign, Eye, ArrowLeft } from "lucide-react";
@@ -118,7 +119,7 @@ export function OrdersPage() {
                       </p>
                       {order.status && (
                         <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
-                          {order.status}
+                          {ORDER_STATUS_LABELS[order.status]}
                         </span>
                       )}
                     </div>

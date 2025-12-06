@@ -45,24 +45,26 @@ public class ProductService {
   public List<ProductResponseDTO> listCatalogProducts(String search, String category, int page, int size) {
     List<Product> products = productRepository.findByActive(true);
 
-    return products.stream().map(product -> {
-      Stock stock = stockRepository.findByProductId(product.getId()).orElse(null);
-      Integer quantity = stock != null ? stock.getQuantity() : 0;
+    return products.stream()
+        .sorted((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()))
+        .map(product -> {
+          Stock stock = stockRepository.findByProductId(product.getId()).orElse(null);
+          Integer quantity = stock != null ? stock.getQuantity() : 0;
 
-      List<ProductImage> productImages = productImageRepository.findByProductOrderByMainDesc(product);
-      List<String> images = productImages.stream().map(ProductImage::getImageBase64).toList();
+          List<ProductImage> productImages = productImageRepository.findByProductOrderByMainDesc(product);
+          List<String> images = productImages.stream().map(ProductImage::getImageBase64).toList();
 
-      return new ProductResponseDTO(
-          product.getId(),
-          product.getName(),
-          quantity,
-          product.getPrice(),
-          product.getActive(),
-          product.getDescription(),
-          product.getRating(),
-          product.getProductImage(),
-          images);
-    }).toList();
+          return new ProductResponseDTO(
+              product.getId(),
+              product.getName(),
+              quantity,
+              product.getPrice(),
+              product.getActive(),
+              product.getDescription(),
+              product.getRating(),
+              product.getProductImage(),
+              images);
+        }).toList();
   }
 
   public ProductResponseDTO getForCatalogById(Long id) {

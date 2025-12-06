@@ -11,7 +11,7 @@ import { faCheckCircle, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { addressService } from "@/services/address.service";
 import { orderService } from "@/services/order.service";
 import { useCart } from "@/contexts/CartContext";
-import type { Address } from "@/types/api.types";
+import type { Address, PaymentMethod } from "@/types/api.types";
 import { toast } from "sonner";
 
 export default function CheckoutPage() {
@@ -23,6 +23,14 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
   const [createdOrderId, setCreatedOrderId] = useState<number | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CREDIT_CARD");
+  const [cardData, setCardData] = useState({
+    cardHolderName: "",
+    cardNumber: "",
+    cardExpiryMonth: "",
+    cardExpiryYear: "",
+    cardCvv: "",
+  });
 
   const [newAddress, setNewAddress] = useState({
     label: "",
@@ -89,6 +97,23 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (paymentMethod === "CREDIT_CARD") {
+      if (!cardData.cardHolderName || !cardData.cardNumber || !cardData.cardExpiryMonth || !cardData.cardExpiryYear || !cardData.cardCvv) {
+        toast.error("Preencha todos os dados do cartão");
+        return;
+      }
+
+      if (cardData.cardNumber.replace(/\s/g, "").length !== 16) {
+        toast.error("Número do cartão deve ter 16 dígitos");
+        return;
+      }
+
+      if (cardData.cardCvv.length !== 3) {
+        toast.error("CVV deve ter 3 dígitos");
+        return;
+      }
+    }
+
     try {
       setLoading(true);
 
@@ -99,6 +124,14 @@ export default function CheckoutPage() {
           productId: item.id,
           quantity: item.quantity,
         })),
+        paymentMethod,
+        ...(paymentMethod === "CREDIT_CARD" && {
+          cardHolderName: cardData.cardHolderName,
+          cardNumber: cardData.cardNumber.replace(/\s/g, ""),
+          cardExpiryMonth: cardData.cardExpiryMonth,
+          cardExpiryYear: cardData.cardExpiryYear,
+          cardCvv: cardData.cardCvv,
+        }),
       };
 
       const order = await orderService.createOrder(orderRequest);
@@ -247,14 +280,6 @@ export default function CheckoutPage() {
                     <FontAwesomeIcon icon={faPlus} className="mr-2" />
                     Adicionar Novo Endereço
                   </Button>
-
-                  <Button
-                    className="w-full mt-4"
-                    onClick={handleCreateOrder}
-                    disabled={!selectedAddressId || loading}
-                  >
-                    {loading ? "Processando..." : "Confirmar Pedido"}
-                  </Button>
                 </>
               ) : (
                 <form onSubmit={handleCreateAddress} className="space-y-4">
@@ -357,6 +382,132 @@ export default function CheckoutPage() {
                   </div>
                 </form>
               )}
+            </CardContent>
+          </Card>
+
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Forma de Pagamento</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RadioGroup
+                value={paymentMethod}
+                onValueChange={(value) => setPaymentMethod(value as PaymentMethod)}
+              >
+                <div className="flex items-center space-x-2 border p-4 rounded-lg mb-2">
+                  <RadioGroupItem value="CREDIT_CARD" id="credit-card" />
+                  <Label htmlFor="credit-card" className="flex-1 cursor-pointer">
+                    <div className="font-medium">Cartão de Crédito</div>
+                    <div className="text-sm text-gray-600">
+                      Pagamento seguro com cartão
+                    </div>
+                  </Label>
+                </div>
+
+                <div className="flex items-center space-x-2 border p-4 rounded-lg">
+                  <RadioGroupItem value="BOLETO" id="boleto" />
+                  <Label htmlFor="boleto" className="flex-1 cursor-pointer">
+                    <div className="font-medium">Boleto Bancário</div>
+                    <div className="text-sm text-gray-600">
+                      Pagamento via boleto (vencimento em 3 dias)
+                    </div>
+                  </Label>
+                </div>
+              </RadioGroup>
+
+              {paymentMethod === "CREDIT_CARD" && (
+                <div className="mt-6 space-y-4">
+                  <div>
+                    <Label>Nome no Cartão</Label>
+                    <Input
+                      value={cardData.cardHolderName}
+                      onChange={(e) =>
+                        setCardData({ ...cardData, cardHolderName: e.target.value })
+                      }
+                      placeholder="Como está escrito no cartão"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Número do Cartão</Label>
+                    <Input
+                      value={cardData.cardNumber}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "");
+                        const formatted = value.replace(/(\d{4})(?=\d)/g, "$1 ");
+                        setCardData({ ...cardData, cardNumber: formatted });
+                      }}
+                      placeholder="0000 0000 0000 0000"
+                      maxLength={19}
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <Label>Mês</Label>
+                      <Input
+                        value={cardData.cardExpiryMonth}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          if (value === "" || (parseInt(value) >= 1 && parseInt(value) <= 12)) {
+                            setCardData({ ...cardData, cardExpiryMonth: value });
+                          }
+                        }}
+                        placeholder="MM"
+                        maxLength={2}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Ano</Label>
+                      <Input
+                        value={cardData.cardExpiryYear}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          setCardData({ ...cardData, cardExpiryYear: value });
+                        }}
+                        placeholder="AA"
+                        maxLength={2}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label>CVV</Label>
+                      <Input
+                        value={cardData.cardCvv}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, "");
+                          setCardData({ ...cardData, cardCvv: value });
+                        }}
+                        placeholder="000"
+                        maxLength={3}
+                        type="password"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {paymentMethod === "BOLETO" && (
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    Após confirmar o pedido, você receberá o boleto por e-mail. O pagamento pode levar até 2 dias úteis para ser confirmado.
+                  </p>
+                </div>
+              )}
+
+              <Button
+                className="w-full mt-6"
+                onClick={handleCreateOrder}
+                disabled={!selectedAddressId || loading}
+              >
+                {loading ? "Processando..." : "Confirmar Pedido"}
+              </Button>
             </CardContent>
           </Card>
         </div>

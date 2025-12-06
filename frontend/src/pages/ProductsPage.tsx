@@ -17,6 +17,8 @@ export function ProductsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [searchQuery, setSearchQuery] = useState(
     searchParams.get("search") || ""
   );
@@ -27,7 +29,7 @@ export function ProductsPage() {
 
   useEffect(() => {
     loadAllProducts();
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     const search = searchParams.get("search") || "";
@@ -40,10 +42,11 @@ export function ProductsPage() {
     try {
       setLoading(true);
       const response = await productService.getProducts({
-        page: 0,
-        size: 100,
+        page: currentPage,
+        size: 15,
       });
       setAllProducts(response.content);
+      setTotalPages(response.totalPages);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Erro ao carregar produtos"
@@ -289,68 +292,92 @@ export function ProductsPage() {
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {filteredProducts.map((product) => (
-                    <Card
-                      key={product.id}
-                      className="overflow-hidden transition-all cursor-pointer border-0 bg-white rounded-lg hover:shadow-lg group"
-                      onClick={() => handleProductClick(product.id)}
-                    >
-                      <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
-                        {product.images && product.images.length > 0 ? (
-                          <img
-                            src={product.images[0].includes("data:image/") ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
-                            alt={product.name}
-                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                          />
-                        ) : product.productImage ? (
-                          <img
-                            src={`data:image/jpeg;base64,${product.productImage}`}
-                            alt={product.name}
-                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="text-gray-300 text-center p-8">
-                            <FontAwesomeIcon
-                              icon={faSearch}
-                              className="text-6xl mb-4"
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    {filteredProducts.map((product) => (
+                      <Card
+                        key={product.id}
+                        className="overflow-hidden transition-all cursor-pointer border-0 bg-white rounded-lg hover:shadow-lg group"
+                        onClick={() => handleProductClick(product.id)}
+                      >
+                        <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
+                          {product.images && product.images.length > 0 ? (
+                            <img
+                              src={product.images[0].includes("data:image/") ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
+                              alt={product.name}
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
                             />
-                            <p className="text-sm">Sem imagem</p>
-                          </div>
-                        )}
-                      </div>
-                      <CardContent className="p-5 bg-white">
-                        <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-1 group-hover:text-primary transition-colors">
-                          {product.name}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2 min-h-[40px]">
-                          {product.description ||
-                            "Sem descrição disponível"}
-                        </p>
-                        <div className="flex items-center justify-between pt-4">
-                          <div>
-                            <p className="text-xs text-gray-500 mb-1">Preço</p>
-                            <span className="text-2xl font-bold text-primary">
-                              R${" "}
-                              {product.price.toLocaleString("pt-BR", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })}
-                            </span>
-                          </div>
-                          {product.rating && (
-                            <div className="flex items-center gap-1 bg-success/10 px-3 py-2 rounded-md">
-                              <span className="text-success text-lg">★</span>
-                              <span className="text-sm font-bold text-success">
-                                {product.rating.toFixed(1)}
-                              </span>
+                          ) : product.productImage ? (
+                            <img
+                              src={`data:image/jpeg;base64,${product.productImage}`}
+                              alt={product.name}
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="text-gray-300 text-center p-8">
+                              <FontAwesomeIcon
+                                icon={faSearch}
+                                className="text-6xl mb-4"
+                              />
+                              <p className="text-sm">Sem imagem</p>
                             </div>
                           )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        <CardContent className="p-5 bg-white">
+                          <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                            {product.name}
+                          </h3>
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2 min-h-[40px]">
+                            {product.description ||
+                              "Sem descrição disponível"}
+                          </p>
+                          <div className="flex items-center justify-between pt-4">
+                            <div>
+                              <p className="text-xs text-gray-500 mb-1">Preço</p>
+                              <span className="text-2xl font-bold text-primary">
+                                R${" "}
+                                {product.price.toLocaleString("pt-BR", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                              </span>
+                            </div>
+                            {product.rating && (
+                              <div className="flex items-center gap-1 bg-success/10 px-3 py-2 rounded-md">
+                                <span className="text-success text-lg">★</span>
+                                <span className="text-sm font-bold text-success">
+                                  {product.rating.toFixed(1)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-3 mt-8">
+                      <Button
+                        onClick={() => setCurrentPage((prev) => Math.max(0, prev - 1))}
+                        disabled={currentPage === 0}
+                        className="bg-primary text-white hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed px-6 py-2 rounded-md"
+                      >
+                        Anterior
+                      </Button>
+                      <span className="text-gray-700 font-medium">
+                        Página {currentPage + 1} de {totalPages}
+                      </span>
+                      <Button
+                        onClick={() => setCurrentPage((prev) => Math.min(totalPages - 1, prev + 1))}
+                        disabled={currentPage >= totalPages - 1}
+                        className="bg-primary text-white hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed px-6 py-2 rounded-md"
+                      >
+                        Próxima
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

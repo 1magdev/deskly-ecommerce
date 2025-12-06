@@ -23,7 +23,7 @@ export default function ProductGrid() {
   useEffect(() => {
     (async () => {
       try {
-        const catalogRes = await productService.getCatalog();
+        const catalogRes = await productService.getCatalog({ page: 0, size: 15 });
         // productService.getCatalog pode retornar PageResponse<Product> ou um array direto.
         // Normaliza para Product[].
         const list: Product[] =

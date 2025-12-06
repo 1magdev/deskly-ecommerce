@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { orderService } from "@/services/order.service";
 import type { Order } from "@/types/api.types";
+import { ORDER_STATUS_LABELS } from "@/types/api.types";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Package, Calendar, MapPin, DollarSign, ArrowLeft, CheckCircle } from "lucide-react";
@@ -116,7 +117,7 @@ export function OrderDetailPage() {
                 </p>
                 {order.status && (
                   <span className="inline-block mt-2 px-4 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
-                    {order.status}
+                    {ORDER_STATUS_LABELS[order.status]}
                   </span>
                 )}
               </div>
@@ -214,7 +215,7 @@ export function OrderDetailPage() {
                   <CheckCircle className="h-5 w-5 text-blue-600" />
                   <div>
                     <p className="font-semibold text-blue-900">Status do Pedido</p>
-                    <p className="text-sm text-blue-700">{order.status}</p>
+                    <p className="text-sm text-blue-700">{ORDER_STATUS_LABELS[order.status]}</p>
                   </div>
                 </div>
               )}

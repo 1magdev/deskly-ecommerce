@@ -21,7 +21,7 @@ interface UserData {
 
 export function BackofficeTabs(userData: UserData) {
   const navigate = useNavigate();
-  const { logout, isAdmin } = useAuth();
+  const { logout, isAdmin, userRole } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -34,8 +34,7 @@ export function BackofficeTabs(userData: UserData) {
         return "Administrador";
       case "BACKOFFICE":
         return "Estoquista";
-      case "CUSTOMER":
-        return "Cliente";
+
       default:
         return role;
     }
@@ -46,7 +45,9 @@ export function BackofficeTabs(userData: UserData) {
       <SidebarHeader className="flex flex-row items-center justify-between text-white p-4">
         <div>
           <h2 className="text-lg font-semibold">{userData.name}</h2>
-          <p className="text-sm text-gray-400">{getRoleLabel(userData.role || "")}</p>
+          <p className="text-sm text-gray-400">
+            {getRoleLabel(userData.role || "")}
+          </p>
         </div>
         <SidebarTrigger className="text-white hover:text-white" />
       </SidebarHeader>
@@ -64,16 +65,18 @@ export function BackofficeTabs(userData: UserData) {
                   <span>Produtos</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={() => navigate("/backoffice/orders")}
-                  className="text-white hover:bg-gray-800"
-                >
-                  <ShoppingBag className="h-4 w-4" />
-                  <span>Pedidos</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              {isAdmin() && (
+              {userRole === "BACKOFFICE" && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => navigate("/backoffice/orders")}
+                    className="text-white hover:bg-gray-800"
+                  >
+                    <ShoppingBag className="h-4 w-4" />
+                    <span>Pedidos</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+              {userRole === "ADMIN" && (
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => navigate("/backoffice/users")}

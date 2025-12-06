@@ -65,6 +65,15 @@ public class OrderService {
         order.setAddress(address);
         order.setShippingValue(dto.getShippingValue());
         order.setTotalValue(totalValue.add(dto.getShippingValue()));
+        order.setPaymentMethod(dto.getPaymentMethod());
+
+        if (dto.getPaymentMethod() != null && dto.getPaymentMethod().name().equals("CREDIT_CARD")) {
+            order.setCardHolderName(dto.getCardHolderName());
+            order.setCardNumber(dto.getCardNumber());
+            order.setCardExpiryMonth(dto.getCardExpiryMonth());
+            order.setCardExpiryYear(dto.getCardExpiryYear());
+            order.setCardCvv(dto.getCardCvv());
+        }
 
         Order saved = orderRepository.save(order);
 
@@ -118,18 +127,13 @@ public class OrderService {
         return orders.map(this::toResponse);
     }
 
-    public OrderResponseDTO updateOrderStatus(Long orderId, String status) {
+    public OrderResponseDTO updateOrderStatus(Long orderId, OrderStatus status) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
 
-        try {
-            OrderStatus newStatus = OrderStatus.valueOf(status.toUpperCase());
-            order.setStatus(newStatus);
-            orderRepository.save(order);
-            return toResponse(order);
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status inválido: " + status);
-        }
+        order.setStatus(status);
+        orderRepository.save(order);
+        return toResponse(order);
     }
 
     private OrderResponseDTO toResponse(Order order) {
@@ -140,6 +144,11 @@ public class OrderService {
         dto.setStatus(order.getStatus());
         dto.setCreatedAt(order.getCreatedAt());
         dto.setStatus(order.getStatus());
+        dto.setPaymentMethod(order.getPaymentMethod());
+
+        if (order.getCardNumber() != null && order.getCardNumber().length() >= 4) {
+            dto.setCardLastFourDigits(order.getCardNumber().substring(order.getCardNumber().length() - 4));
+        }
 
         AddressResponseDTO addressDto = new AddressResponseDTO();
         addressDto.setId(order.getAddress().getId());

@@ -36,6 +36,25 @@ public class Order {
     @Column(name = "status", nullable = false)
     private OrderStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", nullable = false)
+    private PaymentMethod paymentMethod;
+
+    @Column(name = "card_holder_name")
+    private String cardHolderName;
+
+    @Column(name = "card_number")
+    private String cardNumber;
+
+    @Column(name = "card_expiry_month")
+    private String cardExpiryMonth;
+
+    @Column(name = "card_expiry_year")
+    private String cardExpiryYear;
+
+    @Column(name = "card_cvv")
+    private String cardCvv;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -43,7 +62,7 @@ public class Order {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (status == null) {
-            status = OrderStatus.PENDING;
+            status = OrderStatus.AGUARDANDO_PAGAMENTO;
         }
     }
 }

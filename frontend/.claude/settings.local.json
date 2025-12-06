@@ -6,7 +6,9 @@
       "Bash(curl:*)",
       "Bash(find:*)",
       "Bash(./mvnw clean:*)",
-      "Bash(mvn clean compile:*)"
+      "Bash(mvn clean compile:*)",
+      "Bash(git checkout:*)",
+      "Bash(git ls-tree:*)"
     ],
     "deny": [],
     "ask": []

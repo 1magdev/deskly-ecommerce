@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { orderService } from "@/services/order.service";
 import type { Order, PageResponse, OrderStatus } from "@/types/api.types";
+import { ORDER_STATUS_LABELS } from "@/types/api.types";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -20,20 +21,13 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 
-const statusLabels: Record<OrderStatus, string> = {
-  PENDING: "Pendente",
-  PROCESSING: "Em Processamento",
-  SHIPPED: "Enviado",
-  DELIVERED: "Entregue",
-  CANCELLED: "Cancelado",
-};
-
 const statusColors: Record<OrderStatus, string> = {
-  PENDING: "bg-yellow-100 text-yellow-800",
-  PROCESSING: "bg-blue-100 text-blue-800",
-  SHIPPED: "bg-purple-100 text-purple-800",
-  DELIVERED: "bg-green-100 text-green-800",
-  CANCELLED: "bg-red-100 text-red-800",
+  AGUARDANDO_PAGAMENTO: "bg-yellow-100 text-yellow-800",
+  PAGAMENTO_REJEITADO: "bg-red-100 text-red-800",
+  PAGAMENTO_APROVADO: "bg-green-100 text-green-800",
+  AGUARDANDO_RETIRADA: "bg-blue-100 text-blue-800",
+  EM_TRANSITO: "bg-purple-100 text-purple-800",
+  ENTREGUE: "bg-green-200 text-green-900",
 };
 
 export function OrdersPage() {
@@ -161,7 +155,7 @@ export function OrdersPage() {
                         statusColors[order.status]
                       }`}
                     >
-                      {statusLabels[order.status]}
+                      {ORDER_STATUS_LABELS[order.status]}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -172,17 +166,24 @@ export function OrdersPage() {
                       }
                       disabled={updatingStatus === order.id}
                     >
-                      <SelectTrigger className="w-[180px] bg-white">
+                      <SelectTrigger className="w-[200px] bg-white">
                         <SelectValue placeholder="Alterar status" />
                       </SelectTrigger>
                       <SelectContent className="bg-white">
-                        <SelectItem value="PENDING">Pendente</SelectItem>
-                        <SelectItem value="PROCESSING">
-                          Em Processamento
+                        <SelectItem value="AGUARDANDO_PAGAMENTO">
+                          Aguardando Pagamento
                         </SelectItem>
-                        <SelectItem value="SHIPPED">Enviado</SelectItem>
-                        <SelectItem value="DELIVERED">Entregue</SelectItem>
-                        <SelectItem value="CANCELLED">Cancelado</SelectItem>
+                        <SelectItem value="PAGAMENTO_REJEITADO">
+                          Pagamento Rejeitado
+                        </SelectItem>
+                        <SelectItem value="PAGAMENTO_APROVADO">
+                          Pagamento Aprovado
+                        </SelectItem>
+                        <SelectItem value="AGUARDANDO_RETIRADA">
+                          Aguardando Retirada
+                        </SelectItem>
+                        <SelectItem value="EM_TRANSITO">Em Trânsito</SelectItem>
+                        <SelectItem value="ENTREGUE">Entregue</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>

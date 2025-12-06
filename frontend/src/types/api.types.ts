@@ -259,14 +259,27 @@ export interface PaymentRequest {
 }
 
 // Order Types
-export type OrderStatus = "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+export type OrderStatus =
+  | "AGUARDANDO_PAGAMENTO"
+  | "PAGAMENTO_REJEITADO"
+  | "PAGAMENTO_APROVADO"
+  | "AGUARDANDO_RETIRADA"
+  | "EM_TRANSITO"
+  | "ENTREGUE";
+export type PaymentMethod = "CREDIT_CARD" | "BOLETO";
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  PENDING: "Pendente",
-  PROCESSING: "Em Processamento",
-  SHIPPED: "Enviado",
-  DELIVERED: "Entregue",
-  CANCELLED: "Cancelado",
+  AGUARDANDO_PAGAMENTO: "Aguardando Pagamento",
+  PAGAMENTO_REJEITADO: "Pagamento Rejeitado",
+  PAGAMENTO_APROVADO: "Pagamento Aprovado",
+  AGUARDANDO_RETIRADA: "Aguardando Retirada",
+  EM_TRANSITO: "Em Trânsito",
+  ENTREGUE: "Entregue",
+};
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  CREDIT_CARD: "Cartão de Crédito",
+  BOLETO: "Boleto Bancário",
 };
 
 export interface OrderItem {
@@ -283,6 +296,8 @@ export interface Order {
   totalValue: number;
   shippingValue: number;
   status: OrderStatus;
+  paymentMethod: PaymentMethod;
+  cardLastFourDigits?: string;
   address: Address;
   items: OrderItem[];
   createdAt: string;
@@ -295,4 +310,10 @@ export interface OrderRequest {
     productId: number;
     quantity: number;
   }[];
+  paymentMethod: PaymentMethod;
+  cardHolderName?: string;
+  cardNumber?: string;
+  cardExpiryMonth?: string;
+  cardExpiryYear?: string;
+  cardCvv?: string;
 }
