@@ -205,6 +205,7 @@ export interface Address {
   state: string;
   zipCode: string;
   deliveryAddress: boolean;
+  paymentAddress: boolean;
 }
 
 export interface AddressCreateRequest {
@@ -217,6 +218,7 @@ export interface AddressCreateRequest {
   state: string;
   zipCode: string;
   deliveryAddress?: boolean;
+  paymentAddress: boolean
 }
 
 // Cart Types
@@ -232,9 +234,11 @@ export interface Cart {
   sessionId: string;
   user?: User;
   deliveryAddress?: Address;
+  paymentAddress?: Address;
   shippingCost: number;
   subtotal: number;
   deliveryAddressSelected: boolean;
+  paymentAddressSelected: boolean;
   paymentMethod?: "BOLETO" | "CARD";
   paymentInstallments?: number;
   paymentCardHolderName?: string;
@@ -246,6 +250,10 @@ export interface Cart {
 
 // Checkout Types
 export interface SelectDeliveryAddressRequest {
+  addressId: number;
+}
+
+export interface SelectPaymentAddressRequest {
   addressId: number;
 }
 

@@ -135,6 +135,8 @@ export function ProfilePage() {
       city: "",
       state: "",
       deliveryAddress: false,
+      paymentAddress: false,
+      
     } as Address);
   };
 
@@ -268,7 +270,16 @@ export function ProfilePage() {
             Endereço de entrega
           </label>
         </div>
-
+        <label className="m-2">
+            <input
+              type="checkbox"
+              checked={currentAddress.paymentAddress}
+              onChange={() =>
+                updateField("paymentAddress", !currentAddress.paymentAddress)
+              }
+            />
+            Endereço de pagamento
+          </label>
         <div className="grid md:grid-cols-2 gap-3 text-sm">
           <div className="text-gray-700">
             <span className="font-medium">CEP:</span>{" "}

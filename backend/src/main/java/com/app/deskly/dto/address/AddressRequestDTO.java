@@ -15,4 +15,6 @@ public class AddressRequestDTO {
     private String zipCode;
 
     private boolean deliveryAddress = true;
+    private boolean paymentAddress = true;
+
 }

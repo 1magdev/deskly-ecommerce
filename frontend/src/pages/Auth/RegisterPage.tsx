@@ -31,6 +31,8 @@ interface PersonalFormData {
 
 interface AddressFormData extends Omit<AddressCreateRequest, 'deliveryAddress'> {
   deliveryAddress: boolean;
+  paymentAddress: boolean;
+  
 }
 
 type Step = 'personal' | 'address';
@@ -63,6 +65,7 @@ export function RegisterPage() {
       state: "",
       zipCode: "",
       deliveryAddress: true,
+      paymentAddress: true,
     }
   ]);
 
@@ -94,6 +97,7 @@ export function RegisterPage() {
         state: "",
         zipCode: "",
         deliveryAddress: false,
+        paymentAddress: false,
       }
     ]);
   };
@@ -111,6 +115,26 @@ export function RegisterPage() {
       prev.map((addr, i) => ({
         ...addr,
         deliveryAddress: i === index,
+      }))
+    );
+  };
+
+
+  const handleCheck= (index: number, field: keyof AddressFormData) => {
+    setAddresses((prev) => {
+      const newAddresses = [...prev];
+      newAddresses[index] = { ...newAddresses[index], [field]: !newAddresses[index][field] };
+      return newAddresses;
+    });
+  };
+
+
+
+  const handleSetPaymentsAddress = (index: number) => {
+    setAddresses((prev) =>
+      prev.map((addr, i) => ({
+        ...addr,
+        paymentAddress: i === index,
       }))
     );
   };
@@ -188,6 +212,13 @@ export function RegisterPage() {
       return false;
     }
 
+
+    const hasPaymentAddress = addresses.some((addr) => addr.paymentAddress);
+    if (!hasPaymentAddress) {
+      toast.error("Você precisa definir um endereço como faturamento");
+      return false;
+    }
+
     return true;
   };
 
@@ -232,6 +263,7 @@ export function RegisterPage() {
         state: address.state,
         zipCode: address.zipCode.replace(/\D/g, ""),
         deliveryAddress: address.deliveryAddress,
+        paymentAddress: address.paymentAddress,
       }));
 
       // Registrar usuário com endereços em uma única chamada
@@ -411,6 +443,22 @@ export function RegisterPage() {
                             Definir como principal
                           </Button>
                         )}
+               
+                         {address.paymentAddress && (
+                          <span className="text-xs bg-green text-white px-2 py-1 rounded">Pagamento</span>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {!address.paymentAddress && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSetPrimaryAddress(index)}
+                          >
+                            Definir como faturamento
+                          </Button>
+                        )}
                         {addresses.length > 1 && (
                           <Button
                             type="button"
@@ -482,6 +530,16 @@ export function RegisterPage() {
                         disabled={loadingCep[index]}
                         required
                       />
+
+<label className="m-2">
+            <input
+              type="checkbox"
+              onChange={() => handleCheck(index, 'paymentAddress')}
+              
+              checked={address.paymentAddress}
+            />
+            Endereço de pagamento
+          </label>
                     </div>
                   </Card>
                 ))}

@@ -34,6 +34,7 @@ export default function CheckoutPage() {
     state: "",
     zipCode: "",
     deliveryAddress: true,
+    paymentAddress: true,
   });
 
   const shippingValue = 15.0;

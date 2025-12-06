@@ -21,6 +21,7 @@ public class AddressMapper {
         dto.setState(address.getState());
         dto.setZipCode(address.getZipCode());
         dto.setDeliveryAddress(address.isDeliveryAddress());
+        dto.setPaymentAddress(address.isPaymentAddress());
 
         return dto;
     }
