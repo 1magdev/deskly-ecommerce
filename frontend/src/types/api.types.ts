@@ -205,6 +205,7 @@ export interface Address {
   state: string;
   zipCode: string;
   deliveryAddress: boolean;
+  faturamentoAddress?: boolean
 }
 
 export interface AddressCreateRequest {

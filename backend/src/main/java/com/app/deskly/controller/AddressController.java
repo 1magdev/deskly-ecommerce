@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/addresses")
-@PreAuthorize("hasAuthority('CUSTOMER')")
+@PreAuthorize("isAuthenticated()")
 public class AddressController {
 
     @Autowired
