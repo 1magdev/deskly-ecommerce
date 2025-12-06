@@ -1,13 +1,7 @@
 package com.app.deskly.service;
 
-import com.app.deskly.dto.address.AddressRequestDTO;
-import com.app.deskly.dto.customer.CustomerRequestDTO;
-import com.app.deskly.dto.user.UpdateUserDTO;
-import com.app.deskly.dto.user.UserRequestDTO;
-import com.app.deskly.model.UserRoles;
-import com.app.deskly.model.user.Customer;
-import com.app.deskly.repository.CustomerRepository;
-import com.app.deskly.util.CpfValidator;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -16,7 +10,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import com.app.deskly.dto.address.AddressRequestDTO;
+import com.app.deskly.dto.customer.CustomerRequestDTO;
+import com.app.deskly.dto.user.UpdateUserDTO;
+import com.app.deskly.model.user.Customer;
+import com.app.deskly.repository.CustomerRepository;
+import com.app.deskly.util.CpfValidator;
 
 @Service
 public class CustomerService {
@@ -52,6 +51,14 @@ public class CustomerService {
 
         if (!hasPrimaryAddress) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pelo menos um endereço deve ser marcado como principal");
+        }
+        
+        // Validar se há pelo menos um endereço de pagamento principal
+        boolean hasPaymentAddress = dto.getAddresses().stream()
+                .anyMatch(AddressRequestDTO::isPaymentAddress);
+
+        if (!hasPaymentAddress) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Pelo menos um endereço deve ser marcado como de pagamento principal");
         }
 
         // 1. Criar o customer

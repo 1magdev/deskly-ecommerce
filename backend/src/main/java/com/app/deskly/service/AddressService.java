@@ -1,17 +1,18 @@
 package com.app.deskly.service;
 
-import com.app.deskly.dto.address.AddressRequestDTO;
-import com.app.deskly.dto.address.AddressResponseDTO;
-import com.app.deskly.model.Address;
-import com.app.deskly.model.user.Customer;
-import com.app.deskly.repository.AddressRepository;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.app.deskly.dto.address.AddressRequestDTO;
+import com.app.deskly.dto.address.AddressResponseDTO;
+import com.app.deskly.model.Address;
+import com.app.deskly.model.user.Customer;
+import com.app.deskly.repository.AddressRepository;
 
 @Service
 public class AddressService {
@@ -45,6 +46,7 @@ public class AddressService {
         address.setState(dto.getState());
         address.setZipCode(dto.getZipCode());
         address.setDeliveryAddress(dto.isDeliveryAddress());
+        address.setPaymentAddress(dto.isPaymentAddress());
 
         if (dto.isDeliveryAddress()) {
             List<Address> currentDeliveryAddresses = addressRepository.findByCustomerAndDeliveryAddressTrue(user);
@@ -55,8 +57,18 @@ public class AddressService {
             }
         }
 
+        if (dto.isPaymentAddress()) {
+            List<Address> currentPaymentAddresses = addressRepository.findByCustomerAndPaymentAddressTrue(user);
+
+            for (Address addr : currentPaymentAddresses) {
+                addr.setPaymentAddress(false);
+                addressRepository.save(addr); // SAVE, não DELETE!
+            }
+        }
+
         Address saved = addressRepository.save(address);
         return toResponse(saved);
+
     }
 
     public AddressResponseDTO updateAddress(Customer user, Long id, AddressRequestDTO dto) {
@@ -80,12 +92,22 @@ public class AddressService {
         address.setState(dto.getState());
         address.setZipCode(dto.getZipCode());
         address.setDeliveryAddress(dto.isDeliveryAddress());
+        address.setPaymentAddress(dto.isPaymentAddress());
 
         if (dto.isDeliveryAddress()) {
             List<Address> currentDeliveryAddresses = addressRepository.findByCustomerAndDeliveryAddressTrue(user);
 
             for (Address addr : currentDeliveryAddresses) {
                 addr.setDeliveryAddress(false);
+                addressRepository.save(addr); // SAVE, não DELETE!
+            }
+        }
+
+        if (dto.isPaymentAddress()) {
+            List<Address> currentPaymentAddresses = addressRepository.findByCustomerAndPaymentAddressTrue(user);
+
+            for (Address addr : currentPaymentAddresses) {
+                addr.setPaymentAddress(false);
                 addressRepository.save(addr); // SAVE, não DELETE!
             }
         }
@@ -120,6 +142,8 @@ public class AddressService {
         dto.setState(address.getState());
         dto.setZipCode(address.getZipCode());
         dto.setDeliveryAddress(address.isDeliveryAddress());
+        dto.setPaymentAddress(address.isPaymentAddress());
+        
         return dto;
     }
 }

@@ -30,13 +30,18 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [orderCreated, setOrderCreated] = useState(false);
   const [createdOrderId, setCreatedOrderId] = useState<number | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CREDIT_CARD");
-  const [cardData, setCardData] = useState({
-    cardHolderName: "",
-    cardNumber: "",
-    cardExpiryMonth: "",
-    cardExpiryYear: "",
-    cardCvv: "",
+
+  const [newAddress, setNewAddress] = useState({
+    label: "",
+    street: "",
+    number: "",
+    complement: "",
+    district: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    deliveryAddress: true,
+    paymentAddress: true,
   });
 
   const shippingValue = 15.0;
