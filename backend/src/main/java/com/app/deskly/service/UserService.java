@@ -24,9 +24,6 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public User create(UserRequestDTO dto) {
-        if (dto.getRole() == UserRoles.CUSTOMER) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Use CustomerService para criar clientes");
-        }
 
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "senhas não coincidem");
